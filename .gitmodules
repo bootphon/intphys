@@ -1,0 +1,12 @@
+[submodule "Plugins/UnrealEnginePython"]
+	path = Plugins/UnrealEnginePython
+	url = https://github.com/20tab/UnrealEnginePython.git
+	branch = master
+
+# # This submodule contains code for generation of test videos
+# # (including a physical violation). It is private and readable only by
+# # the intphys developers. End users have no access to this code.
+[submodule "Content/Scripts/test"]
+	path = Content/Scripts/test
+	url = git@gitlab.coml.lscp.ens.fr:intphys/intphys-private.git
+	branch = master

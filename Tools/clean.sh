@@ -8,3 +8,5 @@ rm -rf DerivedDataCache/
 rm -rf Intermediate/
 rm -rf Saved/
 rm -rf LinuxNoEditor/
+rm -rf Plugins/UnrealEnginePython/Intermediate
+rm -rf Plugins/UnrealEnginePython/Binaries

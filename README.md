@@ -7,7 +7,7 @@ Developed with
 4.18 and the [UnrealEnginePython](https://github.com/20tab/UnrealEnginePython)
 plugin.
 
-The 2.0 version of intphys is a reimplementation of intphys-1.0 based on 
+The 2.0 version of intphys is a reimplementation of intphys-1.0 based on
 UE-4.19 using the Python scripting language (*intphys-1.0* was developed
 with UE-4.8 and Lua).
 
@@ -15,7 +15,7 @@ with UE-4.8 and Lua).
 
 This software is used for generation of the datasets used in the
 [Intuitive Physics Challenge](https://intphys.com/challenge.html), it
-allows users to generate more train scenes but **the code for test 
+allows users to generate more train scenes but **the code for test
 scenes generation is kept private**.
 
 ## Video exemples
@@ -104,7 +104,7 @@ this have not been tested.
 
         git clone git@github.com:bootphon/intphys.git
         cd intphys
-        git submodule update --init --remote Plugins/UnrealEnginePython
+        git submodule update --init Plugins/UnrealEnginePython
 
 * You need **Python>=3.6** installed as `/usr/bin/python3.6` (else you
   need to tweak the UnrealEnginePython plugin

@@ -72,7 +72,7 @@ class Train(Scene):
                 initial_force=force,
                 warning=True,
                 overlap=False)
-            noccluders = random.randint(0, 4)
+            noccluders = random.randint(0, 3)
             self.is_occluded = True if noccluders != 0 else False
         for n in range(noccluders):
             location = FVector()

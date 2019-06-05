@@ -3,7 +3,7 @@
 import random
 import math
 from scene import Scene
-from unreal_engine import FVector, FRotator
+from unreal_engine import FVector, FRotator, FLinearColor
 from actors.parameters import LightParams, CameraParams, ObjectParams, OccluderParams
 from tools.materials import get_random_material
 from actors.object import Object
@@ -29,8 +29,9 @@ class Train(Scene):
                 rotation=FRotator(0, random.uniform(-10, 10), 0))
         
         self.params['Light'] = LightParams(
-                type='SkyLight')
-
+                type='SkyLight',
+                color=FLinearColor(random.uniform(0.6, 1.0), random.uniform(0.6, 1.0), random.uniform(0.6, 1.0), 1.0))
+        
         nobjects = random.randint(1, 3)
         unsafe_zones = []
         for n in range(nobjects):

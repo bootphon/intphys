@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from dataclasses import field
-from unreal_engine import FVector, FRotator
+from unreal_engine import FVector, FRotator, FLinearColor
 from unreal_engine.enums import ECameraProjectionMode
 from tools.materials import get_random_material
 
@@ -28,6 +28,7 @@ class FloorParams:
 class LightParams:
     location: FVector = FVector(0, 0, 0)
     rotation: FRotator = FRotator(0, 0, 0)
+    color: FLinearColor = FLinearColor(1, 1, 1, 1)
     type: str = 'SkyLight'
 
 

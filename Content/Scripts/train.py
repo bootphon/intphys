@@ -67,7 +67,7 @@ class Train(Scene):
                 initial_force=force,
                 warning=True,
                 overlap=False)
-            noccluders = random.randint(0, 4)
+            noccluders = random.randint(0, 2)
             self.is_occluded = True if noccluders != 0 else False
         for n in range(noccluders):
             location = FVector()
@@ -104,7 +104,7 @@ class Train(Scene):
                 moves=moves,
                 speed=random.uniform(1, 5),
                 warning=True,
-                overlap=False,
+                overlap=True,
                 start_up=random.choice([True, False]))
 
     def check_spawning_location(self, new_object_location, all_locations):

@@ -50,8 +50,8 @@ class Train(Scene):
             rotation = FVector()
             previous_size = len(unsafe_zones)
             for try_index in range(100):
-                # scale in [1.5, 2]
-                scale = 1.5 + random.random() * 0.5
+                # scale in [1, 2]
+                scale = 1.5 + random.uniform(-0.5, 0.5)
                 location = FVector(
                         random.uniform(200, 700),
                         random.uniform(-500, 500),
@@ -65,7 +65,7 @@ class Train(Scene):
                     break;
             if (len(unsafe_zones) == previous_size):
                 continue
-            mesh = random.choice([m for m in Object.shape.keys()])
+            mesh = random.choice([m for m in Object.shape.keys()] + ['Sphere'])
             self.params['object_{}'.format(n+1)] = ObjectParams(
                 mesh=mesh,
                 material=get_random_material('Object'),

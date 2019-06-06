@@ -28,10 +28,16 @@ class Train(Scene):
                 location=FVector(0, 0, random.uniform(175, 225)),
                 rotation=FRotator(0, random.uniform(-10, 10), 0))
         
-        self.params['Light'] = LightParams(
+        self.params['Light_1'] = LightParams(
                 type='SkyLight',
                 color=FLinearColor(random.uniform(0.6, 1.0), random.uniform(0.6, 1.0), random.uniform(0.6, 1.0), 1.0))
         
+        self.params['Light_2'] = LightParams(
+                type='Directional',
+                location=FVector(-570, 0, random.uniform(200, 300)),
+                rotation=FRotator(0, -46, 0),
+                color=FLinearColor(random.uniform(0.5, 1.0), random.uniform(0.5, 1.0), random.uniform(0.5, 1.0), 1.0))
+
         nobjects = random.randint(1, 3)
         unsafe_zones = []
         for n in range(nobjects):

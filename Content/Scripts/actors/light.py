@@ -2,7 +2,7 @@ from collections import defaultdict
 
 import unreal_engine as ue
 from unreal_engine import FLinearColor
-from unreal_engine.classes import SkyLightComponent
+from unreal_engine.classes import SkyLightComponent, DirectionalLightComponent
 
 from actors.base_actor import BaseActor
 from actors.parameters import LightParams
@@ -48,6 +48,9 @@ class Light(BaseActor):
         if self.type == 'SkyLight':
             self.skylight_component = self.actor.get_component_by_type(SkyLightComponent)
             self.skylight_component.SetLightColor(self.color)
+        elif self.type == 'Directional':
+            self.directionallight_component = self.actor.get_component_by_type(DirectionalLightComponent)
+            self.directionallight_component.SetLightColor(self.color)
 
         # deactivate the physics (we don't want the light to fall)
         # self.get_mesh().set_simulate_physics(False)

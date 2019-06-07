@@ -75,6 +75,7 @@ class BaseActor():
         message = '{} overlapping {}'.format(
             self.actor.get_name(), other.get_name())
         ue.log(message)
+        self.is_valid = False
 
     def on_actor_hit(self, me, other, *args):
         if (other.get_name()[:5] == "Floor" or me == other):

@@ -59,7 +59,7 @@ class Train(Scene):
                 rotation = FRotator(
                     0, 0, 360 * random.random())
                 # TODO apply angle
-                new_zone = [FVector(location.x - scale, location.y - scale, location.z), FVector(location.x + scale, location.y + scale, location.z)]
+                new_zone = [FVector(location.x - 50 * scale, location.y + 50 * scale, location.z), FVector(location.x + scale, location.y - scale, location.z)]
                 if (self.check_spawning_location(new_zone, unsafe_zones)):
                     unsafe_zones.append(new_zone)
                     break;
@@ -76,8 +76,8 @@ class Train(Scene):
                 initial_force=force,
                 warning=True,
                 overlap=False)
-            noccluders = random.randint(0, 2)
-            self.is_occluded = True if noccluders != 0 else False
+        noccluders = random.randint(0, 2)
+        self.is_occluded = True if noccluders != 0 else False
         for n in range(noccluders):
             location = FVector()
             rotation = FVector()
@@ -92,7 +92,7 @@ class Train(Scene):
                         0, 0, random.uniform(-180, 180))
                 scale = FVector(random.uniform(0.5, 1.5), 1, random.uniform(0.5, 1.5))
                 # TODO apply rotation
-                new_zone = [FVector(location.x - scale.x, location.y - scale.y, location.z), FVector(location.x + scale.x, location.y + scale.y, location.z)]
+                new_zone = [FVector(location.x - scale.x, location.y + scale.y, location.z), FVector(location.x + scale.x, location.y - scale.y, location.z)]
                 if (self.check_spawning_location(new_zone, unsafe_zones)):
                     unsafe_zones.append(new_zone)
                     break;
@@ -117,7 +117,6 @@ class Train(Scene):
                 start_up=random.choice([True, False]))
 
     def check_spawning_location(self, new_object_location, all_locations):
-        return True
         # new_object_location is an array of 2 3D points representing locations of unsafe square (top left corner and bottom right one)
         # all_locations is an array of array same shape of new_object_location
         # https://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other

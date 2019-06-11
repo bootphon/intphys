@@ -25,17 +25,20 @@ class Train(Scene):
         super().generate_parameters()
 
         self.params['Camera'] = CameraParams(
-                location=FVector(0, 0, random.uniform(175, 225)),
-                rotation=FRotator(0, random.uniform(-10, 10), 0))
+            location=FVector(0, 0, random.uniform(175, 225)),
+            rotation=FRotator(0, random.uniform(-10, 10), 0))
 
         self.params['Light'] = LightParams(
-                type='SkyLight',
-                color=FLinearColor(random.uniform(0.6, 1.0), random.uniform(0.6, 1.0), random.uniform(0.6, 1.0), 1.0))
+            type='SkyLight',
+            color=FLinearColor(random.uniform(0.6, 1.0), random.uniform(0.6, 1.0), random.uniform(0.6, 1.0), 1.0))
 
         nobjects = random.randint(1, 3)
         unsafe_zones = []
         noccluders = random.randint(0, 2)
         self.is_occluded = True if noccluders != 0 else False
+        location = FVector()
+        rotation = FVector()
+        scale = 0
 
         for n in range(nobjects):
             vforce = []
@@ -52,22 +55,22 @@ class Train(Scene):
                 # scale in [1, 2]
                 scale = random.uniform(1, 2)
                 location = FVector(
-                        random.uniform(200, 700),
-                        random.uniform(-500, 500),
-                        0)
+                    random.uniform(200, 700),
+                    random.uniform(-500, 500),
+                    0)
                 rotation = FRotator(
                     0, 0, 360 * random.random())
                 # TODO apply angle
                 new_zone = [FVector(location.x - 50 * scale, location.y + 50 * scale, location.z),
                             FVector(location.x + 50 * scale, location.y - 50 * scale, location.z)]
-                if (self.check_spawning_location(new_zone, unsafe_zones)):
+                if self.check_spawning_location(new_zone, unsafe_zones):
                     unsafe_zones.append(new_zone)
-                    break;
-            if (len(unsafe_zones) == previous_size):
+                    break
+            if len(unsafe_zones) == previous_size:
                 continue
-            mesh = random.choice([m for m in Object.shape.keys()] + ['Sphere'])
-            #mesh = 'Cube'
-            self.params['object_{}'.format(n+1)] = ObjectParams(
+            # mesh = random.choice([m for m in Object.shape.keys()] + ['Sphere'])
+            mesh = 'Cube'
+            self.params['object_{}'.format(n + 1)] = ObjectParams(
                 mesh=mesh,
                 material=get_random_material('Object'),
                 location=location,
@@ -82,19 +85,19 @@ class Train(Scene):
             previous_size = len(unsafe_zones)
             for try_index in range(100):
                 location = FVector(
-                        random.uniform(200, 700),
-                        random.uniform(-500, 500),
-                        0)
+                    random.uniform(200, 700),
+                    random.uniform(-500, 500),
+                    0)
                 rotation = FRotator(
-                        0, 0, random.uniform(-180, 180))
+                    0, 0, random.uniform(-180, 180))
                 scale = FVector(random.uniform(0.5, 1.5), 1, random.uniform(0.5, 1.5))
-                # TODO apply rotation
+                #  TODO apply rotation
                 new_zone = [FVector(location.x - 50 * scale.x, location.y + 50 * scale.y, location.z),
                             FVector(location.x + 50 * scale.x, location.y - 50 * scale.y, location.z)]
-                if (self.check_spawning_location(new_zone, unsafe_zones)):
+                if self.check_spawning_location(new_zone, unsafe_zones):
                     unsafe_zones.append(new_zone)
-                    break;
-            if (len(unsafe_zones) == previous_size):
+                    break
+            if len(unsafe_zones) == previous_size:
                 continue
             nmoves = random.randint(0, 3)
             moves = []
@@ -103,7 +106,7 @@ class Train(Scene):
                     moves.append(random.randint(0, 200))
                 else:
                     moves.append(random.randint(moves[-1], 200))
-            self.params['occluder_{}'.format(n+1)] = OccluderParams(
+            self.params['occluder_{}'.format(n + 1)] = OccluderParams(
                 material=get_random_material('Wall'),
                 location=location,
                 rotation=rotation,
@@ -115,14 +118,15 @@ class Train(Scene):
                 start_up=random.choice([True, False]))
 
     def check_spawning_location(self, new_object_location, all_locations):
-        # new_object_location is an array of 2 3D points representing locations of unsafe square (top left corner and bottom right one)
-        # all_locations is an array of array same shape of new_object_location
-        # https://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other
+        #  new_object_location is an array of 2 3D points representing locations of unsafe square (top left corner
+        #  and bottom right one)
+        #  all_locations is an array of array same shape of new_object_location
+        #  https://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other
         for location in all_locations:
             if (location[0].x < new_object_location[1].x and location[1].x > new_object_location[0].x and
                     location[0].y > new_object_location[1].y and location[1].y < new_object_location[0].y):
-                return False # it intersect
-        return True # it doesn't intersect
+                return False  # it intersect
+        return True  # it doesn't intersect
 
     def stop_run(self, scene_index, total):
         super().stop_run()

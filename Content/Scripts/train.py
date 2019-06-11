@@ -53,29 +53,27 @@ class Train(Scene):
             previous_size = len(unsafe_zones)
             for try_index in range(100):
                 # scale in [1, 2]
-                scale = random.uniform(1, 2)
+                scale_scal = random.uniform(1, 2)
+                scale = FVector(scale_scal, scale_scal, scale_scal)
                 location = FVector(
                     random.uniform(200, 700),
                     random.uniform(-500, 500),
                     0)
                 rotation = FRotator(
                     0, 0, 360 * random.random())
-                # TODO apply angle
-                new_zone = [FVector(location.x - 50 * scale, location.y + 50 * scale, location.z),
-                            FVector(location.x + 50 * scale, location.y - 50 * scale, location.z)]
+                new_zone = self.create_new_zone(location, scale, rotation)
                 if self.check_spawning_location(new_zone, unsafe_zones):
                     unsafe_zones.append(new_zone)
                     break
             if len(unsafe_zones) == previous_size:
                 continue
-            # mesh = random.choice([m for m in Object.shape.keys()] + ['Sphere'])
-            mesh = 'Cube'
+            mesh = random.choice([m for m in Object.shape.keys()] + ['Sphere'])
             self.params['object_{}'.format(n + 1)] = ObjectParams(
                 mesh=mesh,
                 material=get_random_material('Object'),
                 location=location,
                 rotation=rotation,
-                scale=FVector(scale, scale, scale),
+                scale=scale,
                 mass=1,
                 initial_force=force,
                 warning=True,
@@ -91,9 +89,7 @@ class Train(Scene):
                 rotation = FRotator(
                     0, 0, random.uniform(-180, 180))
                 scale = FVector(random.uniform(0.5, 1.5), 1, random.uniform(0.5, 1.5))
-                #  TODO apply rotation
-                new_zone = [FVector(location.x - 50 * scale.x, location.y + 50 * scale.y, location.z),
-                            FVector(location.x + 50 * scale.x, location.y - 50 * scale.y, location.z)]
+                new_zone = self.create_new_zone(location, scale, rotation)
                 if self.check_spawning_location(new_zone, unsafe_zones):
                     unsafe_zones.append(new_zone)
                     break
@@ -117,14 +113,48 @@ class Train(Scene):
                 overlap=True,
                 start_up=random.choice([True, False]))
 
+    def create_new_zone(self, location, scale, rotation):
+        #  creation of a new zone
+        #  new_zone is an array of 4 3D points, the vertices
+        #  of unsafe square
+
+        zone = [FVector(location.x - 50 * scale.x, location.y - 50 * scale.y, location.z),
+                FVector(location.x + 50 * scale.x, location.y - 50 * scale.y, location.z),
+                FVector(location.x + 50 * scale.x, location.y + 50 * scale.y, location.z),
+                FVector(location.x - 50 * scale.x, location.y + 50 * scale.y, location.z)]
+        for point in zone:
+            x, y = point.x-location.x, point.y-location.y
+            point.x = x*math.cos(rotation.yaw*math.pi/180) - y*math.sin(rotation.yaw*math.pi/180)
+            point.y = x*math.sin(rotation.yaw*math.pi/180) + y*math.cos(rotation.yaw*math.pi/180)
+            point.x += location.x
+            point.y += location.y
+        return zone
+
     def check_spawning_location(self, new_object_location, all_locations):
-        #  new_object_location is an array of 2 3D points representing locations of unsafe square (top left corner
-        #  and bottom right one)
+        #  new_object_location is an array of 4 3D points, the vertices
+        #  of unsafe square
+        #
         #  all_locations is an array of array same shape of new_object_location
+        #
         #  https://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other
+        #
+        #  new_top, new_bottom, new_right, new_left are the extremum of new_object_location
+        #  top and bottom are following the x axis
+        #  right and left follow the y axis
+        #
+        #  top, bottom, right, left are the same for each location of all_locations
+
+        new_top = max([point.x for point in new_object_location])
+        new_bottom = min([point.x for point in new_object_location])
+        new_right = max([point.y for point in new_object_location])
+        new_left = min([point.y for point in new_object_location])
         for location in all_locations:
-            if (location[0].x < new_object_location[1].x and location[1].x > new_object_location[0].x and
-                    location[0].y > new_object_location[1].y and location[1].y < new_object_location[0].y):
+            top = max([point.x for point in location])
+            bottom = min([point.x for point in location])
+            right = max([point.y for point in location])
+            left = min([point.y for point in location])
+            if (left < new_right and right > new_left and
+                    top > new_bottom and bottom < new_top):
                 return False  # it intersect
         return True  # it doesn't intersect
 

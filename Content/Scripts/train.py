@@ -34,8 +34,10 @@ class Train(Scene):
 
         nobjects = random.randint(1, 3)
         unsafe_zones = []
+        noccluders = random.randint(0, 2)
+        self.is_occluded = True if noccluders != 0 else False
+
         for n in range(nobjects):
-            force = FVector()
             vforce = []
             for i in range(3):
                 vforce.append(random.choice([-4, -3, -2, 2, 3, 4]))
@@ -45,13 +47,10 @@ class Train(Scene):
             force = FVector(vforce[0] * math.pow(10, vforce[1]),
                             vforce[2] * math.pow(10, vforce[3]),
                             vforce[4] * math.pow(10, vforce[5]))
-            scale = 0
-            location = FVector()
-            rotation = FVector()
             previous_size = len(unsafe_zones)
             for try_index in range(100):
                 # scale in [1, 2]
-                scale = 1.5 + random.uniform(-0.5, 0.5)
+                scale = random.uniform(1, 2)
                 location = FVector(
                         random.uniform(200, 700),
                         random.uniform(-500, 500),
@@ -59,13 +58,15 @@ class Train(Scene):
                 rotation = FRotator(
                     0, 0, 360 * random.random())
                 # TODO apply angle
-                new_zone = [FVector(location.x - 50 * scale, location.y + 50 * scale, location.z), FVector(location.x + scale, location.y - scale, location.z)]
+                new_zone = [FVector(location.x - 50 * scale, location.y + 50 * scale, location.z),
+                            FVector(location.x + 50 * scale, location.y - 50 * scale, location.z)]
                 if (self.check_spawning_location(new_zone, unsafe_zones)):
                     unsafe_zones.append(new_zone)
                     break;
             if (len(unsafe_zones) == previous_size):
                 continue
             mesh = random.choice([m for m in Object.shape.keys()] + ['Sphere'])
+            #mesh = 'Cube'
             self.params['object_{}'.format(n+1)] = ObjectParams(
                 mesh=mesh,
                 material=get_random_material('Object'),
@@ -76,12 +77,8 @@ class Train(Scene):
                 initial_force=force,
                 warning=True,
                 overlap=False)
-        noccluders = random.randint(0, 2)
-        self.is_occluded = True if noccluders != 0 else False
+
         for n in range(noccluders):
-            location = FVector()
-            rotation = FVector()
-            scale = FVector()
             previous_size = len(unsafe_zones)
             for try_index in range(100):
                 location = FVector(
@@ -92,7 +89,8 @@ class Train(Scene):
                         0, 0, random.uniform(-180, 180))
                 scale = FVector(random.uniform(0.5, 1.5), 1, random.uniform(0.5, 1.5))
                 # TODO apply rotation
-                new_zone = [FVector(location.x - scale.x, location.y + scale.y, location.z), FVector(location.x + scale.x, location.y - scale.y, location.z)]
+                new_zone = [FVector(location.x - 50 * scale.x, location.y + 50 * scale.y, location.z),
+                            FVector(location.x + 50 * scale.x, location.y - 50 * scale.y, location.z)]
                 if (self.check_spawning_location(new_zone, unsafe_zones)):
                     unsafe_zones.append(new_zone)
                     break;

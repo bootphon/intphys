@@ -38,46 +38,12 @@ class Train(Scene):
         self.is_occluded = True if noccluders != 0 else False
         location = FVector()
         rotation = FVector()
-        scale = 0
+        scale = 1
 
-        for n in range(nobjects):
-            vforce = []
-            for i in range(3):
-                vforce.append(random.choice([-4, -3, -2, 2, 3, 4]))
-                vforce.append(random.uniform(3, 4))
-            # the vertical force is necessarly positive
-            vforce[4] = abs(vforce[4])
-            force = FVector(vforce[0] * math.pow(10, vforce[1]),
-                            vforce[2] * math.pow(10, vforce[3]),
-                            vforce[4] * math.pow(10, vforce[5]))
-            previous_size = len(unsafe_zones)
-            for try_index in range(100):
-                # scale in [1, 2]
-                scale_scal = random.uniform(1, 2)
-                scale = FVector(scale_scal, scale_scal, scale_scal)
-                location = FVector(
-                    random.uniform(200, 700),
-                    random.uniform(-500, 500),
-                    0)
-                rotation = FRotator(
-                    0, 0, 360 * random.random())
-                new_zone = self.create_new_zone(location, scale, rotation)
-                if self.check_spawning_location(new_zone, unsafe_zones):
-                    unsafe_zones.append(new_zone)
-                    break
-            if len(unsafe_zones) == previous_size:
-                continue
-            mesh = random.choice([m for m in Object.shape.keys()] + ['Sphere'])
-            self.params['object_{}'.format(n + 1)] = ObjectParams(
-                mesh=mesh,
-                material=get_random_material('Object'),
-                location=location,
-                rotation=rotation,
-                scale=scale,
-                mass=1,
-                initial_force=force,
-                warning=True,
-                overlap=False)
+        if random.randint(0, 1) == 1:
+            self.generate_random_objects(nobjects, unsafe_zones)
+        else:
+            self.generate_collision_objects(nobjects, unsafe_zones)
 
         for n in range(noccluders):
             previous_size = len(unsafe_zones)
@@ -112,6 +78,96 @@ class Train(Scene):
                 warning=True,
                 overlap=True,
                 start_up=random.choice([True, False]))
+
+    def generate_random_objects(self, nobjects, unsafe_zones):
+        for n in range(nobjects):
+            if random.choice([0, 1, 2]) != 0:
+                vforce = []
+                for i in range(3):
+                    vforce.append(random.choice([-4, -3, -2, 2, 3, 4]))
+                    vforce.append(random.uniform(3, 4))
+                # the vertical force is necessarly positive
+                vforce[4] = abs(vforce[4])
+                force = FVector(vforce[0] * math.pow(10, vforce[1]),
+                                vforce[2] * math.pow(10, vforce[3]),
+                                vforce[4] * math.pow(10, vforce[5]))
+            else:
+                force = FVector(0, 0, 0)
+            previous_size = len(unsafe_zones)
+            for try_index in range(100):
+                # scale in [1, 2]
+                scale_scal = random.uniform(1, 2)
+                scale = FVector(scale_scal, scale_scal, scale_scal)
+                location = FVector(
+                    random.uniform(200, 700),
+                    random.uniform(-500, 500),
+                    0)
+                rotation = FRotator(
+                    0, 0, 360 * random.random())
+                new_zone = self.create_new_zone(location, scale, rotation)
+                if self.check_spawning_location(new_zone, unsafe_zones):
+                    unsafe_zones.append(new_zone)
+                    break
+            if len(unsafe_zones) == previous_size:
+                continue
+            mesh = random.choice([m for m in Object.shape.keys()] + ['Sphere'])
+            self.params['object_{}'.format(n + 1)] = ObjectParams(
+                mesh=mesh,
+                material=get_random_material('Object'),
+                location=location,
+                rotation=rotation,
+                scale=scale,
+                mass=1,
+                initial_force=force,
+                warning=True,
+                overlap=False)
+
+    def generate_collision_objects(self, nobjects, unsafe_zones):
+        nobjects = 3
+        collisionPoint = FVector(
+            random.uniform(200, 700),
+            random.uniform(-300, 300),
+            0
+        )
+        for n in range(nobjects):
+            previous_size = len(unsafe_zones)
+            for try_index in range(100):
+                # scale in [1, 2]
+                scale_scal = random.uniform(1, 2)
+                scale = FVector(scale_scal, scale_scal, scale_scal)
+                location = FVector(
+                    random.uniform(200, 700),
+                    random.uniform(-500, 500),
+                    0)
+                rotation = FRotator(
+                    0, 0, 360 * random.random())
+                new_zone = self.create_new_zone(location, scale, rotation)
+                if self.check_spawning_location(new_zone, unsafe_zones):
+                    unsafe_zones.append(new_zone)
+                    break
+            if len(unsafe_zones) == previous_size:
+                continue
+            vforce = []
+            dirForce = [collisionPoint.x - location.x,
+                        collisionPoint.y - location.y,
+                        random.randint(2,4)]
+            #intensity = [random.uniform(0.3, 0.4), random.uniform(0.3, 0.4), random.uniform(0.3, 0.4)]
+            intensity = [random.uniform(1.5, 1.8), random.uniform(1.5, 1.8), random.uniform(3,4)]
+            force = FVector(dirForce[0] * math.pow(10, intensity[0]),
+                            dirForce[1] * math.pow(10, intensity[1]),
+                            dirForce[2] * math.pow(10, intensity[2]))
+
+            mesh = random.choice([m for m in Object.shape.keys()] + ['Sphere'])
+            self.params['object_{}'.format(n + 1)] = ObjectParams(
+                mesh=mesh,
+                material=get_random_material('Object'),
+                location=location,
+                rotation=rotation,
+                scale=scale,
+                mass=1,
+                initial_force=force,
+                warning=True,
+                overlap=False)
 
     def create_new_zone(self, location, scale, rotation):
         #  creation of a new zone
@@ -173,7 +229,7 @@ class Train(Scene):
         # ue.log("Run 1/1: Possible run")
         super().play_run()
         for name, actor in self.actors.items():
-            if 'object' in name.lower() and random.choice([0, 1, 2]) != 0:
+            if 'object' in name.lower():
                 actor.set_force(actor.initial_force)
 
     def is_possible(self):

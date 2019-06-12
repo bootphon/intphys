@@ -32,33 +32,19 @@ class Train(Scene):
             type='SkyLight',
             color=FLinearColor(random.uniform(0.6, 1.0), random.uniform(0.6, 1.0), random.uniform(0.6, 1.0), 1.0))
 
-        nobjects = random.randint(1, 3)
         unsafe_zones = []
         noccluders = random.randint(0, 2)
         self.is_occluded = True if noccluders != 0 else False
-        location = FVector()
-        rotation = FVector()
-        scale = 1
 
         if random.randint(0, 1) == 1:
+            nobjects = random.randint(1, 3)
             self.generate_random_objects(nobjects, unsafe_zones)
         else:
-            self.generate_collision_objects(nobjects, unsafe_zones)
+            self.generate_collision_objects(unsafe_zones)
 
         for n in range(noccluders):
             previous_size = len(unsafe_zones)
-            for try_index in range(100):
-                location = FVector(
-                    random.uniform(200, 700),
-                    random.uniform(-500, 500),
-                    0)
-                rotation = FRotator(
-                    0, 0, random.uniform(-180, 180))
-                scale = FVector(random.uniform(0.5, 1.5), 1, random.uniform(0.5, 1.5))
-                new_zone = self.create_new_zone(location, scale, rotation)
-                if self.check_spawning_location(new_zone, unsafe_zones):
-                    unsafe_zones.append(new_zone)
-                    break
+            position = self.find_position("occ", unsafe_zones)
             if len(unsafe_zones) == previous_size:
                 continue
             nmoves = random.randint(0, 3)
@@ -70,9 +56,9 @@ class Train(Scene):
                     moves.append(random.randint(moves[-1], 200))
             self.params['occluder_{}'.format(n + 1)] = OccluderParams(
                 material=get_random_material('Wall'),
-                location=location,
-                rotation=rotation,
-                scale=scale,
+                location=position[0],
+                rotation=position[1],
+                scale=position[2],
                 moves=moves,
                 speed=random.uniform(1, 5),
                 warning=True,
@@ -94,76 +80,48 @@ class Train(Scene):
             else:
                 force = FVector(0, 0, 0)
             previous_size = len(unsafe_zones)
-            for try_index in range(100):
-                # scale in [1, 2]
-                scale_scal = random.uniform(1, 2)
-                scale = FVector(scale_scal, scale_scal, scale_scal)
-                location = FVector(
-                    random.uniform(200, 700),
-                    random.uniform(-500, 500),
-                    0)
-                rotation = FRotator(
-                    0, 0, 360 * random.random())
-                new_zone = self.create_new_zone(location, scale, rotation)
-                if self.check_spawning_location(new_zone, unsafe_zones):
-                    unsafe_zones.append(new_zone)
-                    break
+            position = self.find_position("obj", unsafe_zones)
             if len(unsafe_zones) == previous_size:
                 continue
             mesh = random.choice([m for m in Object.shape.keys()] + ['Sphere'])
             self.params['object_{}'.format(n + 1)] = ObjectParams(
                 mesh=mesh,
                 material=get_random_material('Object'),
-                location=location,
-                rotation=rotation,
-                scale=scale,
+                location=position[0],
+                rotation=position[1],
+                scale=position[2],
                 mass=1,
                 initial_force=force,
                 warning=True,
                 overlap=False)
 
-    def generate_collision_objects(self, nobjects, unsafe_zones):
+    def generate_collision_objects(self, unsafe_zones):
         nobjects = 3
-        collisionPoint = FVector(
+        collision_point = FVector(
             random.uniform(200, 700),
             random.uniform(-300, 300),
             0
         )
         for n in range(nobjects):
             previous_size = len(unsafe_zones)
-            for try_index in range(100):
-                # scale in [1, 2]
-                scale_scal = random.uniform(1, 2)
-                scale = FVector(scale_scal, scale_scal, scale_scal)
-                location = FVector(
-                    random.uniform(200, 700),
-                    random.uniform(-500, 500),
-                    0)
-                rotation = FRotator(
-                    0, 0, 360 * random.random())
-                new_zone = self.create_new_zone(location, scale, rotation)
-                if self.check_spawning_location(new_zone, unsafe_zones):
-                    unsafe_zones.append(new_zone)
-                    break
+            position = self.find_position("obj", unsafe_zones)
             if len(unsafe_zones) == previous_size:
                 continue
-            vforce = []
-            dirForce = [collisionPoint.x - location.x,
-                        collisionPoint.y - location.y,
-                        random.randint(2,4)]
-            #intensity = [random.uniform(0.3, 0.4), random.uniform(0.3, 0.4), random.uniform(0.3, 0.4)]
-            intensity = [random.uniform(1.5, 1.8), random.uniform(1.5, 1.8), random.uniform(3,4)]
-            force = FVector(dirForce[0] * math.pow(10, intensity[0]),
-                            dirForce[1] * math.pow(10, intensity[1]),
-                            dirForce[2] * math.pow(10, intensity[2]))
+            dir_force = [collision_point.x - position[0].x,
+                         collision_point.y - position[0].y,
+                         random.randint(2, 4)]
+            intensity = [random.uniform(1.5, 1.8), random.uniform(1.5, 1.8), random.uniform(3, 4)]
+            force = FVector(dir_force[0] * math.pow(10, intensity[0]),
+                            dir_force[1] * math.pow(10, intensity[1]),
+                            dir_force[2] * math.pow(10, intensity[2]))
 
             mesh = random.choice([m for m in Object.shape.keys()] + ['Sphere'])
             self.params['object_{}'.format(n + 1)] = ObjectParams(
                 mesh=mesh,
                 material=get_random_material('Object'),
-                location=location,
-                rotation=rotation,
-                scale=scale,
+                location=position[0],
+                rotation=position[1],
+                scale=position[2],
                 mass=1,
                 initial_force=force,
                 warning=True,
@@ -185,6 +143,32 @@ class Train(Scene):
             point.x += location.x
             point.y += location.y
         return zone
+
+    def find_position(self, type_actor, unsafe_zones):
+        """
+        Find a safe position and return it as a tuple (location, rotation, scale)
+        type is "occ" if the actor is an occluder and "obj" if it's an object
+        """
+        location = FVector()
+        rotation = FVector()
+        scale = FVector()
+        for try_index in range(100):
+            if type_actor == "occ":
+                scale = FVector(random.uniform(0.5, 1.5), 1, random.uniform(0.5, 1.5))
+            else:
+                # scale of an object in [1, 2]
+                s = random.uniform(1, 2)
+                scale = FVector(s, s, s)
+            location = FVector(
+                        random.uniform(200, 700),
+                        random.uniform(-500, 500),
+                        0)
+            rotation = FRotator(0, 0, random.uniform(-180, 180))
+            new_zone = self.create_new_zone(location, scale, rotation)
+            if self.check_spawning_location(new_zone, unsafe_zones):
+                unsafe_zones.append(new_zone)
+                break
+        return location, rotation, scale
 
     def check_spawning_location(self, new_object_location, all_locations):
         #  new_object_location is an array of 4 3D points, the vertices

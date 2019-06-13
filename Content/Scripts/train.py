@@ -4,7 +4,7 @@ import random
 import math
 from scene import Scene
 from unreal_engine import FVector, FRotator, FLinearColor
-from actors.parameters import LightParams, CameraParams, ObjectParams, OccluderParams
+from actors.parameters import LightParams, CameraParams, ObjectParams, OccluderParams, WallsParams
 from tools.materials import get_random_material
 from actors.object import Object
 
@@ -37,6 +37,14 @@ class Train(Scene):
                 location=FVector(-570, 0, random.uniform(200, 300)),
                 rotation=FRotator(0, -46, 0),
                 color=FLinearColor(random.uniform(0.5, 1.0), random.uniform(0.5, 1.0), random.uniform(0.5, 1.0), 1.0))
+
+        prob_walls = 0.3
+        if random.uniform(0, 1) <= prob_walls:
+            self.params['Walls'] = WallsParams(
+                material=get_random_material('Wall'),
+                height=random.uniform(1, 10),
+                length=random.uniform(3000, 5000),
+                depth=random.uniform(1500, 3000))
 
         nobjects = random.randint(1, 3)
         unsafe_zones = []

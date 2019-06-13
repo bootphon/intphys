@@ -42,8 +42,6 @@ class Train(Scene):
         noccluders = random.randint(0, 2)
         self.is_occluded = True if noccluders != 0 else False
 
-        # et on met des murs yay !
-        #  on va dire qu'on les met 1 fois sur 3
         if random.randint(1,3) == 3:
             self.params['walls'] = WallsParams(
                 material=get_random_material('Wall'),

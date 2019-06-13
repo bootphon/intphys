@@ -78,6 +78,9 @@ class Train(Scene):
                 start_up=random.choice([True, False]))
 
     def generate_random_objects(self, nobjects, unsafe_zones):
+        """
+        generate randomly nobjects objects
+        """
         for n in range(nobjects):
             if random.choice([0, 1, 2]) != 0:
                 vforce = []
@@ -108,6 +111,11 @@ class Train(Scene):
                 overlap=False)
 
     def generate_collision_objects(self, unsafe_zones):
+        """
+        Generate 3 objects in order to maximize collision
+        A collision point is randomly chosen, the 3 objects have an initial
+        force in the direction of the collision point
+        """
         nobjects = 3
         collision_point = FVector(
             random.uniform(200, 700),
@@ -140,6 +148,9 @@ class Train(Scene):
                 overlap=False)
 
     def create_new_zone(self, location, scale, rotation):
+        """
+        Create a new zone
+        """
         #  creation of a new zone
         #  new_zone is an array of 4 3D points, the vertices
         #  of unsafe square

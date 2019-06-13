@@ -25,12 +25,18 @@ class Train(Scene):
         super().generate_parameters()
 
         self.params['Camera'] = CameraParams(
-            location=FVector(0, 0, random.uniform(175, 225)),
-            rotation=FRotator(0, random.uniform(-10, 10), random.uniform(-10, 10)))
+                location=FVector(0, 0, random.uniform(175, 225)),
+                rotation=FRotator(0, random.uniform(-10, 10), 0))
 
-        self.params['Light'] = LightParams(
-            type='SkyLight',
-            color=FLinearColor(random.uniform(0.6, 1.0), random.uniform(0.6, 1.0), random.uniform(0.6, 1.0), 1.0))
+        self.params['Light_1'] = LightParams(
+                type='SkyLight',
+                color=FLinearColor(random.uniform(0.6, 1.0), random.uniform(0.6, 1.0), random.uniform(0.6, 1.0), 1.0))
+
+        self.params['Light_2'] = LightParams(
+                type='Directional',
+                location=FVector(-570, 0, random.uniform(200, 300)),
+                rotation=FRotator(0, -46, 0),
+                color=FLinearColor(random.uniform(0.5, 1.0), random.uniform(0.5, 1.0), random.uniform(0.5, 1.0), 1.0))
 
         unsafe_zones = []
         noccluders = random.randint(0, 2)

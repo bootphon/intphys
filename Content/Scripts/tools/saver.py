@@ -78,7 +78,7 @@ class Saver:
         # not UE names (to be 'object_1' instead of eg
         # 'Object_C_126'), as well suppress the 'name' field in actor
         # status
-        names_map = {'Sky': 'sky'}
+        names_map = {'Sky': 'sky', 'Walls': 'walls'}
         for k, v in self.status_header.items():
             if isinstance(v, dict) and 'name' in v.keys():
                 names_map[v['name']] = k

@@ -4,7 +4,7 @@ import random
 import math
 from scene import Scene
 from unreal_engine import FVector, FRotator, FLinearColor
-from actors.parameters import LightParams, CameraParams, ObjectParams, OccluderParams
+from actors.parameters import LightParams, CameraParams, ObjectParams, OccluderParams, WallsParams
 from tools.materials import get_random_material
 from actors.object import Object
 
@@ -26,7 +26,7 @@ class Train(Scene):
 
         self.params['Camera'] = CameraParams(
             location=FVector(0, 0, random.uniform(175, 225)),
-            rotation=FRotator(0, random.uniform(-10, 10), 0))
+            rotation=FRotator(0, random.uniform(-10, 10), random.uniform(-10, 10)))
 
         self.params['Light'] = LightParams(
             type='SkyLight',
@@ -35,6 +35,18 @@ class Train(Scene):
         unsafe_zones = []
         noccluders = random.randint(0, 2)
         self.is_occluded = True if noccluders != 0 else False
+
+        # et on met des murs yay !
+        #  on va dire qu'on les met 1 fois sur 3
+        if random.randint(1,3) == 3:
+            self.params['walls'] = WallsParams(
+                material=get_random_material('Wall'),
+                length=2000,
+                depth=1000,
+                height=1,
+                overlap=False,
+                warning=False
+            )
 
         if random.randint(0, 1) == 1:
             nobjects = random.randint(1, 3)

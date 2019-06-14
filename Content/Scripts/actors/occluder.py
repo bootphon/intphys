@@ -98,8 +98,7 @@ class Occluder(BaseMesh):
 
     def on_actor_overlap(self, me, other):
         super().on_actor_overlap(me, other)
-        if 'occluder' in other.get_name().lower():
-            self.is_valid = False
+
 
     def on_actor_hit(self, me, other, *args):
         super().on_actor_hit(me, other)

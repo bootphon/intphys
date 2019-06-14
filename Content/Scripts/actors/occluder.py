@@ -105,6 +105,11 @@ class Occluder(BaseMesh):
         if 'occluder' in other.get_name().lower():
             self.is_valid = False
 
+    def moving_down_on_actor_hit(self, me, other, *args):
+        super().on_actor_hit(me, other)
+        if self.up == True and self.moving == True:
+            self.up = False
+
     def reset(self, params):
         super().reset(params)
         self.set_location(self.location)

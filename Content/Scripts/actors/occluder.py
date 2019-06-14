@@ -70,6 +70,8 @@ class Occluder(BaseMesh):
                     rotation.roll -= self.speed
                     self.up = True
         elif (self.moving is True):
+            if self.warning and self.overlap:
+                self.actor.bind_event('OnActorHit', self.moving_down_on_actor_hit)
             if (self.up is True):
                 rotation.roll += self.speed
             else:

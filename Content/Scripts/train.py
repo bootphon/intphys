@@ -1,4 +1,7 @@
 # coding: utf-8
+"""
+This is a module
+"""
 
 import random
 import math
@@ -72,8 +75,18 @@ class Train(Scene):
                 start_up=random.choice([True, False]))
 
     def generate_random_objects(self, nobjects, unsafe_zones):
-        """
-        generate randomly nobjects objects
+        """Generate random objects at random positions
+
+        Parameters
+        ----------
+        nobjects : int
+            nobjects is the number of objects you want to generate
+        unsafe_zones : list
+            unsafe_zones is a list of existing unsafe zones (zones where an
+            actor has already been placed)
+
+
+
         """
         for n in range(nobjects):
             if random.choice([0, 1, 2]) != 0:

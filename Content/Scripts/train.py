@@ -2,6 +2,7 @@
 
 import random
 import math
+import colorsys
 from scene import Scene
 from unreal_engine import FVector, FRotator, FLinearColor
 from actors.parameters import LightParams, CameraParams, ObjectParams, OccluderParams, WallsParams
@@ -30,13 +31,13 @@ class Train(Scene):
 
         self.params['Light_1'] = LightParams(
                 type='SkyLight',
-                color=FLinearColor(random.uniform(0.6, 1.0), random.uniform(0.6, 1.0), random.uniform(0.6, 1.0), 1.0))
+                color=self.make_color())
 
         self.params['Light_2'] = LightParams(
                 type='Directional',
                 location=FVector(-570, 0, random.uniform(200, 300)),
                 rotation=FRotator(0, -46, 0),
-                color=FLinearColor(random.uniform(0.5, 1.0), random.uniform(0.5, 1.0), random.uniform(0.5, 1.0), 1.0))
+                color=self.make_color())
 
         unsafe_zones = []
         noccluders = random.randint(0, 2)
@@ -224,6 +225,11 @@ class Train(Scene):
                     top > new_bottom and bottom < new_top):
                 return False  # it intersect
         return True  # it doesn't intersect
+
+    def make_color(self):
+        h, s, v = random.uniform(0.05, 0.18), 0.4, random.uniform(0.5, 1.0)
+        r, g, b = colorsys.hsv_to_rgb(h, s, v)
+        return FLinearColor(r, g, b, 1.0)
 
     def stop_run(self, scene_index, total):
         super().stop_run()

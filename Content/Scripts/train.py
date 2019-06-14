@@ -42,16 +42,6 @@ class Train(Scene):
         noccluders = random.randint(0, 2)
         self.is_occluded = True if noccluders != 0 else False
 
-        if random.randint(1,3) == 3:
-            self.params['walls'] = WallsParams(
-                material=get_random_material('Wall'),
-                length=2000,
-                depth=1000,
-                height=1,
-                overlap=False,
-                warning=False
-            )
-
         if random.randint(0, 1) == 1:
             nobjects = random.randint(1, 3)
             self.generate_random_objects(nobjects, unsafe_zones)

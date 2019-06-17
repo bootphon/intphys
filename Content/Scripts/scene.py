@@ -50,7 +50,9 @@ class Scene:
         self.params['Light'] = LightParams(
                 type='SkyLight')
         """
-        prob_walls = 0.3  # TODO no walls to avoid luminosity problems
+
+        
+        prob_walls = 0.3
         if random.uniform(0, 1) <= prob_walls:
             self.params['Walls'] = WallsParams(
                 material=get_random_material('Wall'),

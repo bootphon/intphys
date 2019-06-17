@@ -155,18 +155,21 @@ class Train(Scene):
                 warning=True,
                 overlap=False)
 
-    def create_new_zone(self, location, scale, rotation):
+    def create_new_zone(self, location, scale, rotation, type_actor):
         """
         Create a new zone
         """
         #  creation of a new zone
         #  new_zone is an array of 4 3D points, the vertices
         #  of unsafe square
-
         zone = [FVector(location.x - 50 * scale.x, location.y - 50 * scale.y, location.z),
                 FVector(location.x + 50 * scale.x, location.y - 50 * scale.y, location.z),
                 FVector(location.x + 50 * scale.x, location.y + 50 * scale.y, location.z),
                 FVector(location.x - 50 * scale.x, location.y + 50 * scale.y, location.z)]
+        if type_actor == 'occ':
+            zone[2] = FVector(location.x + 50 * scale.x + 10, location.y + 50 * scale.y + 100 * scale.z + 10, location.z)
+            zone[3] = FVector(location.x - 50 * scale.x + 10, location.y + 50 * scale.y + 100 * scale.z + 10, location.z)
+
         for point in zone:
             x, y = point.x-location.x, point.y-location.y
             point.x = x*math.cos(rotation.yaw*math.pi/180) - y*math.sin(rotation.yaw*math.pi/180)
@@ -195,7 +198,7 @@ class Train(Scene):
                         random.uniform(-500, 500),
                         0)
             rotation = FRotator(0, 0, random.uniform(-180, 180))
-            new_zone = self.create_new_zone(location, scale, rotation)
+            new_zone = self.create_new_zone(location, scale, rotation, type_actor)
             if self.check_spawning_location(new_zone, unsafe_zones):
                 unsafe_zones.append(new_zone)
                 break

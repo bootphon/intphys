@@ -51,12 +51,12 @@ class Scene:
                 type='SkyLight')
         """
 
-        
+
         prob_walls = 0.3
         if random.uniform(0, 1) <= prob_walls:
             self.params['Walls'] = WallsParams(
                 material=get_random_material('Wall'),
-                height=random.uniform(1, 10),
+                height=random.uniform(0.4, 7),
                 length=random.uniform(3000, 5000),
                 depth=random.uniform(1500, 3000))
 

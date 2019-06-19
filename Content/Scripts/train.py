@@ -28,17 +28,18 @@ class Train(Scene):
         self.params['Camera'] = CameraParams(
                 location=FVector(0, 0, random.uniform(175, 225)),
                 rotation=FRotator(0, random.uniform(-10, 10), 0))
-
+        
         self.params['Light_1'] = LightParams(
                 type='SkyLight',
-                color=self.make_color())
-
+                location=FVector(0, 0, 30),
+                color=self.make_color(0.9, 1.0))
+        
         self.params['Light_2'] = LightParams(
                 type='Directional',
-                location=FVector(-570, 0, random.uniform(200, 300)),
+                # location=FVector(-570, 0, random.uniform(200, 300)),
                 rotation=FRotator(0, -46, 0),
-                color=self.make_color())
-
+                color=self.make_color(0.1, 0.4))
+        
         unsafe_zones = []
         noccluders = random.randint(0, 2)
         self.is_occluded = True if noccluders != 0 else False
@@ -226,8 +227,8 @@ class Train(Scene):
                 return False  # it intersect
         return True  # it doesn't intersect
 
-    def make_color(self):
-        h, s, v = random.uniform(0.05, 0.18), 0.4, random.uniform(0.5, 1.0)
+    def make_color(self, min_value = 0.5, max_value = 1.0):
+        h, s, v = random.uniform(0.05, 0.18), 0.3, random.uniform(min_value, max_value)
         r, g, b = colorsys.hsv_to_rgb(h, s, v)
         return FLinearColor(r, g, b, 1.0)
 

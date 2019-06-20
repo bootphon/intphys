@@ -1,7 +1,4 @@
 # coding: utf-8
-"""
-This is a module
-"""
 
 import random
 import math
@@ -37,17 +34,11 @@ class Train(Scene):
                 location=FVector(0, 0, 30),
                 color=self.make_color(0.9, 1.0))
 
-        self.params['Light_2'] = LightParams(
-                type='Directional',
-                # location=FVector(-570, 0, random.uniform(200, 300)),
-                rotation=FRotator(0, -46, 0),
-                color=self.make_color(0.1, 0.4))
-
         unsafe_zones = []
         noccluders = random.randint(0, 2)
         self.is_occluded = True if noccluders != 0 else False
 
-        if random.randint(1,3) == 3:
+        if random.randint(0,3) == 3:
             self.params['walls'] = WallsParams(
                 material=get_random_material('Wall'),
                 height=random.uniform(0.3, 4),

@@ -51,7 +51,7 @@ class Scene:
                 type='SkyLight')
         """
 
-
+        """
         prob_walls = 0.3
         if random.uniform(0, 1) <= prob_walls:
             self.params['Walls'] = WallsParams(
@@ -59,7 +59,8 @@ class Scene:
                 height=random.uniform(0.4, 7),
                 length=random.uniform(3000, 5000),
                 depth=random.uniform(1500, 3000))
-
+        """
+        
     def play_run(self):
         if self.run == 0:
             self.spawn_actors()

@@ -47,7 +47,7 @@ class Train(Scene):
         noccluders = random.randint(0, 2)
         self.is_occluded = True if noccluders != 0 else False
 
-        if random.randint(3,3) == 3:
+        if random.randint(1,3) == 3:
             self.params['walls'] = WallsParams(
                 material=get_random_material('Wall'),
                 height=random.uniform(0.3, 4),
@@ -95,11 +95,17 @@ class Train(Scene):
             unsafe_zones is a list of existing unsafe zones (zones where an
             actor has already been placed)
 
-
-
         """
         for n in range(nobjects):
-            if random.choice([0, 1, 2]) != 0:
+            previous_size = len(unsafe_zones)
+            # find a position (location, rotation, scale)
+            position = self.find_position("obj", unsafe_zones)
+            if len(unsafe_zones) == previous_size:
+                continue
+
+            random_force = random.randint(0, 2)
+            # if random_force == 0, the force is totally random
+            if random_force == 0:
                 vforce = []
                 for i in range(3):
                     vforce.append(random.choice([-4, -3, -2, 2, 3, 4]))
@@ -109,12 +115,24 @@ class Train(Scene):
                 force = FVector(vforce[0] * math.pow(10, vforce[1]),
                                 vforce[2] * math.pow(10, vforce[3]),
                                 vforce[4] * math.pow(10, vforce[5]))
+            # if random_force == 1, the force is directed in the camera range
+            elif random_force == 1:
+                collision_point = FVector(
+                    random.uniform(300, 700),
+                    random.uniform(-200, 200),
+                    0
+                )
+                dir_force = [collision_point.x - position[0].x,
+                             collision_point.y - position[0].y,
+                             random.randint(2, 4)]
+                intensity = [random.uniform(1.5, 1.8), random.uniform(1.5, 1.8), random.uniform(3, 4)]
+                force = FVector(dir_force[0] * math.pow(10, intensity[0]),
+                                dir_force[1] * math.pow(10, intensity[1]),
+                                dir_force[2] * math.pow(10, intensity[2]))
+            # if random_force == 2, the force is null
             else:
                 force = FVector(0, 0, 0)
-            previous_size = len(unsafe_zones)
-            position = self.find_position("obj", unsafe_zones)
-            if len(unsafe_zones) == previous_size:
-                continue
+
             mesh = random.choice([m for m in Object.shape.keys()] + ['Sphere'])
             self.params['object_{}'.format(n + 1)] = ObjectParams(
                 mesh=mesh,
@@ -248,6 +266,7 @@ class Train(Scene):
 
     def stop_run(self, scene_index, total):
         super().stop_run()
+        "print stop run"
         if not self.saver.is_dry_mode:
             self.saver.save(self.get_scene_subdir(scene_index, total))
             # reset actors if it is the last run

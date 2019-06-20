@@ -55,7 +55,14 @@ if [ ! -z "$3" ]; then extra_options="$3"; fi
 # list all subdirectories containing at least one png file, list can
 # be too long for a command line so put it in a file
 echo -n "Looking for directories containg PNG images..."
-find $data_dir -type f -name "*.png" -exec dirname {} \; | uniq > png_dirs.txt
+
+if [ "$extra_options" == -s ]; then
+  echo "Looking only in the scene directories"
+  find $data_dir -type f -wholename "*/scene/*.png" -exec dirname {} \; | uniq > png_dirs.txt
+  extra_options=""
+else
+  find $data_dir -type f -name "*.png" -exec dirname {} \; | uniq > png_dirs.txt
+fi
 trap "rm -f png_dirs.txt" EXIT
 npng_dirs=$(cat  png_dirs.txt | wc -l)
 echo " found $npng_dirs directories"

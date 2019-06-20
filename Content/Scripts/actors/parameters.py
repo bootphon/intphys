@@ -34,6 +34,7 @@ class LightParams:
 class AxisCylinderParams:
     location: FVector = FVector(0, 0, 0)
     rotation: FRotator = FRotator(0, 0, 0)
+    is_long: bool = False
 
 @dataclass
 class WallsParams:

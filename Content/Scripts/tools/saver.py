@@ -111,6 +111,9 @@ class Saver:
                 res.append(actor.left.actor)
                 res.append(actor.right.actor)
                 res.append(actor.front.actor)
+            elif 'axiscylinder' in name.lower():
+                print("TODO append actors")
+                pass
             else:
                 res.append(actor.actor)
         ScreenshotManager.SetActors(res)

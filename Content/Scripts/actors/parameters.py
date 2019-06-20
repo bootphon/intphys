@@ -30,6 +30,10 @@ class LightParams:
     rotation: FRotator = FRotator(0, 0, 0)
     type: str = 'SkyLight'
 
+@dataclass
+class AxisCylinderParams:
+    location: FVector = FVector(0, 0, 0)
+    rotation: FRotator = FRotator(0, 0, 0)
 
 @dataclass
 class WallsParams:

@@ -40,8 +40,28 @@ else
     exit 1
 fi
 
+scene=False
 extra_options=""
-if [ ! -z "$3" ]; then extra_options="$3"; fi
+extra_options_arg=""
+delay=""
+
+shift; shift
+
+while test $# -ne 0; do
+    case "$1" in
+      "--scene")
+        scene=True
+        ;;
+      "-d")
+        shift; delay=$1
+        ;;
+      *)
+        extra_options="$1"
+        shift; extra_options_arg="$1"
+        ;;
+      esac
+      shift
+done
 
 # ensure GNU parallel is installed
 [ -z $(which parallel 2> /dev/null) ] \
@@ -56,10 +76,9 @@ if [ ! -z "$3" ]; then extra_options="$3"; fi
 # be too long for a command line so put it in a file
 echo -n "Looking for directories containg PNG images..."
 
-if [ "$extra_options" == -s ]; then
+if [ $scene ]; then
   echo "Looking only in the scene directories"
   find $data_dir -type f -wholename "*/scene/*.png" -exec dirname {} \; | uniq > png_dirs.txt
-  extra_options=""
 else
   find $data_dir -type f -name "*.png" -exec dirname {} \; | uniq > png_dirs.txt
 fi
@@ -89,6 +108,8 @@ make_video() {
     dir=$1
     format=$2
     extra_options=$3
+    delay=10
+    if [ ! -z "$4" ]; then delay="$4"; fi
 
     # list all png images in the directory
     png=$(ls $dir/*.png 2> /dev/null)
@@ -120,7 +141,7 @@ make_video() {
             # convert the png sequence to a video.gif (with black at
             # begin and end of the animation)
             # -compress jpeg -resize 128x128
-            convert $extra_options -delay 10 -loop 0 \
+            convert $extra_options -delay $delay -loop 0 \
                     black.png $dir/*.png black.png $dir/video.gif \
                 || (echo "failed gif conversion"; exit 1)
             echo "Wrote $dir/video.gif"
@@ -131,6 +152,6 @@ make_video() {
 # convert the videos in parallel using all the available CPUs
 export -f make_video
 echo "Generating $npng_dirs $format videos in parallel..."
-parallel make_video :::: png_dirs.txt ::: $format ::: "$extra_options" || exit 1
+parallel make_video :::: png_dirs.txt ::: $format ::: "$extra_options $extra_options_arg" ::: "$delay" || exit 1
 
 exit 0

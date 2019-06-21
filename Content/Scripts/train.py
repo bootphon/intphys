@@ -27,7 +27,7 @@ class Train(Scene):
 
         self.params['Camera'] = CameraParams(
                 location=FVector(0, 0, random.uniform(175, 225)),
-                rotation=FRotator(0, random.uniform(-10, 10), 0))
+                rotation=FRotator(0, random.uniform(-10, 10), random.uniform(-10, 10)))
 
         self.params['Light_1'] = LightParams(
                 type='SkyLight',

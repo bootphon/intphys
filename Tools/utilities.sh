@@ -42,15 +42,15 @@ generate_img () {
   <p>
     <center>
       <h4> Possible events </h4>
-      <a href="$1/1/scene/video.gif"><img src="$1/1/scene/video.gif" alt="gif $1/1/scene/video.gif"/></a>
-      <a href="$1/2/scene/video.gif"><img src="$1/2/scene/video.gif" alt="gif $1/2/scene/video.gif"/></a>
+      <a href="../source_gif/$1-1.gif"><img src="../source_gif/$1-1.gif" alt="../source_gif/$1-1.gif"/></a>
+      <a href="../source_gif/$1-2.gif"><img src="../source_gif/$1-2.gif" alt="../source_gif/$1-2.gif"/></a>
     </center>
   </p>
   <p>
     <center>
       <h4> Impossible events </h4>
-      <a href="$1/3/scene/video.gif"><img src="$1/3/scene/video.gif" alt="gif $1/3/scene/video.gif"/></a>
-      <a href="$1/4/scene/video.gif"><img src="$1/4/scene/video.gif" alt="gif $1/4/scene/video.gif"/></a>
+      <a href="../source_gif/$1-3.gif"><img src="../source_gif/$1-3.gif" alt="../source_gif/$1-3.gif"/></a>
+      <a href="../source_gif/$1-4.gif"><img src="../source_gif/$1-4.gif" alt="../source_gif/$1-4.gif"/></a>
     </center>
   </p>
   "
@@ -60,7 +60,7 @@ generate_img () {
 generate_page () {
   (
   read line < $1
-  title=${line:${#DIR}+1}
+  title=${line}
   html_head "Quadruplet n°$2"
   html_title "Quadruplet n°$2" "$title"
   echo "
@@ -69,22 +69,28 @@ generate_page () {
   </p>
   "
   s=$(echo "$line" | rev | cut -d / -f3-30 | rev)
-  generate_img $s
+  generate_img $2 "$3/source_gif"
+  previous=$((($2+8-1)%$4+1))
+  next=$((($2+8+1)%$4+1))
   echo "
   <p>
-    <center><a href="$3/index.html">Retour index</a></center>
+    <left><a href="$previous.html">Précédent</a><left>
+    <div align="right"><a href="$next.html">Suivant</a></div>
+  </p>
+  <p>
+    <center><a href="../index.html">Retour index</a></center>
   </p>"
   html_tail
-  ) > $3/$2.html
+  ) > $3/source_html/$2.html
 }
 
 # generate the index
 generate_index () {
-  echo "Generatin index"
+  echo "Generating index"
   (
   for i in `seq 1 $1`;
   do
-    echo "<p> <a href="$2/$i.html"> Quadruplet $i </a> </p>"
+    echo "<p> <a href="source_html/$i.html"> Quadruplet $i </a> </p>"
   done
   ) > $2/index.html
 }
@@ -99,6 +105,6 @@ generate_pages () {
     last=$(($first+3))
     echo "Generating page $np"
     (sed -n "$first,$last p" $1) > temp.txt
-    generate_page temp.txt $np $2
+    generate_page temp.txt $np $2 $NP
   done
 }

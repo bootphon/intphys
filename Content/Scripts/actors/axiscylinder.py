@@ -63,8 +63,8 @@ class Axiscylinder():
 	
 	def move(self):
 		self.count += 1
-		self.dy += self.speed
-
+		self.dy = self.speed * self.count
+		
 		self.cylinder.set_location(FVector(self.location.x, self.location.y + self.dy,
 			self.cylinder.location.z))
 		self.axis.set_location(FVector(self.location.x, self.location.y + self.dy,

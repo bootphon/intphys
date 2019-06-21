@@ -38,19 +38,28 @@ class Train(Scene):
         noccluders = random.randint(0, 2)
         self.is_occluded = True if noccluders != 0 else False
 
-        if random.randint(0,3) == 3:
-            self.params['walls'] = WallsParams(
-                material=get_random_material('Wall'),
-                height=random.uniform(0.3, 4),
-                length=random.uniform(1500, 5000),
-                depth=random.uniform(800, 2000)
-            )
-
-        if random.randint(0, 1) == 1:
+        prob_walls = random.uniform(0, 1)
+        scenarios = ['random', 'collision']
+        scenarios = 2*scenarios+['wall']
+        scenario = random.choice(scenarios)
+        if scenario == 'random':
+            # random scenario
             nobjects = random.randint(1, 3)
             self.generate_random_objects(nobjects, unsafe_zones)
-        else:
+            self.generate_walls(prob_walls, 4, 2000)
+        elif scenario == 'collision':
+            # scenario that maximizes collision between objects
             self.generate_collision_objects(unsafe_zones)
+            self.generate_walls(prob_walls, 4, 2000)
+        else:
+            # scenario with the objects going above the Walls
+            # always 3 objects, nobjects-nobjects_r are going above the Wall
+            # nobjects_r are placed randomly
+            self.generate_walls(0, 0.7, 900)
+            nobjects = 3
+            nobjects_r = random.randint(0, 2)
+            self.generate_random_objects(nobjects_r, unsafe_zones)
+            self.objects_above_walls_scenario(nobjects - nobjects_r, nobjects_r, unsafe_zones)
 
         for n in range(noccluders):
             previous_size = len(unsafe_zones)
@@ -74,6 +83,17 @@ class Train(Scene):
                 warning=True,
                 overlap=True,
                 start_up=random.choice([True, False]))
+
+    def generate_walls(self, prob_walls, max_height, max_depth):
+        """Generate walls
+        """
+        if prob_walls <= 0.3:
+            self.params['walls'] = WallsParams(
+                material=get_random_material('Wall'),
+                height=random.uniform(0.3, max_height),
+                length=random.uniform(1500, 5000),
+                depth=random.uniform(800, max_depth)
+            )
 
     def generate_random_objects(self, nobjects, unsafe_zones):
         """Generate random objects at random positions
@@ -172,6 +192,44 @@ class Train(Scene):
                 initial_force=force,
                 warning=True,
                 overlap=False)
+
+    def objects_above_walls_scenario(self, nobjects, nprevious, unsafe_zones):
+        """
+        Generate objects, maximize objects being thrown above
+        walls.
+        """
+        # nobjects = random.randint(1,3)
+
+        collision_point = FVector(
+            random.uniform(800, 1000),
+            random.uniform(-300, 300),
+            0
+        )
+        for n in range(nobjects):
+            previous_size = len(unsafe_zones)
+            position = self.find_position("obj", unsafe_zones)
+            if len(unsafe_zones) == previous_size:
+                continue
+            dir_force = [collision_point.x - position[0].x,
+                         collision_point.y - position[0].y,
+                         random.randint(3, 4)]
+            intensity = [random.uniform(1.5, 1.8), random.uniform(1.5, 1.8), random.uniform(3.7, 4)]
+            force = FVector(dir_force[0] * math.pow(10, intensity[0]),
+                            dir_force[1] * math.pow(10, intensity[1]),
+                            dir_force[2] * math.pow(10, intensity[2]))
+
+            mesh = random.choice([m for m in Object.shape.keys()] + ['Sphere'])
+            self.params['object_{}'.format(nprevious + 1)] = ObjectParams(
+                mesh=mesh,
+                material=get_random_material('Object'),
+                location=position[0],
+                rotation=position[1],
+                scale=position[2],
+                mass=1,
+                initial_force=force,
+                warning=True,
+                overlap=False)
+
 
     def create_new_zone(self, location, scale, rotation, type_actor):
         """

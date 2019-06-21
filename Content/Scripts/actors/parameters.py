@@ -35,6 +35,7 @@ class AxisCylinderParams:
     location: FVector = FVector(0, 0, 0)
     rotation: FRotator = FRotator(0, 0, 0)
     is_long: bool = False
+    moves: list = field(default_factory=list)
 
 @dataclass
 class WallsParams:

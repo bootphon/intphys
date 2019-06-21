@@ -149,5 +149,6 @@ class Scene:
     def tick(self):
         if self.actors is not None:
             for actor_name, actor in self.actors.items():
-                if 'object' in actor_name or 'occluder' in actor_name:
+                if 'object' in actor_name or 'occluder' in actor_name \
+                            or 'axiscylinder' in actor_name:
                     actor.move()

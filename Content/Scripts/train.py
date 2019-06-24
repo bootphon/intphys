@@ -74,7 +74,7 @@ class Train(Scene):
                 else:
                     moves.append(random.randint(moves[-1], 200))
             self.params['occluder_{}'.format(n + 1)] = OccluderParams(
-                material=get_random_material('Wall'),
+                material=get_random_material('Wall', self.params['Floor'].material),
                 location=position[0],
                 rotation=position[1],
                 scale=position[2],

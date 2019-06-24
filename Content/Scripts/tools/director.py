@@ -97,6 +97,11 @@ class Director(object):
                     self.scenes[self.scene].name))
         self.scenes[self.scene].play_run()
 
+        # for train only, "warmup" the scene to settle the physics simulation
+        if "train" in self.scenes[self.scene].name:
+            for i in range(1, 10):
+                self.scenes[self.scene].tick()
+
     def stop_scene(self):
         if self.scene >= len(self.scenes):
             return
@@ -184,6 +189,7 @@ class Director(object):
         self.is_paused = False
         set_game_paused(self.world, False)
         if self.scene < len(self.scenes):
+            #print(self.ticker)
             self.scenes[self.scene].tick()
             if self.ticker % 2 == 1:
                 self.capture()

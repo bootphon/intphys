@@ -32,7 +32,7 @@ class Light(BaseActor):
 
         self.get_parameters(params)
         self.set_parameters()
-        
+
         """
         if 'Directional' in params.type:
             self.actor.bUsedAsAtmosphereSunLight = True
@@ -48,6 +48,7 @@ class Light(BaseActor):
         if self.type == 'SkyLight':
             self.skylight_component = self.actor.get_component_by_type(SkyLightComponent)
             self.skylight_component.SetLightColor(self.color)
+            self.skylight_component.SetIntensity(1.7)
         elif self.type == 'Directional':
             self.directionallight_component = self.actor.get_component_by_type(DirectionalLightComponent)
             self.directionallight_component.SetLightColor(self.color)

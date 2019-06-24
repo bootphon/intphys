@@ -53,15 +53,15 @@ generate_img () {
   <p>
     <center>
       <h4> Possible events </h4>
-      <a href="../source_gif/$1-1.gif"><img src="../source_gif/$1-1.gif" alt="../source_gif/$1-1.gif"/></a>
-      <a href="../source_gif/$1-2.gif"><img src="../source_gif/$1-2.gif" alt="../source_gif/$1-2.gif"/></a>
+      <a href="../source_gif/$zero$1-1.gif"><img src="../source_gif/$zero$1-1.gif" alt="../source_gif/$zero$1-1.gif"/></a>
+      <a href="../source_gif/$zero$1-2.gif"><img src="../source_gif/$zero$1-2.gif" alt="../source_gif/$zero$1-2.gif"/></a>
     </center>
   </p>
   <p>
     <center>
       <h4> Impossible events </h4>
-      <a href="../source_gif/$1-3.gif"><img src="../source_gif/$1-3.gif" alt="../source_gif/$1-3.gif"/></a>
-      <a href="../source_gif/$1-4.gif"><img src="../source_gif/$1-4.gif" alt="../source_gif/$1-4.gif"/></a>
+      <a href="../source_gif/$zero$1-3.gif"><img src="../source_gif/$zero$1-3.gif" alt="../source_gif/$zero$1-3.gif"/></a>
+      <a href="../source_gif/$zero$1-4.gif"><img src="../source_gif/$zero$1-4.gif" alt="../source_gif/$zero$1-4.gif"/></a>
     </center>
   </p>
   "
@@ -71,7 +71,7 @@ generate_img () {
 generate_page () {
   (
   read line < $1
-  title=${line}
+  title=$(echo "$line" | rev | cut -d/ -f3 | rev)
   html_head "Quadruplet n°$2"
   html_title "Quadruplet n°$2" "$title"
   echo "

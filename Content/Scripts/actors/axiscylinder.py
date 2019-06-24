@@ -49,6 +49,7 @@ class Axiscylinder():
 		self.cylinder.get_mesh().set_simulate_physics(False)
 		self.axis.get_mesh().set_simulate_physics(False)
 		self.is_valid = True
+		self.hidden = False
 
 		self.count = 0 # for movements
 		self.dy = 0
@@ -65,10 +66,21 @@ class Axiscylinder():
 		self.count += 1
 		self.dy = self.speed * self.count
 		
-		self.cylinder.set_location(FVector(self.location.x, self.location.y + self.dy,
+		self.cylinder.set_location(FVector(self.cylinder.location.x, self.cylinder.location.y + self.dy,
 			self.cylinder.location.z))
-		self.axis.set_location(FVector(self.location.x, self.location.y + self.dy,
+		self.axis.set_location(FVector(self.axis.location.x, self.axis.location.y + self.dy,
 			self.axis.location.z))
+
+	def set_location(self, location):
+		self.count = 0 # if we don't reset the movement count, the object will teleport
+		if self.is_long:
+			v = location
+			v.z = v.z + 100
+			self.axis.set_location(v)
+			self.cylinder.set_location(v)
+		else:
+			self.axis.set_location(location)
+			self.cylinder.set_location(location)
 
 	def get_status(self):
 		pass

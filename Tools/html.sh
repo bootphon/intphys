@@ -17,7 +17,7 @@
      files are in the destination directory. The source directory must be
      a directory containing the output of ./intphys." \
     && echo "By default, the display is for a set of test videos, add the
-     option --train to have a html display for a set of train videos."
+     option --train to have a html display for a set of train videos." \
     && echo \
     && exit 0
 
@@ -61,7 +61,6 @@ source_gif=$(cd $dest_rep/source_gif && pwd)
 
 if $is_test
 then
-  echo "cas test"
   # case of test
   # number of videos
   nv=$(wc -l png_dirs.txt | cut -d ' ' -f 1)
@@ -86,13 +85,11 @@ then
   rm png_dirs.txt
 
 else
-  echo "cas train"
   # case of train
   echo "Copying the gifs in $2/source_gif"
-  i=1
   while read line; do
-    cp $line/video.gif $source_gif/$i.gif
-    i=$(($i+1))
+    num=$(echo "$line" | rev | cut -d/ -f2 | rev | cut -d_ -f1)
+    cp $line/video.gif $source_gif/$num.gif
   done < png_dirs.txt
   # generatint the pages and index for test
   generate_pages_train png_dirs.txt $dest_rep

@@ -38,13 +38,24 @@ html_tail () {
 
 # generate a gif
 generate_gif () {
-  echo "
-  <p>
-    <center>
-      <a href="../source_gif/$1.gif"><img src="../source_gif/$1.gif" alt="../source_gif/$1.gif"/></a>
-    </center>
-  </p>
-  "
+  if [ $1 -lt 10 ]
+  then
+    echo "
+    <p>
+      <center>
+        <a href="../source_gif/0$1.gif"><img src="../source_gif/0$1.gif" alt="../source_gif/0$1.gif"/></a>
+      </center>
+    </p>
+    "
+  else
+    echo "
+    <p>
+      <center>
+        <a href="../source_gif/$1.gif"><img src="../source_gif/$1.gif" alt="../source_gif/$1.gif"/></a>
+      </center>
+    </p>
+    "
+  fi
 }
 
 # generate the 4 gifs

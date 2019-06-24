@@ -36,6 +36,17 @@ html_tail () {
     </html>"
 }
 
+# generate a gif
+generate_gif () {
+  echo "
+  <p>
+    <center>
+      <a href="../source_gif/$1.gif"><img src="../source_gif/$1.gif" alt="../source_gif/$1.gif"/></a>
+    </center>
+  </p>
+  "
+}
+
 # generate the 4 gifs
 generate_img () {
   echo "
@@ -70,8 +81,8 @@ generate_page () {
   "
   s=$(echo "$line" | rev | cut -d / -f3-30 | rev)
   generate_img $2 "$3/source_gif"
-  previous=$((($2+8-1)%$4+1))
-  next=$((($2+8+1)%$4+1))
+  previous=$((($2+$4-1-1)%$4+1))
+  next=$((($2+$4-1+1)%$4+1))
   echo "
   <p>
     <left><a href="$previous.html">Précédent</a><left>
@@ -90,7 +101,7 @@ generate_index () {
   (
   for i in `seq 1 $1`;
   do
-    echo "<p> <a href="source_html/$i.html"> Quadruplet $i </a> </p>"
+    echo "<p> <a href="source_html/$i.html"> Page $i </a> </p>"
   done
   ) > $2/index.html
 }
@@ -107,4 +118,34 @@ generate_pages () {
     (sed -n "$first,$last p" $1) > temp.txt
     generate_page temp.txt $np $2 $NP
   done
+}
+
+# generate all the pages for the train
+generate_pages_train () {
+  nl=$(wc -l $1 | cut -d ' ' -f 1)
+  for np in `seq 1 $nl`;
+  do
+    generate_page_train $np $nl $2
+  done
+  generate_index $nl $2
+}
+
+# generate one page for the train
+generate_page_train () {
+  (
+  html_head "Train n°$1"
+  html_title "Train n°$1"
+  generate_gif $1
+  previous=$((($1+$2-1-1)%$2+1))
+  next=$((($1+$2-1+1)%$2+1))
+  echo "
+  <p>
+    <left><a href="$previous.html">Précédent</a><left>
+    <div align="right"><a href="$next.html">Suivant</a></div>
+  </p>
+  <p>
+    <center><a href="../index.html">Retour index</a></center>
+  </p>"
+  html_tail
+  ) > $3/source_html/$1.html
 }

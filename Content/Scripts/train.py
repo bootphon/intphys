@@ -45,17 +45,17 @@ class Train(Scene):
         if scenario == 'random':
             # random scenario
             nobjects = random.randint(1, 3)
+            self.generate_walls(prob_walls, 4, 2000, unsafe_zones)
             self.generate_random_objects(nobjects, unsafe_zones)
-            self.generate_walls(prob_walls, 4, 2000)
         elif scenario == 'collision':
             # scenario that maximizes collision between objects
+            self.generate_walls(prob_walls, 4, 2000, unsafe_zones)
             self.generate_collision_objects(unsafe_zones)
-            self.generate_walls(prob_walls, 4, 2000)
         else:
             # scenario with the objects going above the Walls
             # always 3 objects, nobjects-nobjects_r are going above the Wall
             # nobjects_r are placed randomly
-            self.generate_walls(0, 0.7, 900)
+            self.generate_walls(0, 0.7, 900, unsafe_zones)
             nobjects = 3
             nobjects_r = random.randint(0, 2)
             self.generate_random_objects(nobjects_r, unsafe_zones)
@@ -71,8 +71,8 @@ class Train(Scene):
             for m in range(nmoves):
                 if len(moves) == 0:
                     moves.append(random.randint(0, 200))
-                else:
-                    moves.append(random.randint(moves[-1], 200))
+                elif (moves[-1]+10) < 200:
+                    moves.append(random.randint(moves[-1]+10, 200))
             self.params['occluder_{}'.format(n + 1)] = OccluderParams(
                 material=get_random_material('Wall', self.params['Floor'].material),
                 location=position[0],
@@ -84,7 +84,7 @@ class Train(Scene):
                 overlap=True,
                 start_up=random.choice([True, False]))
 
-    def generate_walls(self, prob_walls, max_height, max_depth):
+    def generate_walls(self, prob_walls, max_height, max_depth, unsafe_zones):
         """Generate walls
         """
         if prob_walls <= 0.3:
@@ -94,6 +94,10 @@ class Train(Scene):
                 length=random.uniform(1500, 5000),
                 depth=random.uniform(800, max_depth)
             )
+            unsafe_zones.append([FVector(self.params['walls'].depth, -600, 0),
+                                 FVector(3000, -600, 0),
+                                 FVector(3000, 600, 0),
+                                 FVector(self.params['walls'].depth, 600, 0)])
 
     def generate_random_objects(self, nobjects, unsafe_zones):
         """Generate random objects at random positions

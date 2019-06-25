@@ -4,6 +4,7 @@ from unreal_engine.classes import Material
 from actors.base_mesh import BaseMesh
 from actors.object import Object
 from actors.parameters import AxisCylinderParams, ObjectParams
+from tools.utils import as_dict
 
 """
 A cylinder with a cylindrical shaft, made from two joined cylinders
@@ -51,7 +52,6 @@ class Axiscylinder():
 		self.is_valid = True
 		self.hidden = False
 
-		self.count = 0 # for movements
 		self.dy = 0
 	
 	def get_parameters(self, params):
@@ -63,8 +63,7 @@ class Axiscylinder():
 		self.speed = params.speed
 	
 	def move(self):
-		self.count += 1
-		self.dy = self.speed * self.count
+		self.dy = self.speed
 		
 		self.cylinder.set_location(FVector(self.cylinder.location.x, self.cylinder.location.y + self.dy,
 			self.cylinder.location.z))
@@ -72,7 +71,6 @@ class Axiscylinder():
 			self.axis.location.z))
 
 	def set_location(self, location):
-		self.count = 0 # if we don't reset the movement count, the object will teleport
 		if self.is_long:
 			v = location
 			v.z = v.z + 100
@@ -82,5 +80,14 @@ class Axiscylinder():
 			self.axis.set_location(location)
 			self.cylinder.set_location(location)
 
+	def actor_destroy(self):
+		self.cylinder.actor_destroy()
+		self.axis.actor_destroy()
+
 	def get_status(self):
-		pass
+		status = {
+			'name': self.cylinder.actor.get_name(),
+			# 'type': self.actor.get_name().split('_')[0],
+			'location': as_dict(self.location),
+			'rotation': as_dict(self.rotation)}
+		return status

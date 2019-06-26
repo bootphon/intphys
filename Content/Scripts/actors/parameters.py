@@ -31,6 +31,14 @@ class LightParams:
     color: FLinearColor = FLinearColor(1, 1, 1, 1)
     type: str = 'SkyLight'
 
+@dataclass
+class AxisCylinderParams:
+    location: FVector = FVector(0, 0, 0)
+    rotation: FRotator = FRotator(0, 0, 0)
+    is_long: bool = False
+    down: bool = False
+    moves: list = field(default_factory=list)
+    speed: float = 2.5
 
 @dataclass
 class WallsParams:

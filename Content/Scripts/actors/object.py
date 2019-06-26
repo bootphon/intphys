@@ -25,7 +25,7 @@ class Object(BaseMesh):
         'RollingPin': '/Game/Meshes/Rolling_Pin.Rolling_Pin'
         # we exclude cylinder because it looks like a cube (from a face)
         # or like a sphere (from the other face)
-        # 'Cylinder': '/Game/Meshes/Cylinder.Cylinder'
+        # 'Cylinder': '/Game/Meshes/Cylinder.Cylinder'
     }
 
     # factor to normalize the mass of meshes wrt the mass of a sphere

@@ -22,6 +22,7 @@ class Object(BaseMesh):
         'Cube': '/Game/Meshes/Cube.Cube',
         'Cone': '/Game/Meshes/Cone.Cone',
         'Lollipop': '/Game/Meshes/Lollipop.Lollipop',
+        'RollingPin': '/Game/Meshes/Rolling_Pin.Rolling_Pin'
         # we exclude cylinder because it looks like a cube (from a face)
         # or like a sphere (from the other face)
         # 'Cylinder': '/Game/Meshes/Cylinder.Cylinder'
@@ -34,7 +35,8 @@ class Object(BaseMesh):
         'Sphere': 1.0,
         'Cube': 0.6155297517867,
         'Cone': 1.6962973279499,
-        'Lollipop': 1}
+        'Lollipop': 1,
+        'Rolling_Pin': 2}
 
 
     def __init__(self, world, params=ObjectParams()):

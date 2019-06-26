@@ -113,7 +113,6 @@ class Saver:
                 res.append(actor.front.actor)
             elif 'axiscylinder' in name.lower():
                 res.append(actor.cylinder.actor)
-                res.append(actor.axis.actor)
             else:
                 res.append(actor.actor)
         ScreenshotManager.SetActors(res)

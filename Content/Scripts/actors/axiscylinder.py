@@ -5,6 +5,7 @@ from actors.base_mesh import BaseMesh
 from actors.object import Object
 from actors.parameters import AxisCylinderParams, ObjectParams
 from tools.utils import as_dict
+from tools.materials import get_random_material
 
 """
 A cylinder with a cylindrical shaft, made from two joined cylinders
@@ -20,35 +21,26 @@ class Axiscylinder():
 
 		x, y, z = self.location.x, self.location.y, self.location.z
 
+		self.material = get_random_material('Object')
+
 		if not self.is_long: # short axis-cylinder
 			if not self.down:
 				self.cylinder = Object(world, ObjectParams(
-					mesh = 'Cylinder',
-					location = FVector(x, y, z+100)))
-				self.axis = Object(world, ObjectParams(
-					mesh = 'Cylinder',
-					location = FVector(x, y, z+200),
-					scale = FVector(0.25, 0.25, 1)))
+					mesh = 'Lollipop',
+					location = FVector(x, y, z+100),
+					material = self.material))
 			else:
 				self.cylinder = Object(world, ObjectParams(
-					mesh = 'Cylinder',
-					location = FVector(x, y, z+100-100)))
-				self.axis = Object(world, ObjectParams(
-					mesh = 'Cylinder',
-					location = FVector(x, y, z+200-300),
-					scale = FVector(0.25, 0.25, 1)))
+					mesh = 'Lollipop',
+					location = FVector(x, y, z+100-100),
+					rotation = FRotator(180, 0, 0),
+					material = self.material))
 		else: # long axis-cylinder
 			self.cylinder = Object(world, ObjectParams(
-				mesh = 'Cylinder',
-				location = FVector(x, y, z),
-				scale = FVector(1, 1, 2)))
-			self.axis = Object(world, ObjectParams(
-				mesh = 'Cylinder',
-				location = FVector(x, y, z-100),
-				scale = FVector(0.25, 0.25, 4)))
+				mesh = 'RollingPin',
+				location = FVector(x, y, z)))
 
 		self.cylinder.get_mesh().set_simulate_physics(False)
-		self.axis.get_mesh().set_simulate_physics(False)
 		self.is_valid = True
 		self.hidden = False
 
@@ -67,22 +59,19 @@ class Axiscylinder():
 		
 		self.cylinder.set_location(FVector(self.cylinder.location.x, self.cylinder.location.y + self.dy,
 			self.cylinder.location.z))
-		self.axis.set_location(FVector(self.axis.location.x, self.axis.location.y + self.dy,
-			self.axis.location.z))
+		"""self.axis.set_location(FVector(self.axis.location.x, self.axis.location.y + self.dy,
+			self.axis.location.z))"""
 
 	def set_location(self, location):
 		if self.is_long:
 			v = location
 			v.z = v.z + 100
-			self.axis.set_location(v)
 			self.cylinder.set_location(v)
 		else:
-			self.axis.set_location(location)
 			self.cylinder.set_location(location)
 
 	def actor_destroy(self):
 		self.cylinder.actor_destroy()
-		self.axis.actor_destroy()
 
 	def get_status(self):
 		status = {

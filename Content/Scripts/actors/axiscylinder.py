@@ -59,8 +59,6 @@ class Axiscylinder():
 		
 		self.cylinder.set_location(FVector(self.cylinder.location.x, self.cylinder.location.y + self.dy,
 			self.cylinder.location.z))
-		"""self.axis.set_location(FVector(self.axis.location.x, self.axis.location.y + self.dy,
-			self.axis.location.z))"""
 
 	def set_location(self, location):
 		if self.is_long:

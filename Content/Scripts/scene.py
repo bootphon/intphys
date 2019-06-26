@@ -4,7 +4,7 @@ import importlib
 import unreal_engine as ue
 from unreal_engine.classes import Friction
 from unreal_engine import FVector, FRotator
-from actors.parameters import FloorParams, WallsParams, CameraParams
+from actors.parameters import FloorParams, WallsParams, CameraParams, LightParams
 from tools.materials import get_random_material
 from actors.skysphere import Skysphere
 
@@ -46,10 +46,9 @@ class Scene:
         """
         self.params['Floor'] = FloorParams(
                 material=get_random_material('Floor'))
-        """
+        
         self.params['Light'] = LightParams(
                 type='SkyLight')
-        """
 
         """
         prob_walls = 0.3

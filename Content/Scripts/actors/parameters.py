@@ -31,14 +31,23 @@ class LightParams:
     color: FLinearColor = FLinearColor(1, 1, 1, 1)
     type: str = 'SkyLight'
 
+
 @dataclass
 class AxisCylinderParams:
     location: FVector = FVector(0, 0, 0)
     rotation: FRotator = FRotator(0, 0, 0)
+    scale: FVector = FVector(1, 1, 1)
+    friction: float = 0.5
+    restitution: float = 0.5
+    overlap: bool = False
+    warning: bool = False
+    mesh: str = 'Lollipop'
+    material: str = get_random_material('Object')
     is_long: bool = False
     down: bool = False
     moves: list = field(default_factory=list)
     speed: float = 2.5
+
 
 @dataclass
 class WallsParams:

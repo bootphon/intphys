@@ -15,66 +15,53 @@ The down variable defines wether the small end of the AxisCylinder is at top (Fa
 It has no effect on long AxisCylinders.
 """
 
-class Axiscylinder():
-	def __init__(self, world, params=AxisCylinderParams):
+class Axiscylinder(BaseMesh):
+
+	length = {
+		'Lollipop': '/Game/Meshes/Lollipop.Lollipop',
+        'RollingPin': '/Game/Meshes/Rolling_Pin.Rolling_Pin'
+	}
+
+	def __init__(self, world, params=AxisCylinderParams()):
+		super().__init__(
+            world.actor_spawn(ue.load_class('/Game/Object.Object_C')))
 		self.get_parameters(params)
+		self.set_parameters()
 
-		x, y, z = self.location.x, self.location.y, self.location.z
-
-		self.material = get_random_material('Object')
-
-		if not self.is_long: # short axis-cylinder
-			if not self.down:
-				self.cylinder = Object(world, ObjectParams(
-					mesh = 'Lollipop',
-					location = FVector(x, y, z+100),
-					material = self.material))
-			else:
-				self.cylinder = Object(world, ObjectParams(
-					mesh = 'Lollipop',
-					location = FVector(x, y, z+100-100),
-					rotation = FRotator(180, 0, 0),
-					material = self.material))
-		else: # long axis-cylinder
-			self.cylinder = Object(world, ObjectParams(
-				mesh = 'RollingPin',
-				location = FVector(x, y, z)))
-
-		self.cylinder.get_mesh().set_simulate_physics(False)
-		self.is_valid = True
-		self.hidden = False
-
-		self.dy = 0
-	
 	def get_parameters(self, params):
-		self.location = params.location
-		self.rotation = params.rotation
+		super().get_parameters(
+			params.location,
+			params.rotation,
+			params.scale,
+			params.friction,
+			params.restitution,
+			params.overlap,
+			params.warning,
+			self.length[params.mesh]
+		)
+		self.material = ue.load_object(Material, params.material)
+		self.dy = 0
 		self.is_long = params.is_long
 		self.down = params.down
 		self.moves = params.moves
 		self.speed = params.speed
-	
+
+		if not self.is_long: # short axis-cylinder
+			self.mesh_str = self.length['Lollipop']
+			if not self.down:
+				self.location.z += 100
+			else:
+				self.rotation.pitch = 180
+		else: # long axis-cylinder
+			self.mesh_str = self.length['RollingPin']
+
+	def set_parameters(self):
+		super().set_parameters()
+		self.get_mesh().set_simulate_physics(False)
+
 	def move(self):
 		self.dy = self.speed
-		
-		self.cylinder.set_location(FVector(self.cylinder.location.x, self.cylinder.location.y + self.dy,
-			self.cylinder.location.z))
-
-	def set_location(self, location):
-		if self.is_long:
-			v = location
-			v.z = v.z + 100
-			self.cylinder.set_location(v)
-		else:
-			self.cylinder.set_location(location)
-
-	def actor_destroy(self):
-		self.cylinder.actor_destroy()
-
-	def get_status(self):
-		status = {
-			'name': self.cylinder.actor.get_name(),
-			# 'type': self.actor.get_name().split('_')[0],
-			'location': as_dict(self.location),
-			'rotation': as_dict(self.rotation)}
-		return status
+		self.set_location(FVector(
+			self.location.x,
+			self.location.y + self.dy,
+			self.location.z))

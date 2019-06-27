@@ -46,6 +46,7 @@ class Axiscylinder(BaseMesh):
 		self.moves = params.moves
 		self.speed = params.speed
 
+		self.location.z += 50
 		if not self.is_long: # short axis-cylinder
 			self.mesh_str = self.length['Lollipop']
 			if not self.down:

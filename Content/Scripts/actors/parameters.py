@@ -30,6 +30,7 @@ class LightParams:
     rotation: FRotator = FRotator(0, 0, 0)
     color: FLinearColor = FLinearColor(1, 1, 1, 1)
     type: str = 'SkyLight'
+    varIntensity: float = 0
 
 
 @dataclass

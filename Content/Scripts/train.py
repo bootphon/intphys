@@ -32,7 +32,8 @@ class Train(Scene):
         self.params['Light_1'] = LightParams(
                 type='SkyLight',
                 location=FVector(0, 0, 30),
-                color=self.make_color(0.9, 1.0))
+                color=self.make_color(0.9, 1.0),
+                varIntensity=random.uniform(-0.2, 1.1))
 
         unsafe_zones = []
         noccluders = random.randint(0, 2)

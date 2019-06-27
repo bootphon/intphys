@@ -42,16 +42,18 @@ class Light(BaseActor):
         self.color = params.color
         super().get_parameters(params.location, params.rotation, True, False)
 
-    def set_parameters(self):
-        super().set_parameters()
-
         if self.type == 'SkyLight':
             self.skylight_component = self.actor.get_component_by_type(SkyLightComponent)
             self.skylight_component.SetLightColor(self.color)
-            self.skylight_component.SetIntensity(1.7)
+            self.skylight_component.SetIntensity(1.7 + params.varIntensity)
         elif self.type == 'Directional':
             self.directionallight_component = self.actor.get_component_by_type(DirectionalLightComponent)
             self.directionallight_component.SetLightColor(self.color)
+
+
+    def set_parameters(self):
+        super().set_parameters()
+
 
         # deactivate the physics (we don't want the light to fall)
         # self.get_mesh().set_simulate_physics(False)

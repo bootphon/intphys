@@ -43,7 +43,6 @@ class Axiscylinder(BaseMesh):
 		self.dy = 0
 		self.is_long = params.is_long
 		self.down = params.down
-		self.moves = params.moves
 		self.speed = params.speed
 
 		self.location.z += 50

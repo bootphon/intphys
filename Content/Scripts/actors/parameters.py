@@ -68,6 +68,7 @@ class WallsParams:
     length: float = 2000
     depth: float = 1000
     height: float = 1
+    z: float = 0
     overlap: bool = False
     warning: bool = False
 

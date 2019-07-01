@@ -78,7 +78,7 @@ class Saver:
         # not UE names (to be 'object_1' instead of eg
         # 'Object_C_126'), as well suppress the 'name' field in actor
         # status
-        names_map = {'Sky': 'sky'}
+        names_map = {'Sky': 'sky', 'Walls': 'walls'}
         for k, v in self.status_header.items():
             if isinstance(v, dict) and 'name' in v.keys():
                 names_map[v['name']] = k
@@ -111,6 +111,8 @@ class Saver:
                 res.append(actor.left.actor)
                 res.append(actor.right.actor)
                 res.append(actor.front.actor)
+            elif 'axiscylinder_1' in name.lower():
+                res.append(actor.actor)
             else:
                 res.append(actor.actor)
         ScreenshotManager.SetActors(res)

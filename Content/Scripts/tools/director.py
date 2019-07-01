@@ -97,6 +97,11 @@ class Director(object):
                     self.scenes[self.scene].name))
         self.scenes[self.scene].play_run()
 
+        # for train only, "warmup" the scene to settle the physics simulation
+        if "train" in self.scenes[self.scene].name:
+            for i in range(1, 10):
+                self.scenes[self.scene].tick()
+
     def stop_scene(self):
         if self.scene >= len(self.scenes):
             return
@@ -115,11 +120,13 @@ class Director(object):
         # clear the saver from any saved content and delete the output
         # directory of the failed scene
         self.saver.reset(True)
-        output_dir = self.scenes[self.scene].get_scene_subdir(
-            self.scene, len(self.scenes))
-        if self.scenes[self.scene].is_test_scene():
-            output_dir = '/'.join(output_dir.split('/')[:-1])
-        shutil.rmtree(output_dir)
+
+        if not self.saver.is_dry_mode:
+            output_dir = self.scenes[self.scene].get_scene_subdir(
+                self.scene, len(self.scenes))
+            if self.scenes[self.scene].is_test_scene():
+                output_dir = '/'.join(output_dir.split('/')[:-1])
+            shutil.rmtree(output_dir)
 
         is_test = True if 'test' in \
             type(self.scenes[self.scene]).__name__.lower() else False
@@ -182,6 +189,7 @@ class Director(object):
         self.is_paused = False
         set_game_paused(self.world, False)
         if self.scene < len(self.scenes):
+            #print(self.ticker)
             self.scenes[self.scene].tick()
             if self.ticker % 2 == 1:
                 self.capture()

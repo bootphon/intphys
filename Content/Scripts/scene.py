@@ -4,7 +4,7 @@ import importlib
 import unreal_engine as ue
 from unreal_engine.classes import Friction
 from unreal_engine import FVector, FRotator
-from actors.parameters import FloorParams, WallsParams, CameraParams
+from actors.parameters import FloorParams, WallsParams, CameraParams, LightParams
 from tools.materials import get_random_material
 from actors.skysphere import Skysphere
 
@@ -46,18 +46,20 @@ class Scene:
         """
         self.params['Floor'] = FloorParams(
                 material=get_random_material('Floor'))
-        """
+        
         self.params['Light'] = LightParams(
                 type='SkyLight')
+
         """
-        prob_walls = 0  # TODO no walls to avoid luminosity problems
+        prob_walls = 0.3
         if random.uniform(0, 1) <= prob_walls:
             self.params['Walls'] = WallsParams(
                 material=get_random_material('Wall'),
-                height=random.uniform(1, 5),
+                height=random.uniform(0.4, 7),
                 length=random.uniform(3000, 5000),
                 depth=random.uniform(1500, 3000))
-
+        """
+        
     def play_run(self):
         if self.run == 0:
             self.spawn_actors()
@@ -149,5 +151,6 @@ class Scene:
     def tick(self):
         if self.actors is not None:
             for actor_name, actor in self.actors.items():
-                if 'object' in actor_name or 'occluder' in actor_name:
+                if 'object' in actor_name or 'occluder' in actor_name \
+                            or 'axiscylinder' in actor_name:
                     actor.move()

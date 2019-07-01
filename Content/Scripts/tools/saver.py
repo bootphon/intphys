@@ -106,13 +106,13 @@ class Saver:
         self.camera = actors['Camera']
         ScreenshotManager.SetOriginActor(self.camera.actor)
         res = []
+        print(actors.items())
         for name, actor in actors.items():
+            print(actor.actor.get_name())
             if 'wall' in name.lower():
                 res.append(actor.left.actor)
                 res.append(actor.right.actor)
                 res.append(actor.front.actor)
-            elif 'axiscylinder_1' in name.lower():
-                res.append(actor.actor)
             else:
                 res.append(actor.actor)
         ScreenshotManager.SetActors(res)

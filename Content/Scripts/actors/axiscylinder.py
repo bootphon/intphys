@@ -10,9 +10,12 @@ from tools.materials import get_random_material
 """
 A cylinder with a cylindrical shaft, made from two joined cylinders
 
-The move variable is used to make the axis-cylinder move as occluders do.
 The down variable defines wether the small end of the AxisCylinder is at top (False) or bottom (True).
 It has no effect on long AxisCylinders.
+
+The moves variable describes the movement as such:
+	[[speed1, loc1], [speed2, loc2], ...],
+where locN is the y-location where the object changes speed to speedN+1
 """
 
 class Axiscylinder(BaseMesh):
@@ -43,7 +46,10 @@ class Axiscylinder(BaseMesh):
 		self.dy = 0
 		self.is_long = params.is_long
 		self.down = params.down
-		self.speed = params.speed
+		self.moves = params.moves
+
+		self.current_move = 0
+		self.speed = self.moves[self.current_move][0]
 
 		self.location.z += 50
 		if not self.is_long: # short axis-cylinder
@@ -60,7 +66,12 @@ class Axiscylinder(BaseMesh):
 		self.get_mesh().set_simulate_physics(False)
 
 	def move(self):
+		if abs(self.location.y - self.moves[self.current_move][1]) < 3.0:
+			self.current_move += 1
+			self.speed = self.moves[self.current_move][0]
+			
 		self.dy = self.speed
+		
 		self.set_location(FVector(
 			self.location.x,
 			self.location.y + self.dy,

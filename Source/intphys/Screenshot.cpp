@@ -5,6 +5,8 @@
 #include "Runtime/Core/Public/GenericPlatform/GenericPlatformMath.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
+#include <iostream>
+
 
 static bool VerifyOrCreateDirectory(const FString& Directory)
 {
@@ -59,6 +61,11 @@ void FScreenshot::SetActors(TArray<AActor*>& Actors)
             m_ActorsSet.Contains(TEXT("Walls")) == false)
         {
             m_ActorsSet.Add(FString(TEXT("Walls")));
+        }
+        else if (actor->GetName().Contains(FString(TEXT("AxisCylinder"))) == true &&
+            m_ActorsSet.Contains(TEXT("AxisCylinders")) == false)
+        {
+          m_ActorsSet.Add(FString(TEXT("AxisCylinders")));
         }
         else
         {
@@ -324,6 +331,8 @@ bool FScreenshot::CaptureDepthAndMasks(const TArray<AActor*>& IgnoredActors)
                 FString ActorName = HitResult.GetActor()->GetName();
                 if (HitResult.GetActor()->GetName().Contains(FString(TEXT("Wall"))) == true)
                     ActorName = FString(TEXT("Walls"));
+                else if (HitResult.GetActor()->GetName().Contains(FString(TEXT("AxisCylinder"))) == true)
+                    ActorName = FString(TEXT("AxisCylinders"));
                 int8 ActorIndex = -1;
                 ActorIndex = static_cast<uint8>(m_ActorsSet.Add(ActorName).AsInteger() + 1);
                 if (ActorIndex <= 0)

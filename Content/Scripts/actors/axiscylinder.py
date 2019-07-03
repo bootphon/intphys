@@ -27,7 +27,7 @@ class Axiscylinder(BaseMesh):
 
 	def __init__(self, world, params=AxisCylinderParams()):
 		super().__init__(
-            world.actor_spawn(ue.load_class('/Game/Object.Object_C')))
+            world.actor_spawn(ue.load_class('/Game/AxisCylinder.AxisCylinder_C')))
 		self.get_parameters(params)
 		self.set_parameters()
 

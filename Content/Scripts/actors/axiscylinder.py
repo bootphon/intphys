@@ -43,7 +43,6 @@ class Axiscylinder(BaseMesh):
 			self.length[params.mesh]
 		)
 		self.material = ue.load_object(Material, params.material)
-		self.dy = 0
 		self.is_long = params.is_long
 		self.down = params.down
 		self.moves = params.moves
@@ -69,10 +68,8 @@ class Axiscylinder(BaseMesh):
 		if abs(self.location.y - self.moves[self.current_move][1]) < 3.0:
 			self.current_move += 1
 			self.speed = self.moves[self.current_move][0]
-			
-		self.dy = self.speed
 		
 		self.set_location(FVector(
 			self.location.x,
-			self.location.y + self.dy,
+			self.location.y + self.speed,
 			self.location.z))

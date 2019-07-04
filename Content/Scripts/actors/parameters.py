@@ -46,7 +46,7 @@ class AxisCylinderParams:
     material: str = get_random_material('Object')
     is_long: bool = False
     down: bool = False
-    speed: float = 2.5
+    moves: list = field(default_factory=list)
 
 
 @dataclass

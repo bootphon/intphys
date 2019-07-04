@@ -18,8 +18,8 @@ It has no effect on long AxisCylinders.
 class Axiscylinder(BaseMesh):
 
 	length = {
-		'Lollipop': '/Game/Meshes/Lollipop.Lollipop',
-        'RollingPin': '/Game/Meshes/Rolling_Pin.Rolling_Pin'
+		'Lollipop': '/Game/Meshes/Cube_Lollipop.Cube_Lollipop',
+        'RollingPin': '/Game/Meshes/Cube_Rolling_Pin.Cube_Rolling_Pin'
 	}
 
 	def __init__(self, world, params=AxisCylinderParams()):

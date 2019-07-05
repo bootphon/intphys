@@ -68,6 +68,7 @@ class Axiscylinder(BaseMesh):
 		if not self.is_long: # short axis-cylinder
 			self.mesh_str = self.length[self.shape]['Lollipop']
 			if not self.down:
+				self.rotation.pitch = 0
 				self.location.z += 100
 			else:
 				self.rotation.pitch = 180

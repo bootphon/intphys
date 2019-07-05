@@ -3,6 +3,7 @@ from dataclasses import field
 from unreal_engine import FVector, FRotator, FLinearColor
 from unreal_engine.enums import ECameraProjectionMode
 from tools.materials import get_random_material
+import random
 
 
 @dataclass
@@ -43,10 +44,13 @@ class AxisCylinderParams:
     overlap: bool = False
     warning: bool = False
     mesh: str = 'Lollipop'
-    material: str = get_random_material('Object')
+    material_cube: str = get_random_material('Object')
+    material_cylinder: str = get_random_material('AxisCylinder')
     is_long: bool = False
     down: bool = False
     moves: list = field(default_factory=list)
+    obj_shape: str = random.choice(['Cube', 'Cylinder'])
+	# obj_shape: str = 'Cube'
 
 
 @dataclass

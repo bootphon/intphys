@@ -6,6 +6,7 @@ from actors.object import Object
 from actors.parameters import AxisCylinderParams, ObjectParams
 from tools.utils import as_dict
 from tools.materials import get_random_material
+import random
 
 """
 A cylinder with a cylindrical shaft, made from two joined cylinders
@@ -21,9 +22,16 @@ where locN is the y-location where the object changes speed to speedN+1
 class Axiscylinder(BaseMesh):
 
 	length = {
-		'Lollipop': '/Game/Meshes/Cube_Lollipop.Cube_Lollipop',
-        'RollingPin': '/Game/Meshes/Cube_Rolling_Pin.Cube_Rolling_Pin'
+		'Lollipop_C': '/Game/Meshes/Cube_Lollipop.Cube_Lollipop',
+        'RollingPin_C': '/Game/Meshes/Cube_Rolling_Pin.Cube_Rolling_Pin'
 	}
+
+	length = {'Cube':
+				{'Lollipop': '/Game/Meshes/Cube_Lollipop.Cube_Lollipop',
+		         'RollingPin': '/Game/Meshes/Cube_Rolling_Pin.Cube_Rolling_Pin'},
+			  'Cylinder':
+			  	{'Lollipop': '/Game/Meshes/Lollipop.Lollipop',
+		         'RollingPin': '/Game/Meshes/Rolling_Pin.Rolling_Pin'}}
 
 	def __init__(self, world, params=AxisCylinderParams()):
 		super().__init__(
@@ -32,6 +40,9 @@ class Axiscylinder(BaseMesh):
 		self.set_parameters()
 
 	def get_parameters(self, params):
+		# cube or cylinder
+		self.shape = params.obj_shape
+
 		super().get_parameters(
 			params.location,
 			params.rotation,
@@ -40,9 +51,12 @@ class Axiscylinder(BaseMesh):
 			params.restitution,
 			params.overlap,
 			params.warning,
-			self.length[params.mesh]
+			self.length[self.shape][params.mesh]
 		)
-		self.material = ue.load_object(Material, params.material)
+		if self.shape == 'Cube':
+			self.material = ue.load_object(Material, params.material_cube)
+		else:
+			self.material = ue.load_object(Material, params.material_cylinder)
 		self.is_long = params.is_long
 		self.down = params.down
 		self.moves = params.moves
@@ -52,13 +66,13 @@ class Axiscylinder(BaseMesh):
 
 		self.location.z += 50
 		if not self.is_long: # short axis-cylinder
-			self.mesh_str = self.length['Lollipop']
+			self.mesh_str = self.length[self.shape]['Lollipop']
 			if not self.down:
 				self.location.z += 100
 			else:
 				self.rotation.pitch = 180
 		else: # long axis-cylinder
-			self.mesh_str = self.length['RollingPin']
+			self.mesh_str = self.length[self.shape]['RollingPin']
 
 	def set_parameters(self):
 		super().set_parameters()
@@ -68,7 +82,7 @@ class Axiscylinder(BaseMesh):
 		if abs(self.location.y - self.moves[self.current_move][1]) < 3.0:
 			self.current_move += 1
 			self.speed = self.moves[self.current_move][0]
-		
+
 		self.set_location(FVector(
 			self.location.x,
 			self.location.y + self.speed,

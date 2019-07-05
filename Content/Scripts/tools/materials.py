@@ -33,7 +33,7 @@ def get_random_material(category, material = None):
 
     """
     # the list of valid actor categories
-    valid_categories = ['Floor', 'Object', 'Wall']
+    valid_categories = ['Floor', 'Object', 'Wall', 'AxisCylinder']
     if category not in valid_categories:
         raise ValueError(
             f'category {category} unknown, must be in {valid_categories}')

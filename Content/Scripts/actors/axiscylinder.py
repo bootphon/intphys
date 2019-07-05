@@ -21,11 +21,6 @@ where locN is the y-location where the object changes speed to speedN+1
 
 class Axiscylinder(BaseMesh):
 
-	length = {
-		'Lollipop_C': '/Game/Meshes/Cube_Lollipop.Cube_Lollipop',
-        'RollingPin_C': '/Game/Meshes/Cube_Rolling_Pin.Cube_Rolling_Pin'
-	}
-
 	length = {'Cube':
 				{'Lollipop': '/Game/Meshes/Cube_Lollipop.Cube_Lollipop',
 		         'RollingPin': '/Game/Meshes/Cube_Rolling_Pin.Cube_Rolling_Pin'},

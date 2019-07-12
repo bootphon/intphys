@@ -14,7 +14,9 @@ class Scene:
         self.world = world
         self.params = {}
         self.saver = saver
-        self.generate_parameters()
+        while not self.generate_parameters():
+            print("gen param")
+            continue
         self.actors = None
         self.run = 0
         self.last_locations = []

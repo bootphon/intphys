@@ -27,7 +27,7 @@ class BaseActor():
         self.actor = None
 
     def get_parameters(self, location, rotation, overlap, warning):
-        """ Get the parameters.
+        """ Gets the parameters.
 
         Parameters
         ----------
@@ -46,7 +46,7 @@ class BaseActor():
         self.hidden = False
 
     def set_parameters(self):
-        """ Set the parameters : set location and rotation, and call the
+        """ Sets the parameters : set location and rotation, and call the
         methods on_actor_hit (resp. on_actor_overlap) if an actor is
         hit (resp. overlapped).
         """
@@ -60,7 +60,7 @@ class BaseActor():
             self.actor.bind_event('OnActorHit', self.on_actor_hit)
 
     def set_location(self, location):
-        """ Set the location of the actor and raise a warning if the setting
+        """ Sets the location of the actor and raise a warning if the setting
         failed.
         """
         self.location = location
@@ -70,7 +70,7 @@ class BaseActor():
         return True
 
     def set_rotation(self, rotation):
-        """ Set the rotation of the actor.
+        """ Sets the rotation of the actor.
         """
         # if not self.actor.set_actor_rotation(rotation):
         # the set_actor_rotation is very strict, looks for
@@ -129,7 +129,7 @@ class BaseActor():
         ue.log(message)
 
     def set_hidden(self, hidden):
-        """ Set the hidden parameter
+        """ Sets the hidden parameter
 
         Parameters
         ----------

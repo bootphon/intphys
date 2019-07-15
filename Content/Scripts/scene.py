@@ -15,7 +15,7 @@ class Scene:
         self.params = {}
         self.saver = saver
         while not self.generate_parameters():
-            print("gen param")
+            print("Regenerated parameters")
             continue
         self.actors = None
         self.run = 0

@@ -1,5 +1,6 @@
 import importlib
 import json
+import os
 import shutil
 import unreal_engine as ue
 import tools.materials
@@ -196,8 +197,26 @@ class Director(object):
             if self.ticker % 2 == 1:
                 self.capture()
         else:
+            # we generated all the requested scenes, gently exit the program
             if self.restarted:
+                # informs on the amount of restarted scenes
                 ue.log("Generated {}% more scenes due to restarted scenes".
                        format(int((self.restarted / self.total_scenes) * 100)))
+
+            # informs on the max depth, and save it to a file (for use in post
+            # processing)
+            print('global max depth encountered in scenes is: {}'
+                  .format(self.saver.max_depth))
+            filename = os.path.join(
+                self.saver.output_dir, 'postprocessing.json')
+            info = {'resolution': {
+                'x': int(self.saver.size[0]),
+                'y': int(self.saver.size[1]),
+                'z': int(self.saver.size[2])},
+                       'max_depth': self.saver.max_depth}
+            open(filename, 'w').write(json.dumps(info, indent=4))
+
+            # exit the program
             exit_ue()
+
         self.ticker += 1

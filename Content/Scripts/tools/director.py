@@ -203,18 +203,6 @@ class Director(object):
                 ue.log("Generated {}% more scenes due to restarted scenes".
                        format(int((self.restarted / self.total_scenes) * 100)))
 
-            # save to a JSON some parameters needed for postprocessing
-            print('global max depth encountered in scenes is: {}'
-                  .format(self.saver.max_depth))
-            filename = os.path.join(
-                self.saver.output_dir, 'postprocessing.json')
-            info = {'resolution': {
-                'x': int(self.saver.size[0]),
-                'y': int(self.saver.size[1]),
-                'z': int(self.saver.size[2])},
-                       'max_depth': self.saver.max_depth}
-            open(filename, 'w').write(json.dumps(info, indent=4))
-
             # exit the program
             exit_ue()
 

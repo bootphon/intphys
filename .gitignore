@@ -73,3 +73,9 @@ Exemples/html
 # Vim
 *.swp
 *.swo
+
+# postprocessing building files
+Tools/postprocessing/CMakeCache.txt
+Tools/postprocessing/CMakeFiles
+Tools/postprocessing/cmake_install.cmake
+Tools/postprocessing/postprocess

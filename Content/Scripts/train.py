@@ -84,6 +84,8 @@ class Train(Scene):
                 warning=True,
                 overlap=True,
                 start_up=random.choice([True, False]))
+        
+        return True
 
             return True
 

@@ -108,8 +108,8 @@ class Director(object):
     def stop_scene(self):
         if self.scene >= len(self.scenes):
             return
-        if self.scenes[self.scene].stop_run(self.scene,
-                                            len(self.scenes)) is False:
+        if self.scenes[self.scene].stop_run(
+                self.scene, len(self.scenes)) is False:
             self.restart_scene()
         elif (self.scenes[self.scene].is_over() and
                 self.scene < len(self.scenes)):
@@ -203,8 +203,7 @@ class Director(object):
                 ue.log("Generated {}% more scenes due to restarted scenes".
                        format(int((self.restarted / self.total_scenes) * 100)))
 
-            # informs on the max depth, and save it to a file (for use in post
-            # processing)
+            # save to a JSON some parameters needed for postprocessing
             print('global max depth encountered in scenes is: {}'
                   .format(self.saver.max_depth))
             filename = os.path.join(

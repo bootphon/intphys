@@ -14,7 +14,9 @@ class Scene:
         self.world = world
         self.params = {}
         self.saver = saver
-        self.generate_parameters()
+        while not self.generate_parameters():
+            print("Regenerated parameters")
+            continue
         self.actors = None
         self.run = 0
         self.last_locations = []
@@ -46,20 +48,20 @@ class Scene:
         """
         self.params['Floor'] = FloorParams(
                 material=get_random_material('Floor'))
-        
+
         self.params['Light'] = LightParams(
                 type='SkyLight')
 
-        """
-        prob_walls = 0.3
-        if random.uniform(0, 1) <= prob_walls:
-            self.params['Walls'] = WallsParams(
-                material=get_random_material('Wall'),
-                height=random.uniform(0.4, 7),
-                length=random.uniform(3000, 5000),
-                depth=random.uniform(1500, 3000))
-        """
-        
+        # prob_walls = 0.3
+        # if random.uniform(0, 1) <= prob_walls:
+        #     self.params['Walls'] = WallsParams(
+        #         material=get_random_material('Wall'),
+        #         height=random.uniform(0.4, 7),
+        #         length=random.uniform(3000, 5000),
+        #         depth=random.uniform(1500, 3000))
+
+        return True
+
     def play_run(self):
         if self.run == 0:
             self.spawn_actors()
@@ -130,7 +132,11 @@ class Scene:
         # to the total number of scenes
         padded_idx = str(idx).zfill(len(str(total)))
         if 'Train' in type(self).__name__:
-            scene_name = padded_idx + '_' + self.name + "_train_nobj" + str(self.get_nobjects())
+            scene_name = (
+                padded_idx +
+                '_' + self.name +
+                "_train_nobj" +
+                str(self.get_nobjects()))
         else:
             scene_name = (
                 padded_idx +

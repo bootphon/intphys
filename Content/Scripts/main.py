@@ -49,11 +49,11 @@ class Main:
             ue.log_warning('INTPHYS_OUTPUTDIR not defined, capture disabled')
 
         # setup the pause duration (in number of ticks) at the
-        # beginning of each run (to let time for the texture to be
+        # begining of each run (to let time for the texture to be
         # correctly displayed)
         try:
             pause_duration = int(os.environ['INTPHYS_PAUSEDURATION'])
-        except:
+        except KeyError:
             pause_duration = 50
 
         # setup the director with the list of scenes to generate, 100

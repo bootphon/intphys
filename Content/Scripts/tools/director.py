@@ -1,5 +1,6 @@
 import importlib
 import json
+import os
 import shutil
 import unreal_engine as ue
 import tools.materials
@@ -17,6 +18,7 @@ class Director(object):
                 size=size,
                 dry_mode=True if output_dir is None else False,
                 output_dir=output_dir)
+
         try:
             self.scenarios_dict = json.loads(open(params_file, 'r').read())
             self.generate_scenes()
@@ -24,6 +26,7 @@ class Director(object):
             print(e)
         except BufferError as e:
             print(e)
+
         # start the ticker, take a screen capture each 2 game ticks
         # self.ticker = Tick(tick_interval=tick_interval)
         # self.ticker.start()
@@ -189,13 +192,31 @@ class Director(object):
         self.is_paused = False
         set_game_paused(self.world, False)
         if self.scene < len(self.scenes):
-            #print(self.ticker)
+            # print(self.ticker)
             self.scenes[self.scene].tick()
             if self.ticker % 2 == 1:
                 self.capture()
         else:
+            # we generated all the requested scenes, gently exit the program
             if self.restarted:
+                # informs on the amount of restarted scenes
                 ue.log("Generated {}% more scenes due to restarted scenes".
                        format(int((self.restarted / self.total_scenes) * 100)))
+
+            # informs on the max depth, and save it to a file (for use in post
+            # processing)
+            print('global max depth encountered in scenes is: {}'
+                  .format(self.saver.max_depth))
+            filename = os.path.join(
+                self.saver.output_dir, 'postprocessing.json')
+            info = {'resolution': {
+                'x': int(self.saver.size[0]),
+                'y': int(self.saver.size[1]),
+                'z': int(self.saver.size[2])},
+                       'max_depth': self.saver.max_depth}
+            open(filename, 'w').write(json.dumps(info, indent=4))
+
+            # exit the program
             exit_ue()
+
         self.ticker += 1

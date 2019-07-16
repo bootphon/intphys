@@ -40,47 +40,44 @@ class Director(object):
         self.restarted = 0
 
     def generate_scenes(self):
-        for scenario, a in self.scenarios_dict.items():
-            if 'train' in scenario:
+        for Set, d in self.scenarios_dict.items():
+            if 'train' in Set:
                 module = importlib.import_module("train")
                 train_class = getattr(module, "Train")
-                for i in range(a):
+                for i in range(d):
                     self.scenes.append(train_class(self.world, self.saver))
             else:
-                # 'scenario_O1 -> 'O1'
-                scenario = scenario.split('_')[1]
+              for scenario, scenes in d.items():
+                  module = importlib.import_module("test.{}".format(scenario))
+                  test_class = getattr(module, "{}Test".format(scenario))
+                  for scene, b in scenes.items():
+                      if ('occluded' in scene):
+                          is_occluded = True
+                      elif ('visible' in scene):
+                          is_occluded = False
+                      else:
+                          raise BufferError(
+                              "Didn't find 'occluded' nor 'visi" +
+                              "ble' in one scene of the json file")
 
-                # import the class of the corresponding scenario
-                module = importlib.import_module("test.{}".format(scenario))
-                test_class = getattr(module, "{}Test".format(scenario))
-                for scene, b in a.items():
-                    if ('occluded' in scene):
-                        is_occluded = True
-                    elif ('visible' in scene):
-                        is_occluded = False
-                    else:
-                        raise BufferError(
-                            "Didn't find 'occluded' nor 'visi" +
-                            "ble' in one scene of the json file")
-
-                    for movement, nb in b.items():
-                        if (
-                                'static' not in movement and
-                                'dynamic_1' not in movement and
-                                'dynamic_2' not in movement):
-                            raise BufferError(
-                                "Didn't find 'static', " +
-                                "'dynamic_1' nor 'dynamic_2' " +
-                                "in one scene of the json file")
-                        else:
-                            for i in range(nb):
-                                try:
-                                    self.scenes.append(test_class(
-                                        self.world, self.saver,
-                                        is_occluded, movement))
-                                except NotImplementedError:
-                                    continue
-
+                      for movement, nb in b.items():
+                          if (
+                                  'static' not in movement and
+                                  'dynamic_1' not in movement and
+                                  'dynamic_2' not in movement):
+                              raise BufferError(
+                                  "Didn't find 'static', " +
+                                  "'dynamic_1' nor 'dynamic_2' " +
+                                  "in one scene of the json file")
+                          else:
+                              for i in range(nb):
+                                  try:
+                                      self.scenes.append(test_class(
+                                          self.world, self.saver,
+                                          is_occluded, movement))
+                                  except NotImplementedError:
+                                      continue
+                                      
         self.total_scenes = len(self.scenes)
 
     def play_scene(self):

@@ -45,7 +45,7 @@ DIR=$(cd "$(dirname "$0")" && pwd)
 . "$DIR"/utilities.sh
 
 # generate the gifs of the scenes
-"$DIR"/images2video.sh $source_rep gif -d 7 --scene
+"$DIR"/../images2video.sh $source_rep gif -d 7 --scene
 
 # check if the destination repository exists, and create it if it doesn't
 if [ ! -d "$dest_rep" ]

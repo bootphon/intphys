@@ -1,12 +1,8 @@
-import random
 import os
 import importlib
-import unreal_engine as ue
-from unreal_engine.classes import Friction
 from unreal_engine import FVector, FRotator
-from actors.parameters import FloorParams, WallsParams, CameraParams, LightParams
+from actors.parameters import FloorParams, CameraParams, LightParams
 from tools.materials import get_random_material
-from actors.skysphere import Skysphere
 
 
 class Scene:
@@ -31,7 +27,8 @@ class Scene:
         """Return the status of each CONSTANT actor in the scene"""
         header = {
             'block_name': self.name,
-            'block_type': 'train' if 'Train' in type(self).__name__ else 'test',
+            'block_type': (
+                'train' if 'Train' in type(self).__name__ else 'test'),
             'is_possible': self.is_possible()}
         for k, v in self.actors.items():
             if 'object' not in k and 'occluder' not in k:
@@ -42,10 +39,10 @@ class Scene:
         self.params['Camera'] = CameraParams(
                 location=FVector(0, 0, 200),
                 rotation=FRotator(0, 0, 0))
-        """
-        self.params['Skysphere'] = \
-            SkysphereParams(rotation=FRotator(180, 180, 180))
-        """
+
+        # self.params['Skysphere'] = \
+        #     SkysphereParams(rotation=FRotator(180, 180, 180))
+
         self.params['Floor'] = FloorParams(
                 material=get_random_material('Floor'))
 
@@ -157,6 +154,9 @@ class Scene:
     def tick(self):
         if self.actors is not None:
             for actor_name, actor in self.actors.items():
-                if 'object' in actor_name or 'occluder' in actor_name \
-                            or 'axiscylinder' in actor_name:
+                if (
+                        'object' in actor_name
+                        or 'occluder' in actor_name
+                        or 'axiscylinder' in actor_name
+                ):
                     actor.move()

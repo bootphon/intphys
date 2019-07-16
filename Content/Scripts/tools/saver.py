@@ -34,10 +34,6 @@ class Saver:
         self.is_dry_mode = dry_mode
         self.output_dir = output_dir
 
-        # store the max_depth across runs (this is used during postprocessing
-        # to normalize the depth across all the dataset)
-        self.max_depth = 0
-
         # an empty list to append status along the run
         self.status_header = {}
         self.status = []
@@ -107,9 +103,6 @@ class Saver:
         with open(json_file, 'w') as fin:
             fin.write(json.dumps(status, indent=4))
 
-        self.max_depth = max(self.max_depth, max_depth)
-
-        # ue.log('saved captures to {}'.format(output_dir))
         return True
 
     def update(self, actors):

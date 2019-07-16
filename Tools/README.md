@@ -10,7 +10,7 @@ datasets generation. Here is a brief description of its content:
 * `html/html.sh` generates an HTML page with gifs from a dataset directory
 
 * `parallel/intphys_parallel.sh` runs multiple instances of `intphys.py` in
-  parallel and is usefull to speedup dataset generation on multicore machines.
+  parallel and is usefull to speedup dataset generation on a multicore machine.
 
 * `postprocessing` contains a C++ program to postprocess a dataset after a call
   to `inphys.py` or `intphys_parallel.sh`, see REAMDE there for more

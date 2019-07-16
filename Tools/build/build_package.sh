@@ -5,7 +5,7 @@
 # We assume $UE_ROOT is defined.
 
 # abspath to the root directory of intphys
-INTPHYS_DIR=$(dirname $(dirname $(readlink -f $0)))
+INTPHYS_DIR=$(dirname $(dirname $(dirname $(readlink -f $0))))
 
 # where we are packaging the project
 PACKAGE_DIR=$INTPHYS_DIR/Package

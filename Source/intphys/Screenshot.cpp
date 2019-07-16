@@ -5,18 +5,18 @@
 #include "Runtime/Core/Public/GenericPlatform/GenericPlatformMath.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
-#include <iostream>
+#include <fstream>
 
 
-static bool VerifyOrCreateDirectory(const FString& Directory)
+static FORCEINLINE bool VerifyOrCreateDirectory(const FString& Directory)
 {
     IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
 
-    if (!PlatformFile.DirectoryExists(*Directory))
+    if (not PlatformFile.DirectoryExists(*Directory))
     {
-        PlatformFile.CreateDirectory(*Directory);
+        PlatformFile.CreateDirectoryTree(*Directory);
 
-        if (!PlatformFile.DirectoryExists(*Directory))
+        if (not PlatformFile.DirectoryExists(*Directory))
         {
             return false;
         }
@@ -90,23 +90,18 @@ void FScreenshot::Reset(bool delete_actors)
     m_ActorsMap.Empty();
 
     for (auto& Image : m_Scene)
-        Image.Init(FColor(), Image.Num());
+      Image.Init(FColor(), Image.Num());
     for (auto& Image : m_Depth)
-        Image.Init(0.0, Image.Num());
+      Image.Init(0.0, Image.Num());
     for (auto& Image : m_Masks)
-        Image.Init(0, Image.Num());
+      Image.Init(0, Image.Num());
     for (auto& Image : m_Masks2)
-        Image.Reset();
+      Image.Reset();
 }
 
 
 bool FScreenshot::Capture(const TArray<AActor*>& IgnoredActors)
 {
-    // if (m_Verbose)
-    // {
-    //     UE_LOG(LogTemp, Log, TEXT("Capturing (tick %d)"), m_ImageIndex+1);
-    // }
-
     if (m_ImageIndex >= m_Size.Z)
     {
         UE_LOG(LogTemp, Error, TEXT("Screen capture failed: too much images captured"));
@@ -129,7 +124,12 @@ bool FScreenshot::Save(const FString& Directory, float& OutMaxDepth, TMap<FStrin
     for (const auto& Name : {TEXT("scene"), TEXT("masks"), TEXT("depth")})
     {
         FString SubDirectory = FPaths::Combine(Directory, FString(Name));
-        VerifyOrCreateDirectory(SubDirectory);
+        bool bDone = VerifyOrCreateDirectory(SubDirectory);
+        if(not bDone)
+          {
+            UE_LOG(LogTemp, Error, TEXT("Failed to create directory %s"), *SubDirectory);
+            return bDone;
+          }
     }
 
     // Save the images
@@ -158,6 +158,7 @@ bool FScreenshot::IsActorInFrame(const AActor* Actor, const uint FrameIndex)
     ActorIndex = static_cast<uint8>(m_ActorsSet.Add(Actor->GetName()).AsInteger() + 1);
     if (ActorIndex <= 0)
         UE_LOG(LogTemp, Warning, TEXT("Didn't found %s in actors array"), *Actor->GetName());
+
     // it is not really optimized, but anyway
     int max = 0;
     int target_nb = -1;
@@ -167,26 +168,18 @@ bool FScreenshot::IsActorInFrame(const AActor* Actor, const uint FrameIndex)
         {
             if (elem.Key == ActorIndex)
             {
-                if (elem.Value > max)
-                    max = elem.Value;
-                if (i == FrameIndex)
+              if (elem.Value > max)
                 {
-                    target_nb = elem.Value;
+                  max = elem.Value;
                 }
-                // UE_LOG(LogTemp, Log, TEXT("%d: %d"), FrameIndex, elem.Value);
+              if (i == FrameIndex)
+                {
+                  target_nb = elem.Value;
+                }
             }
         }
     }
-    /*
-    // 60% percent of visibility to return true
-    if (target_nb != -1)
-        UE_LOG(LogTemp, Log, TEXT("target_nb = %d / max: %d"), target_nb, max);
-    if (target_nb != -1 && (target_nb / max) * 100 > 60)
-    {
-        return true;
-    }
-    return false;
-    */
+
     return m_Masks[FrameIndex].Contains(ActorIndex);
 }
 
@@ -386,11 +379,11 @@ bool FScreenshot::SaveScene(const FString& Directory)
 
 bool FScreenshot::SaveDepth(const FString& Directory, float& OutMaxDepth)
 {
-    // Extract the global max depth
+    // Extract the global max depth and send it to the Python level saver
     TArray<float> MaxDepthArray;
     for (const auto& Image : m_Depth)
     {
-        MaxDepthArray.Add(FMath::Max(Image));
+      MaxDepthArray.Add(FMath::Max(Image));
     }
     OutMaxDepth = FMath::Max(MaxDepthArray);
 
@@ -404,22 +397,30 @@ bool FScreenshot::SaveDepth(const FString& Directory, float& OutMaxDepth)
         // build the filename
         FString FileIndex = FScreenshot::ZeroPadding(i+1);
         FString Filename = FPaths::Combine(
-            Directory, FString::Printf(TEXT("depth_%s.png"), *FileIndex));
+            Directory, FString::Printf(TEXT("depth_%s.bin"), *FileIndex));
 
-        // normalize the depth in [0, 1] and cast to uint8
+        // get the current depth image
         FImageDepth& Image = m_Depth[i];
-        for(uint j = 0; j < Image.Num(); ++j)
-        {
-            uint8 Pixel = static_cast<uint8>(Image[j] * 255.0 / OutMaxDepth);
-            m_WriteBuffer[j] = FColor(Pixel, Pixel, Pixel, 255);
-        }
 
-        // write the image
-        bool bDone = FScreenshot::WritePng(m_WriteBuffer, Filename);
-        if (not bDone)
-        {
+        // save it as a binary file (will be read as a std::vector<float> by the
+        // postprocessor and then normalized and converted to a PNG file). Here
+        // we are using a simple custom serialization, not sure it is robust
+        // across systems. Would be better to use boost::serializer for
+        // instance.
+        std::ofstream DepthFile(std::string(TCHAR_TO_UTF8(*Filename)),
+                                std::ios::out | std::ofstream::binary);
+        const std::size_t Size = static_cast<std::size_t>(Image.Num());
+        DepthFile.write(reinterpret_cast<const char*>(&Size), sizeof(std::size_t));
+        DepthFile.write(reinterpret_cast<const char*>(Image.GetData()), sizeof(float) * Size);
+        DepthFile.close();
+        if(DepthFile.fail())
+          {
+            if(m_Verbose)
+              {
+                UE_LOG(LogTemp, Error, TEXT("Failed to write %s"), *Filename);
+              }
             return false;
-        }
+          }
     }
 
     return true;

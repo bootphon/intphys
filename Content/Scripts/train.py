@@ -87,6 +87,8 @@ class Train(Scene):
         
         return True
 
+            return True
+
     def generate_walls(self, prob_walls, max_height, max_depth, unsafe_zones):
         """Generate walls
         """

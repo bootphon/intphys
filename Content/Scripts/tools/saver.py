@@ -34,6 +34,10 @@ class Saver:
         self.is_dry_mode = dry_mode
         self.output_dir = output_dir
 
+        # store the max_depth across runs (this is used during postprocessing
+        # to normalize the depth across all the dataset)
+        self.max_depth = 0
+
         # an empty list to append status along the run
         self.status_header = {}
         self.status = []
@@ -78,7 +82,11 @@ class Saver:
         # not UE names (to be 'object_1' instead of eg
         # 'Object_C_126'), as well suppress the 'name' field in actor
         # status
-        names_map = {'Sky': 'sky', 'Walls': 'walls', 'AxisCylinders': 'axiscylinders'}
+        names_map = {
+            'Sky': 'sky',
+            'Walls': 'walls',
+            'AxisCylinders': 'axiscylinders'}
+
         for k, v in self.status_header.items():
             if isinstance(v, dict) and 'name' in v.keys():
                 names_map[v['name']] = k
@@ -98,6 +106,8 @@ class Saver:
         json_file = os.path.join(output_dir, 'status.json')
         with open(json_file, 'w') as fin:
             fin.write(json.dumps(status, indent=4))
+
+        self.max_depth = max(self.max_depth, max_depth)
 
         # ue.log('saved captures to {}'.format(output_dir))
         return True

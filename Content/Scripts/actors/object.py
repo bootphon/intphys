@@ -14,9 +14,14 @@ from tools.utils import as_dict
 
 class Object(BaseMesh):
     """
-    shape is a dictionnary with the path of every
-    shape (mesh) available for the Object actor
+    Object inherits from BaseMesh.
+    The objects are the actors that roll and bounce. One of them is a
+    magic actor in the impossible events.
+    The objects can be sphere, cubes or cones.
     """
+
+    # shape is a dictionnary with the path of every
+    # shape (mesh) available for the Object actor
     shape = {
         'Sphere': '/Game/Meshes/Sphere.Sphere',
         'Cube': '/Game/Meshes/Cube.Cube',
@@ -68,11 +73,14 @@ class Object(BaseMesh):
         self.set_force(self.force)
         self.get_mesh().set_simulate_physics()
 
-    """
-    set the mass of the mesh
-    to be honnest I don't really know what the second line do
-    """
     def set_mass(self, mass):
+        """
+        Sets the mass of the mesh
+
+        Parameters
+        ----------
+        mass
+        """
         self.mass = mass
         # set the mass scale differently for each shape
         Friction.SetMassScale(self.mesh,
@@ -81,21 +89,29 @@ class Object(BaseMesh):
             BoneName='None',
             InMassScale=self.mass / self.mesh.GetMassScale())
 
-    """
-    If set to True, persistent will make the force apply to the object at
-    every tick
-    """
     def set_force(self, force, persistent=False):
+        """ Sets the force.
+        Applies initial force to the mesh if persistent is set at False, or
+        persistent force if persistent is set at True.
+
+        Parameters
+        ----------
+        force: FVector
+            The force applied
+        persistent: bool
+            False by default. If set to True, persistent will make the force
+            apply to the object at every tick
+        """
         if (persistent):
             self.force = force
         # the heavier the object is, the more violent the applied force will be
         self.get_mesh().add_force(force *
                                   self.mesh.GetMass())
 
-    """
-    Apply peristent force to the mesh
-    """
     def move(self):
+        """
+        Applies peristent force to the mesh at each tick.
+        """
         self.get_mesh().add_force(self.force)
         self.location = self.actor.get_actor_location()
         self.rotation = self.actor.get_actor_rotation()

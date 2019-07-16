@@ -79,16 +79,6 @@ class BaseActor():
         # r0 = self.actor.get_actor_rotation()
         self.actor.set_actor_rotation(rotation)
         self.rotation = self.actor.get_actor_rotation()
-        """
-        r1, r2 = rotation, self.actor.get_actor_rotation()
-        rd = [abs(d) for d in (
-            r0.roll - r1.roll, r0.yaw - r1.yaw, r0.pitch - r1.pitch)]
-        if max(rd) > 1e-3:
-            ue.log_warning(
-                f'Failed to set the rotation of {self.actor.get_name()}, '
-                f'had {str(r0)}, asked {str(r1)} but have {str(r2)}')
-            return False
-        """
         return True
 
     def on_actor_overlap(self, me, other):

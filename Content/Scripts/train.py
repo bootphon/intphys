@@ -84,10 +84,8 @@ class Train(Scene):
                 warning=True,
                 overlap=True,
                 start_up=random.choice([True, False]))
-        
-        return True
 
-            return True
+        return True
 
     def generate_walls(self, prob_walls, max_height, max_depth, unsafe_zones):
         """Generate walls

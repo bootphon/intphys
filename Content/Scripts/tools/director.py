@@ -17,6 +17,7 @@ class Director(object):
                 size=size,
                 dry_mode=True if output_dir is None else False,
                 output_dir=output_dir)
+
         try:
             self.scenarios_dict = json.loads(open(params_file, 'r').read())
             self.generate_scenes()
@@ -24,6 +25,7 @@ class Director(object):
             print(e)
         except BufferError as e:
             print(e)
+
         # start the ticker, take a screen capture each 2 game ticks
         # self.ticker = Tick(tick_interval=tick_interval)
         # self.ticker.start()
@@ -189,7 +191,7 @@ class Director(object):
         self.is_paused = False
         set_game_paused(self.world, False)
         if self.scene < len(self.scenes):
-            #print(self.ticker)
+            # print(self.ticker)
             self.scenes[self.scene].tick()
             if self.ticker % 2 == 1:
                 self.capture()

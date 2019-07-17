@@ -45,7 +45,7 @@ class Director(object):
                 module = importlib.import_module("train")
                 train_class = getattr(module, "Train")
                 for i in range(d):
-                    self.scenes.append(train_class(self.world, self.saver))
+                    self.scenes.append(train_class(self.world, self.saver, Set))
             else:
               for scenario, scenes in d.items():
                   module = importlib.import_module("test.{}".format(scenario))
@@ -73,11 +73,11 @@ class Director(object):
                               for i in range(nb):
                                   try:
                                       self.scenes.append(test_class(
-                                          self.world, self.saver,
+                                          self.world, self.saver, Set,
                                           is_occluded, movement))
                                   except NotImplementedError:
                                       continue
-                                      
+
         self.total_scenes = len(self.scenes)
 
     def play_scene(self):
@@ -139,13 +139,13 @@ class Director(object):
             is_occluded = self.scenes[self.scene].is_occluded
             movement = self.scenes[self.scene].movement
             self.scenes.insert(self.scene + 1, test_class(
-                self.world, self.saver, is_occluded, movement))
+                self.world, self.saver, self.scenes[self.scene].Set, is_occluded, movement))
             self.scenes.pop(0)
         else:
             module = importlib.import_module('train')
             train_class = getattr(module, "Train")
             self.scenes.insert(self.scene + 1,
-                               train_class(self.world, self.saver))
+                               train_class(self.world, self.saver, self.scenes[self.scene].Set))
             self.scenes.pop(0)
 
     def capture(self):

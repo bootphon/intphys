@@ -19,8 +19,8 @@ class Train(Scene):
     def description(self):
         return 'physically plausible train scene'
 
-    def __init__(self, world, saver):
-        super().__init__(world, saver)
+    def __init__(self, world, saver, Set):
+        super().__init__(world, saver, Set)
 
     def generate_parameters(self):
         super().generate_parameters()

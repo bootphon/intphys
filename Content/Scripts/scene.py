@@ -6,10 +6,11 @@ from tools.materials import get_random_material
 
 
 class Scene:
-    def __init__(self, world, saver):
+    def __init__(self, world, saver, Set):
         self.world = world
         self.params = {}
         self.saver = saver
+        self.set = Set
         while not self.generate_parameters():
             print("Regenerated parameters")
             continue
@@ -128,20 +129,20 @@ class Scene:
         # putting as much zeroes as necessary according
         # to the total number of scenes
         padded_idx = str(idx).zfill(len(str(total)))
-        if 'Train' in type(self).__name__:
+        if 'train' in self.set:
             scene_name = (
-                padded_idx +
-                '_' + self.name +
-                "_train_nobj" +
-                str(self.get_nobjects()))
+                'train/' +
+                padded_idx)
+        # elif 'test' in Set:
+        #     scene_name = (
+        #         'test/' +
+        #         self.name +
+        #         '/' + padded_idx)
         else:
             scene_name = (
-                padded_idx +
-                '_' + self.name +
-                '_test' +
-                '_' + ('occluded' if self.is_occluded else 'visible') +
-                '_' + self.movement +
-                '_nobj' + str(self.get_nobjects()))
+                self.set + '/' +
+                self.name +
+                '/' + padded_idx)
         out = os.path.join(self.saver.output_dir, scene_name)
 
         if 'Test' in type(self).__name__:

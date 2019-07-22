@@ -90,8 +90,12 @@ void intphys::status::update_frame_masks(
    rapidjson::Value new_masks(rapidjson::kObjectType);
    for(const auto& v : masks)
    {
+      // must copy the name of the mask for rapidjson
+      char name[v.first.size()];
+      strcpy(name, v.first.c_str());
+
       new_masks.AddMember(
-         rapidjson::StringRef(v.first.c_str()),
+         rapidjson::Value().SetString(name, v.first.size(), m_status.GetAllocator()),
          rapidjson::Value().SetUint(v.second),
          m_status.GetAllocator());
    }

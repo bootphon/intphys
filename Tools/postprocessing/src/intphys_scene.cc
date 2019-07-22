@@ -129,7 +129,8 @@ void intphys::scene::scene::postprocess(
          std::transform(
             masks.begin(), masks.end(), new_colors.begin(),
             std::inserter(color_map, color_map.end()),
-            [](std::map<std::string, std::uint8_t>::value_type a, std::uint8_t b){return std::make_pair(a.second, b);});
+            [](std::map<std::string, std::uint8_t>::value_type a, std::uint8_t b)
+            { return std::make_pair(a.second, b); });
 
          // generate new masks images and insert the sub-json into the status,
          // at the right frame
@@ -309,7 +310,7 @@ void intphys::scene::test_scene::shuffle(randomizer& random) const
    for(const fs::path& dir_temp : fs::directory_iterator(m_root_directory))
    {
       std::string sdir = dir_temp.string();
-      fs::path dir(sdir.substr(0, sdir.size() - 4));
+      fs::path dir(sdir.substr(0, sdir.size() - 5));
       fs::rename(dir_temp, dir);
    }
 }

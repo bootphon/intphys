@@ -24,45 +24,12 @@ import numpy
 import os
 import pathlib
 import progressbar
-import random
 import tarfile
 import tempfile
 
 
 logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 log = logging.getLogger()
-
-
-def permute_subblocks(data_dir, output_dir):
-    """Permute possible and impossible runs in a test scenario
-
-    A test block is made of subdirectories 1, 2, 3 and 4, where 1 and
-    2 are possible cases and 3 and 4 impossible cases. This method
-    create symlinks from `data_dir` to `output_dir`, simply shuffling
-    1, 2, 3, 4 subdirectories in a random way.
-
-    """
-    assert os.path.isdir(output_dir)
-
-    for block_dir in os.listdir(data_dir):
-        # a block_dir contains 1, 2, 3, 4 subdirectories
-        assert sorted(os.listdir(os.path.join(data_dir, block_dir))) \
-            == ['1', '2', '3', '4']
-
-        # compute a random permutation
-        order = [1, 2, 3, 4]
-        random.shuffle(order)
-
-        # prepare the destination directory
-        os.makedirs(os.path.join(output_dir, block_dir))
-
-        # move from original to permuted
-        for i in range(4):
-            src = os.path.join(data_dir, block_dir, str(i+1))
-            dst = os.path.join(output_dir, block_dir, str(order[i]))
-            os.symlink(src, dst)
-
-    return output_dir
 
 
 def create_archive(archive, files, arcfiles):
@@ -127,40 +94,34 @@ def prepare_test(data_dir, output_dir, block):
     data_dir = os.path.join(data_dir, 'test', block)
     assert os.path.isdir(data_dir)
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        # replace [1, 2, 3, 4] (where 1, 2 are possible and 3, 4 are
-        # impossible) by a random permutation
-        log.info('shuffling possible/impossible subblocks')
-        permute_subblocks(data_dir, tmp_dir)
+    log.info('retrieving metadata')
 
-        log.info('retrieving metadata')
+    meta_files = [
+        str(p) for p in pathlib.Path(data_dir).glob('**/*/*.json')]
+    meta_arcfiles = [
+        p.replace(data_dir, os.path.join('test', block))
+        for p in meta_files]
 
-        meta_files = [
-            str(p) for p in pathlib.Path(tmp_dir).glob('**/*/*.json')]
-        meta_arcfiles = [
-            p.replace(tmp_dir, os.path.join('test', block))
-            for p in meta_files]
+    create_archive(
+        os.path.join(output_dir, 'test_metadata.{}.tar.gz'.format(block)),
+        meta_files, meta_arcfiles)
+
+    log.info('retrieving data')
+
+    def _create_test_archive(directories, archive):
+        data_files = [
+            str(p) for d in sorted(directories)
+            for p in pathlib.Path(d).glob('**/*/*/*.png')]
+        data_arcfiles = [
+            p.replace(data_dir, os.path.join('test', block))
+            for p in data_files]
 
         create_archive(
-            os.path.join(output_dir, 'test_metadata.{}.tar.gz'.format(block)),
-            meta_files, meta_arcfiles)
+            os.path.join(output_dir, archive),
+            data_files, data_arcfiles)
 
-        log.info('retrieving data')
-
-        def _create_test_archive(directories, archive):
-            data_files = [
-                str(p) for d in sorted(directories)
-                for p in pathlib.Path(d).glob('**/*/*/*.png')]
-            data_arcfiles = [
-                p.replace(tmp_dir, os.path.join('test', block))
-                for p in data_files]
-
-            create_archive(
-                os.path.join(output_dir, archive),
-                data_files, data_arcfiles)
-
-        dirs = [os.path.join(tmp_dir, d) for d in os.listdir(tmp_dir)]
-        _create_test_archive(dirs, 'test.{}.tar.gz'.format(block))
+    dirs = [os.path.join(data_dir, d) for d in os.listdir(data_dir)]
+    _create_test_archive(dirs, 'test.{}.tar.gz'.format(block))
 
 
 def parse_args():

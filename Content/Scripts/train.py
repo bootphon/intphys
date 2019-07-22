@@ -19,8 +19,8 @@ class Train(Scene):
     def description(self):
         return 'physically plausible train scene'
 
-    def __init__(self, world, saver):
-        super().__init__(world, saver)
+    def __init__(self, world, saver, Set):
+        super().__init__(world, saver, Set)
 
     def generate_parameters(self):
         super().generate_parameters()
@@ -84,10 +84,8 @@ class Train(Scene):
                 warning=True,
                 overlap=True,
                 start_up=random.choice([True, False]))
-        
-        return True
 
-            return True
+        return True
 
     def generate_walls(self, prob_walls, max_height, max_depth, unsafe_zones):
         """Generate walls

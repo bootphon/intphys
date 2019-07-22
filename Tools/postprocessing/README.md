@@ -7,15 +7,17 @@ First install the dependencies. On Debian/Ubuntu:
     sudo apt install \
         libboost-filesystem-dev \
         libboost-program-options-dev \
-        nlohmann-json-dev \
+        rapidjson-dev \
         libpng++-dev \
         cmake
 
 Then compile the program:
 
-    cmake .
-    make
+    mkdir -p ./build
+    cd ./build
+    cmake ..
+    make -j4
 
 Finally call it:
 
-    ./postprocessing <directory> -j <njobs>
+    ./build/postprocessing <directory> -j <njobs>

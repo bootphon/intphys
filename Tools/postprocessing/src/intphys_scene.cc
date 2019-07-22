@@ -122,7 +122,7 @@ void intphys::scene::scene::postprocess(
       for(const fs::path& png_file : fs::directory_iterator(run_dir / "masks"))
       {
          // generate random new colors for the frame's masks
-         std::set<std::uint8_t> new_colors = random.generate<std::uint8_t>(masks.size(), 0, 255);
+         std::vector<std::uint8_t> new_colors = random.generate<std::uint8_t>(masks.size(), 0, 255);
 
          // generate the map (old_color -> new_color)
          std::map<std::uint8_t, std::uint8_t> color_map;

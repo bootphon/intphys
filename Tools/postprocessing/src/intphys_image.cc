@@ -23,8 +23,9 @@ void intphys::image::remove_alpha_channel(const fs::path& png_file)
 {
   try
     {
-      // write the converted image to a temp file
-      fs::path temp_file = fs::unique_path();
+       // write the converted image to a temp file
+       fs::path model = fs::temp_directory_path() / "%%%%-%%%%-%%%%-%%%%";
+       fs::path temp_file = fs::unique_path(model);
 
       // force read to RGB will drop the alpha channel
       png::image<png::rgb_pixel> im(png_file.string());
@@ -32,7 +33,9 @@ void intphys::image::remove_alpha_channel(const fs::path& png_file)
       // write the converted image to the temp file and move the temp to
       // original file
       im.write(temp_file.string());
-      fs::rename(temp_file, png_file);
+      fs::remove(png_file);
+      fs::copy(temp_file, png_file);
+      fs::remove(temp_file);
     }
   catch(std::exception& e)
     {
@@ -114,8 +117,9 @@ void intphys::image::scramble_masks(
 {
   try
     {
-      // write the converted image to a temp file
-      const fs::path temp_file = fs::unique_path();
+       // write the converted image to a temp file
+       fs::path model = fs::temp_directory_path() / "%%%%-%%%%-%%%%-%%%%";
+       const fs::path temp_file = fs::unique_path(model);
 
       // force read to grayscale will convert from RGBA
       png::image<png::gray_pixel> im(png_file.string());
@@ -133,7 +137,9 @@ void intphys::image::scramble_masks(
       // write the converted image to the temp file and move the temp to
       // original file
       im.write(temp_file.string());
-      fs::rename(temp_file, png_file);
+      fs::remove(png_file);
+      fs::copy(temp_file, png_file);
+      fs::remove(temp_file);
     }
   catch(std::exception& e)
     {

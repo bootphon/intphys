@@ -20,4 +20,4 @@ Then compile the program:
 
 Finally call it:
 
-    ./build/postprocessing <directory> -j <njobs>
+    ./postprocessing <directory> -j <njobs>

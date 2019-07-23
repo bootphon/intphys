@@ -1,11 +1,11 @@
-#include "intphys_image.hh"
-
 #include <cmath>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <png++/png.hpp>
+
+#include "image.hh"
 
 
 namespace fs = boost::filesystem;

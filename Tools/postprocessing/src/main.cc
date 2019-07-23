@@ -4,8 +4,8 @@
 #include <stdexcept>
 #include <boost/program_options.hpp>
 
-#include "intphys_dataset.hh"
-#include "intphys_randomizer.hpp"
+#include "dataset.hh"
+#include "randomizer.hpp"
 
 
 /**
@@ -15,7 +15,7 @@
 */
 void parse_options(
    int& argc, char** argv,
-   std::string& directory, uint8_t& njobs, unsigned& seed)
+   std::string& directory, std::size_t& njobs, unsigned& seed)
 {
    namespace po = boost::program_options;
 
@@ -23,7 +23,7 @@ void parse_options(
    desc.add_options()
       ("help,h", "produce help message")
 
-      ("njobs,j", po::value<uint8_t>(&njobs)->default_value(1),
+      ("njobs,j", po::value<std::size_t>(&njobs)->default_value(1),
        "number of parallel subprocesses (default to 1)")
 
       ("seed,s", po::value<unsigned>(&seed)->default_value(
@@ -71,7 +71,7 @@ int main(int argc, char** argv)
    {
       // parse the input directory from command line
       std::string directory;
-      uint8_t njobs;
+      std::size_t njobs;
       unsigned seed;
       parse_options(argc, argv, directory, njobs, seed);
 
@@ -83,8 +83,8 @@ int main(int argc, char** argv)
       const auto& dim = dataset.scenes_dimension();
       std::cout
          << "found " << dataset.scenes().size() << " scenes for a total of "
-         << dataset.nimages() <<" images, dimension of each scene is "
-         << dim.x << "x" << dim.y << "x" << dim.z << std::endl;
+         << dataset.nruns() << " runs and "
+         << dataset.nimages() <<" images" << std::endl;
 
       // initialize the random engine
       intphys::randomizer random(seed);

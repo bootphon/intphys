@@ -1,13 +1,14 @@
 #include <algorithm>
+#include <mutex>
 #include <stdexcept>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#include <boost/progress.hpp>
-
-#include "intphys_dataset.hh"
-#include "intphys_image.hh"
+#include "dataset.hh"
+#include "foreach.hpp"
+#include "image.hh"
+#include "progressbar.hh"
 
 
 namespace fs = boost::filesystem;
@@ -18,16 +19,6 @@ intphys::dataset::dataset(const fs::path& directory)
      m_scenes()
 {
    check_root_directory();
-
-   // explore train subdirectory
-   const fs::path train_directory = m_root_directory / "train";
-   if(fs::is_directory(train_directory))
-   {
-      for(const fs::path& subdir : fs::directory_iterator(train_directory))
-      {
-         m_scenes.push_back(intphys::scene::make_scene(subdir));
-      }
-   }
 
    // explore test and dev directories
    for(const std::string test : {"test", "dev"})
@@ -45,6 +36,16 @@ intphys::dataset::dataset(const fs::path& directory)
                m_scenes.push_back(intphys::scene::make_scene(subsubdir));
             }
          }
+      }
+   }
+
+   // explore train subdirectory
+   const fs::path train_directory = m_root_directory / "train";
+   if(fs::is_directory(train_directory))
+   {
+      for(const fs::path& subdir : fs::directory_iterator(train_directory))
+      {
+         m_scenes.push_back(intphys::scene::make_scene(subdir));
       }
    }
 
@@ -90,17 +91,18 @@ void intphys::dataset::check_root_directory() const
 }
 
 
-float intphys::dataset::extract_max_depth() const
+float intphys::dataset::extract_max_depth(const std::size_t& njobs) const
 {
-   float max_depth = 0.0;
+   intphys::progressbar show_progress(m_scenes.size(), "extracting depth");
 
-   for(const auto& scene : m_scenes)
+   auto max_depth = [&](const float& a, std::shared_ptr<intphys::scene::scene> b)
    {
-      float current_depth = scene->extract_max_depth();
-      max_depth = std::max(max_depth, current_depth);
-   }
+      float max = std::max(a, b->extract_max_depth());
+      show_progress.next();
+      return max;
+   };
 
-   return max_depth;
+   return std::accumulate(m_scenes.begin(), m_scenes.end(), 0.0, max_depth);
 }
 
 
@@ -110,43 +112,52 @@ const intphys::scene::dimension& intphys::dataset::scenes_dimension() const
 }
 
 
+std::size_t intphys::dataset::nruns() const
+{
+   auto add_runs = [](const std::size_t& a, std::shared_ptr<intphys::scene::scene> b)
+   {
+      return a + b->nruns();
+   };
+
+   return std::accumulate(m_scenes.begin(), m_scenes.end(), 0, add_runs);
+}
+
 std::size_t intphys::dataset::nimages() const
 {
-   std::size_t nruns = 0;
-   for(const auto& scene : m_scenes)
-   {
-      nruns += scene->nruns();
-   }
-
-   return nruns * m_scene_dimension.z * 3;
+   // for each run we have (scene + depth + masks) * scene_dimension
+   return nruns() * m_scene_dimension.z * 3;
 }
 
 
-void intphys::dataset::postprocess(const uint& njobs, randomizer& random) const
+void intphys::dataset::postprocess(
+   const std::size_t& njobs, randomizer& random) const
 {
    // extract the maximum depth in all scenes of the dataset
-   float max_depth = extract_max_depth();
+   float max_depth = extract_max_depth(njobs);
 
    // postprocess the scenes
    postprocess(njobs, random, max_depth);
 }
 
 
-void intphys::dataset::postprocess(const uint& njobs, randomizer& random, float max_depth) const
+void intphys::dataset::postprocess(
+   const std::size_t& njobs, randomizer& random, float max_depth) const
 {
-   intphys::image::resolution resolution{m_scene_dimension.x, m_scene_dimension.y};
+   const intphys::image::resolution resolution{m_scene_dimension.x, m_scene_dimension.y};
 
-   boost::progress_display show_progress(m_scenes.size());
-   for(const auto& scene : m_scenes)
-   {
-      scene->postprocess(max_depth, resolution, random);
+   intphys::progressbar show_progress(m_scenes.size(), "postprocessing scenes");
 
-      if(scene->is_test_scene())
+   intphys::for_each(
+      njobs, m_scenes.begin(), m_scenes.end(),
+      [&](const std::shared_ptr<intphys::scene::scene> scene)
       {
-         // need to cast from IScene to TestScene
-         dynamic_cast<intphys::scene::test_scene*>(scene.get())->shuffle(random);
-      }
+         scene->postprocess(max_depth, resolution, random);
+         if(scene->is_test_scene())
+         {
+            // need to cast from IScene to TestScene
+            dynamic_cast<intphys::scene::test_scene*>(scene.get())->shuffle(random);
+         }
 
-      ++show_progress;
-   }
+         show_progress.next();
+      });
 }

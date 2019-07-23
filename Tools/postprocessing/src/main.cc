@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+#include <thread>
 #include <boost/program_options.hpp>
 
 #include "dataset.hh"
@@ -23,8 +24,10 @@ void parse_options(
    desc.add_options()
       ("help,h", "produce help message")
 
-      ("njobs,j", po::value<std::size_t>(&njobs)->default_value(1),
-       "number of parallel subprocesses (default to 1)")
+      ("njobs,j", po::value<std::size_t>(&njobs)->default_value(
+         std::thread::hardware_concurrency()),
+       "number of threads for parallel execution "
+       "(default to the number of CPU cores available)")
 
       ("seed,s", po::value<unsigned>(&seed)->default_value(
          std::chrono::system_clock::now().time_since_epoch().count()),
@@ -80,10 +83,8 @@ int main(int argc, char** argv)
       intphys::dataset dataset(directory);
 
       // display a bit of information to the user
-      const auto& dim = dataset.scenes_dimension();
       std::cout
          << "found " << dataset.scenes().size() << " scenes for a total of "
-         << dataset.nruns() << " runs and "
          << dataset.nimages() <<" images" << std::endl;
 
       // initialize the random engine

@@ -84,7 +84,7 @@ void intphys::image::normalize_depth(
               std::size_t index = x + y * resolution.height;
 
               // depth normalization, depth field is from white (close) to black
-              // (far). Ant depth greater than max_depth is dropped. A depth at
+              // (far). Any depth greater than max_depth is dropped. A depth at
               // 0 is assumed to be infinite depth.
               float d = raw_depth[index];
               if(d == 0.0 or d > max_depth)

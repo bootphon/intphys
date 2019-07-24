@@ -31,10 +31,10 @@ json=$(readlink -f $1)
 
 
 # generate the dataset
-$(dirname $0)/parallel/intphys_parallel.py $json $output_dir $(nproc) || exit 1
+$(dirname $0)/parallel/intphys_parallel.sh $json $output_dir $(nproc) || exit 1
 
 # postprocess it
-$(dirname $0)/postprocessing/build/postprocess $output_dir || exit 1
+$(dirname $0)/postprocessing/build/postprocess $output_dir -j $(nproc) || exit 1
 
 # build the archives
 $(dirname $0)/make_archives.py $output_dir || exit 1

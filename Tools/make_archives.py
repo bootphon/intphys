@@ -25,7 +25,6 @@ import os
 import pathlib
 import progressbar
 import tarfile
-import tempfile
 
 
 logging.basicConfig(level=logging.DEBUG, format='%(message)s')
@@ -150,11 +149,15 @@ def main():
         raise IOError('"{}" is not a directory'.format(output_dir))
     output_dir = os.path.abspath(output_dir)
 
-    # prepare_dev(data_dir, output_dir)
-    # prepare_train(data_dir, output_dir, N=4)
-    # prepare_test(data_dir, output_dir, block='O1')
-    # prepare_test(data_dir, output_dir, block='O2')
-    prepare_test(data_dir, output_dir, block='O3')
+    if os.path.isdir(os.path.join(data_dir, 'dev')):
+        prepare_dev(data_dir, output_dir)
+
+    if os.path.isdir(os.path.join(data_dir, 'train')):
+        prepare_train(data_dir, output_dir, N=4)
+
+    if os.path.isdir(os.path.join(data_dir, 'test')):
+        for block in os.listdir(os.path.join(data_dir, 'test')):
+            prepare_test(data_dir, output_dir, block=block)
 
 
 if __name__ == '__main__':

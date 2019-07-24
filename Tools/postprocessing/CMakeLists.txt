@@ -9,7 +9,15 @@ find_package(Boost 1.40 COMPONENTS program_options filesystem REQUIRED)
 find_package(PNG REQUIRED)
 find_package(Threads REQUIRED)
 
-include_directories(${Boost_INCLUDE_DIR} ${PNG_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/include)
+include_directories(
+  ${Boost_INCLUDE_DIR}
+  ${PNG_INCLUDE_DIRS}
+  ${PROJECT_SOURCE_DIR}/include)
+
 file(GLOB CXX_SRC ${PROJECT_SOURCE_DIR}/src/*.cc)
 add_executable(postprocess ${CXX_SRC})
-target_link_libraries(postprocess LINK_PUBLIC ${Boost_LIBRARIES} ${PNG_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(
+  postprocess LINK_PUBLIC
+  ${Boost_LIBRARIES}
+  ${PNG_LIBRARIES}
+  ${CMAKE_THREAD_LIBS_INIT})

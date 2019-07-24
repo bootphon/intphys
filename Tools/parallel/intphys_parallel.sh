@@ -6,7 +6,19 @@
 
 
 # absolute path to intphys.py
-intphys=$(readlink -f $(dirname $(readlink -f $0))/../intphys.py)
+intphys=$(readlink -f $(dirname $(readlink -f $0))/../../intphys.py)
+[ ! -f $intphys ] && echo "error: cannot find $intphys" && exit 1
+
+# absolute path to split_json.py
+split_json=$(readlink -f $(dirname $0)/split_json.py)
+[ ! -f "$split_json" ] && echo "error: cannot find $split_json" && exit 1
+
+# absolute path to merge_datasets
+merge_datasets=$(readlink -f $(dirname $0)/merge_datasets.py)
+[ ! -f "$merge_datasets" ] && echo "error: cannot find $merge_datasets" && exit 1
+
+# make sure GNU parallel is in the path
+[ -z "$(which parallel)" ] && echo "error: GNU parallel not found, please install it" && exit 1
 
 
 # a usage message displayed on bad params or --help
@@ -50,10 +62,10 @@ json=$(readlink -f $1)
 if ! [ -f $json ]; then echo "Error: file $1 not found"; exit 1; fi
 
 
-# split the json file in 'njobs' subparts
+# split the json file into a maximum of 'njobs' subparts
 tmpdir=$(mktemp -d)
 trap "rm -rf $tmpdir" EXIT
-$(dirname $0)/split_json.py $json $njobs $tmpdir || exit 1
+$split_json $json $njobs $tmpdir || exit 1
 njsons=$(( $(ls -l $tmpdir | wc -l) - 1 ))
 
 
@@ -70,8 +82,9 @@ export -f run_intphys
 parallel -j $njobs run_intphys ::: $(seq 1 $njsons) || exit 1
 
 
-# merge the output directories
-$(dirname $0)/merge_directories.py $output_dir/parallel  $output_dir || exit 1
+# merge the datasets output directories
+$merge_datasets $output_dir $output_dir/parallel/* || exit 1
+rm -rf $output_dir/parallel
 
 
 exit 0

@@ -26,6 +26,7 @@ class Object(BaseMesh):
         'Sphere': '/Game/Meshes/Sphere.Sphere',
         'Cube': '/Game/Meshes/Cube.Cube',
         'Cone': '/Game/Meshes/Cone.Cone',
+        'Capsule': '/Game/Meshes/Capsule.Capsule'
         # we exclude cylinder because it looks like a cube (from a face)
         # or like a sphere (from the other face)
         # 'Cylinder': '/Game/Meshes/Cylinder.Cylinder'
@@ -37,7 +38,8 @@ class Object(BaseMesh):
     mass_factor = {
         'Sphere': 1.0,
         'Cube': 0.6155297517867,
-        'Cone': 1.6962973279499}
+        'Cone': 1.6962973279499,
+        'Capsule': 1}
 
 
     def __init__(self, world, params=ObjectParams()):

@@ -10,11 +10,9 @@ following tar.gz archives:
   - train.{1, ..., n}.tar.gz contain the train/ folder split in n
     archives of approx. equal size
 
-Installation note
------------------
-
-If the program fails complaining the "progressbar" module is not found, you
-need to install it: "conda install progressbar2" or "pip install progressbar2"
+**Installation note** If the program fails complaining the "progressbar" module
+is not found, you need to install it: "conda install progressbar2" or "pip
+install progressbar2"
 
 """
 
@@ -128,18 +126,29 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
+
     parser.add_argument(
-        'data_dir', help='the input data directory')
+        'data_dir', metavar='<input-directory>',
+        help='the input data directory')
+
     parser.add_argument(
-        '-o', '--output-dir',
+        '-o', '--output-dir', metavar='<output-directory>',
         help=('the output directory where to write the tar.gz files, '
-              'use data_dir by default'))
+              '(default to <input-directory>)'))
+
+    parser.add_argument(
+        '-n', '--ntrain', default=4, metavar='<int>',
+        help='number of train archives to create (default to 4)')
+
     args = parser.parse_args()
-    return args.data_dir, args.output_dir if args.output_dir else args.data_dir
+    return (
+        args.data_dir,
+        args.output_dir if args.output_dir else args.data_dir,
+        int(args.ntrain))
 
 
 def main():
-    data_dir, output_dir = parse_args()
+    data_dir, output_dir, ntrain = parse_args()
 
     if not os.path.isdir(data_dir):
         raise IOError('"{}" is not a directory'.format(data_dir))
@@ -153,7 +162,7 @@ def main():
         prepare_dev(data_dir, output_dir)
 
     if os.path.isdir(os.path.join(data_dir, 'train')):
-        prepare_train(data_dir, output_dir, N=4)
+        prepare_train(data_dir, output_dir, N=ntrain)
 
     if os.path.isdir(os.path.join(data_dir, 'test')):
         for block in os.listdir(os.path.join(data_dir, 'test')):

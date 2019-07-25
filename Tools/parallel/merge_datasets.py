@@ -7,26 +7,6 @@ import shutil
 import string
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description='Merge several intphys datasets into a single one')
-
-    parser.add_argument(
-        'output_dataset', metavar='<output-dataset>',
-        help='output directory with the merged dataset (may exist but must '
-        'not contain an existing dataset)')
-
-    parser.add_argument(
-        'input_datasets', nargs='+', metavar='<input-dataset>',
-        help='directory with a dataset to move into <output-dataset>')
-
-    parser.add_argument(
-        '-c', '--copy', action='store_true',
-        help='copy the input datasets to the output (default is to move them)')
-
-    return parser.parse_args()
-
-
 class Dataset:
     def __init__(self, directory):
         if not os.path.isdir(directory):
@@ -91,13 +71,33 @@ class Dataset:
     def normalize(self):
         """Rename all the scenes directory with increasing zfilled numbers"""
         for block in self._blocks():
-            nscenes = self._count(os.path.dirname(block))
+            nscenes = self._count(block)
             zlen = int(len(str(nscenes)))
             directory = os.path.join(self.root_directory, block)
             for n, scene in enumerate(os.listdir(directory)):
                 src = os.path.join(directory, scene)
                 dest = os.path.join(directory, str(n+1).zfill(zlen))
                 shutil.move(src, dest)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description='Creates a new intphys dataset from several existing ones')
+
+    parser.add_argument(
+        'output_dataset', metavar='<output-dataset>',
+        help='output directory with the merged dataset (may exist but must '
+        'not contain an existing dataset)')
+
+    parser.add_argument(
+        'input_datasets', nargs='+', metavar='<input-dataset>',
+        help='directory with a dataset to move into <output-dataset>')
+
+    parser.add_argument(
+        '-c', '--copy', action='store_true',
+        help='copy the input datasets to the output (default is to move them)')
+
+    return parser.parse_args()
 
 
 def main():
@@ -110,7 +110,7 @@ def main():
     if os.path.exists(output):
         if not os.path.isdir(output):
             raise ValueError(f'{output} exists but is not a directory')
-        if len(Dataset(output).nscenes()) != 0:
+        if Dataset(output).nscenes() != 0:
             raise ValueError(f'{output} is not an empty dataset')
     else:
         os.makedirs(output)

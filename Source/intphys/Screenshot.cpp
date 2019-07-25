@@ -67,6 +67,11 @@ void FScreenshot::SetActors(TArray<AActor*>& Actors)
         {
           m_ActorsSet.Add(FString(TEXT("AxisCylinders")));
         }
+        else if (actor->GetName().Contains(FString(TEXT("Pill"))) == true &&
+            m_ActorsSet.Contains(TEXT("Pills")) == false)
+        {
+          m_ActorsSet.Add(FString(TEXT("AxisCylinders")));
+        }
         else
         {
             m_ActorsSet.Add(actor->GetName());
@@ -326,6 +331,8 @@ bool FScreenshot::CaptureDepthAndMasks(const TArray<AActor*>& IgnoredActors)
                     ActorName = FString(TEXT("Walls"));
                 else if (HitResult.GetActor()->GetName().Contains(FString(TEXT("AxisCylinder"))) == true)
                     ActorName = FString(TEXT("AxisCylinders"));
+                else if (HitResult.GetActor()->GetName().Contains(FString(TEXT("Pill"))) == true)
+                    ActorName = FString(TEXT("Pills"));
                 int8 ActorIndex = -1;
                 ActorIndex = static_cast<uint8>(m_ActorsSet.Add(ActorName).AsInteger() + 1);
                 if (ActorIndex <= 0)

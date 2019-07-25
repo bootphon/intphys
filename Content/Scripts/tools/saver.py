@@ -81,7 +81,8 @@ class Saver:
         names_map = {
             'Sky': 'sky',
             'Walls': 'walls',
-            'AxisCylinders': 'axiscylinders'}
+            'AxisCylinders': 'axiscylinders',
+            'Pills': 'pills'}
 
         for k, v in self.status_header.items():
             if isinstance(v, dict) and 'name' in v.keys():

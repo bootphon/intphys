@@ -102,21 +102,22 @@ class BaseActor():
         self.is_valid = False
 
     def on_actor_hit(self, me, other, *args):
-        """
-        When an the actor is hitting another actor a message is printed.
+        pass
+        # """
+        # When an the actor is hitting another actor a message is printed.
 
-        Parameters
-        ----------
-        me: AActor
-            The current actor
-        othe: AActor
-            The actor hitting the current actor
-        """
-        if (other.get_name()[:5] == "Floor" or me == other):
-            return
-        message = '{} hitting {}'.format(
-            self.actor.get_name(), other.get_name())
-        ue.log(message)
+        # Parameters
+        # ----------
+        # me: AActor
+        #     The current actor
+        # othe: AActor
+        #     The actor hitting the current actor
+        # """
+        # if (other.get_name()[:5] == "Floor" or me == other):
+        #     return
+        # message = '{} hitting {}'.format(
+        #     self.actor.get_name(), other.get_name())
+        # ue.log(message)
 
     def set_hidden(self, hidden):
         """ Sets the hidden parameter

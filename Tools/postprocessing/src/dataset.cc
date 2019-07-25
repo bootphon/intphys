@@ -143,15 +143,13 @@ void intphys::dataset::postprocess(
 void intphys::dataset::postprocess(
    const std::size_t& njobs, randomizer& random, float max_depth) const
 {
-   const intphys::image::resolution resolution{m_scene_dimension.x, m_scene_dimension.y};
-
    intphys::progressbar show_progress(m_scenes.size(), "postprocessing scenes");
 
    intphys::for_each(
       njobs, m_scenes.begin(), m_scenes.end(),
       [&](const std::shared_ptr<intphys::scene::scene> scene)
       {
-         scene->postprocess(max_depth, resolution, random);
+         scene->postprocess(max_depth, m_scene_dimension, random);
          if(scene->is_test_scene())
          {
             // need to cast from IScene to TestScene

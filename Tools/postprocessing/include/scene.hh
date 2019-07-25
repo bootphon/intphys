@@ -43,7 +43,7 @@ public:
    virtual bool is_test_scene() const;
 
    void postprocess(const float& max_depth,
-                    const intphys::image::resolution& resolution,
+                    const intphys::scene::dimension& resolution,
                     intphys::randomizer& random);
 
 protected:

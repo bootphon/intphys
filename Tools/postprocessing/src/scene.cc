@@ -32,22 +32,31 @@ void intphys::scene::scene::check_run_directory(const fs::path& directory)
          throw std::runtime_error(message.str().c_str());
       }
 
-      // make sure each subdirectory have files with the expected extension
-      std::string extension = ".png";
+      // make sure each subdirectory have files with the expected content
       if(subdir == "depth")
       {
-         extension = ".bin";
+         const fs::path depth_file = subdirectory / "depth.bin";
+         if(not fs::is_regular_file(depth_file))
+         {
+            std::stringstream message;
+            message << "file " << depth_file << " not found";
+            throw std::runtime_error(message.str().c_str());
+         }
       }
-      bool good_ext = std::all_of(
-         fs::directory_iterator(subdirectory),
-         fs::directory_iterator(),
-         [&](const fs::path& file){return fs::extension(file) == extension;});
-
-      if(not good_ext)
+      else
       {
-         std::stringstream message;
-         message << "files in " << subdirectory << " must have extension " << extension;
-         throw std::runtime_error(message.str().c_str());
+
+         const bool good_ext = std::all_of(
+            fs::directory_iterator(subdirectory),
+            fs::directory_iterator(),
+            [&](const fs::path& file){return fs::extension(file) == ".png";});
+
+         if(not good_ext)
+         {
+            std::stringstream message;
+            message << "files in " << subdirectory << " must have extension .png";
+            throw std::runtime_error(message.str().c_str());
+         }
       }
    }
 }
@@ -88,7 +97,7 @@ inline bool intphys::scene::scene::is_test_scene() const
 
 void intphys::scene::scene::postprocess(
    const float& max_depth,
-   const intphys::image::resolution& resolution,
+   const intphys::scene::dimension& dimension,
    intphys::randomizer& random)
 {
    for(const fs::path& run_dir : run_directories())
@@ -104,10 +113,11 @@ void intphys::scene::scene::postprocess(
 
       // postprocess depth (create normalized gray images from raw data, and
       // update the status)
-      for(const fs::path& bin_file : fs::directory_iterator(run_dir / "depth"))
-      {
-         intphys::image::normalize_depth(bin_file, max_depth, resolution);
-      }
+      const fs::path depth_file = run_dir / "depth" / "depth.bin";
+      intphys::image::normalize_depth(
+         depth_file, max_depth,
+         intphys::image::resolution{dimension.x, dimension.y},
+         dimension.z);
 
       // update the max depth in the JSON with the global max depth (in the
       // whole dataset)

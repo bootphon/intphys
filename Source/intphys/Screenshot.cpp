@@ -5,6 +5,12 @@
 #include "Runtime/Core/Public/GenericPlatform/GenericPlatformMath.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
+THIRD_PARTY_INCLUDES_START
+#include "ThirdParty/zlib/zlib-1.2.5/Inc/zlib.h"
+#include "ThirdParty/libPNG/libPNG-1.5.27/png.h"
+#include <png++/png.hpp>
+THIRD_PARTY_INCLUDES_END
+
 #include <fstream>
 
 
@@ -29,23 +35,25 @@ static FORCEINLINE bool VerifyOrCreateDirectory(const FString& Directory)
 FScreenshot::FScreenshot(const FIntVector& Size, AActor* OriginActor, bool Verbose)
     : m_Size(Size), m_OriginActor(OriginActor), m_Verbose(Verbose), m_ImageIndex(0)
 {
+   const uint32 SizeXY = Size.X * Size.Y;
     // allocate memory for storing images
     m_Scene.SetNum(Size.Z);
     for (auto& Image : m_Scene)
-        Image.SetNum(Size.X * Size.Y);
-
-    m_Depth.SetNum(Size.Z);
-    for (auto& Image : m_Depth)
-        Image.SetNum(Size.X * Size.Y);
+        Image.SetNum(SizeXY);
 
     m_Masks.SetNum(Size.Z);
     for (auto& Image : m_Masks)
-        Image.SetNum(Size.X * Size.Y);
-
+        Image.SetNum(SizeXY);
     m_Masks2.SetNum(Size.Z);
 
-    m_WriteBuffer.SetNum(Size.X * Size.Y);
-    m_CompressedWriteBuffer.SetNum(Size.X * Size.Y);
+    m_Depth.SetNum(SizeXY * Size.Z);
+
+    // zlib estimation of the maximum compressed size of depth data
+    m_BinaryBuffer.SetNum(compressBound(m_Depth.Num() * m_Depth.GetTypeSize()));
+
+    // To save pngs, will be resized on demand
+    m_WriteBuffer.SetNum(SizeXY);
+    m_PngBuffer.SetNum(SizeXY);
 }
 
 
@@ -89,10 +97,10 @@ void FScreenshot::Reset(bool delete_actors)
         m_ActorsSet.Empty();
     m_ActorsMap.Empty();
 
+
+    m_Depth.Init(0.0, m_Depth.Num());
     for (auto& Image : m_Scene)
       Image.Init(FColor(), Image.Num());
-    for (auto& Image : m_Depth)
-      Image.Init(0.0, Image.Num());
     for (auto& Image : m_Masks)
       Image.Init(0, Image.Num());
     for (auto& Image : m_Masks2)
@@ -128,7 +136,7 @@ bool FScreenshot::Save(const FString& Directory, float& OutMaxDepth, TMap<FStrin
         if(not bDone)
           {
             UE_LOG(LogTemp, Error, TEXT("Failed to create directory %s"), *SubDirectory);
-            return bDone;
+            return false;
           }
     }
 
@@ -297,12 +305,13 @@ bool FScreenshot::CaptureDepthAndMasks(const TArray<AActor*>& IgnoredActors)
 
     // for each pixel of the view, cast a ray in the scene and get the
     // resulting hit actor and hit distance
+    uint DepthIndex = m_ImageIndex * m_Size.X * m_Size.Y;
     FHitResult HitResult;
     bool bHitDetected = false;
     for (int y = 0; y < m_Size.Y; ++y)
     {
         for (int x = 0; x < m_Size.X; ++x)
-	{
+        {
             FVector RayOrigin, RayDirection;
             UGameplayStatics::DeprojectScreenToWorld(
                 PlayerControler, FVector2D(x, y), RayOrigin, RayDirection);
@@ -318,13 +327,13 @@ bool FScreenshot::CaptureDepthAndMasks(const TArray<AActor*>& IgnoredActors)
 
                 // compute depth
                 float HitDistance = FVector::DotProduct(HitResult.Location - OriginLoc, OriginRot);
-                m_Depth[m_ImageIndex][PixelIndex] = HitDistance;
+                m_Depth[DepthIndex + PixelIndex] = HitDistance;
 
                 // compute mask
                 FString ActorName = HitResult.GetActor()->GetName();
-                if (HitResult.GetActor()->GetName().Contains(FString(TEXT("Wall"))) == true)
+                if (ActorName.Contains(FString(TEXT("Wall"))) == true)
                     ActorName = FString(TEXT("Walls"));
-                else if (HitResult.GetActor()->GetName().Contains(FString(TEXT("AxisCylinder"))) == true)
+                else if (ActorName.Contains(FString(TEXT("AxisCylinder"))) == true)
                     ActorName = FString(TEXT("AxisCylinders"));
                 int8 ActorIndex = -1;
                 ActorIndex = static_cast<uint8>(m_ActorsSet.Add(ActorName).AsInteger() + 1);
@@ -380,49 +389,22 @@ bool FScreenshot::SaveScene(const FString& Directory)
 bool FScreenshot::SaveDepth(const FString& Directory, float& OutMaxDepth)
 {
     // Extract the global max depth and send it to the Python level saver
-    TArray<float> MaxDepthArray;
-    for (const auto& Image : m_Depth)
-    {
-      MaxDepthArray.Add(FMath::Max(Image));
-    }
-    OutMaxDepth = FMath::Max(MaxDepthArray);
-
+    OutMaxDepth = FMath::Max(m_Depth);
     if (m_Verbose)
     {
         UE_LOG(LogTemp, Log, TEXT("Max depth is %f"), OutMaxDepth);
     }
 
-    for (uint i = 0; i < m_Size.Z; ++i)
+    // save the depth images a single binary file containing raw depth as floats
+    // (during prostprocessing, will be split into one image per frame and
+    // normalized by the maximum depth of the whole dataset)
+
+    // build the filename
+    FString Filename = FPaths::Combine(Directory, FString("depth.bin"));
+    if (not WriteBinary(m_Depth, Filename))
     {
-        // build the filename
-        FString FileIndex = FScreenshot::ZeroPadding(i+1);
-        FString Filename = FPaths::Combine(
-            Directory, FString::Printf(TEXT("depth_%s.bin"), *FileIndex));
-
-        // get the current depth image
-        FImageDepth& Image = m_Depth[i];
-
-        // save it as a binary file (will be read as a std::vector<float> by the
-        // postprocessor and then normalized and converted to a PNG file). Here
-        // we are using a simple custom serialization, not sure it is robust
-        // across systems. Would be better to use boost::serializer for
-        // instance.
-        std::ofstream DepthFile(std::string(TCHAR_TO_UTF8(*Filename)),
-                                std::ios::out | std::ofstream::binary);
-        const std::size_t Size = static_cast<std::size_t>(Image.Num());
-        DepthFile.write(reinterpret_cast<const char*>(&Size), sizeof(std::size_t));
-        DepthFile.write(reinterpret_cast<const char*>(Image.GetData()), sizeof(float) * Size);
-        DepthFile.close();
-        if(DepthFile.fail())
-          {
-            if(m_Verbose)
-              {
-                UE_LOG(LogTemp, Error, TEXT("Failed to write %s"), *Filename);
-              }
-            return false;
-          }
+       return false;
     }
-
     return true;
 }
 
@@ -478,10 +460,10 @@ bool FScreenshot::SaveMasks(const FString& Directory, TMap<FString, uint8>& OutA
 bool FScreenshot::WritePng(const TArray<FColor>& Bitmap, const FString& Filename)
 {
     // Convert the raw pixels Bitmap to a PNG compressed array
-    FImageUtils::CompressImageArray(m_Size.X, m_Size.Y, Bitmap, m_CompressedWriteBuffer);
+    FImageUtils::CompressImageArray(m_Size.X, m_Size.Y, Bitmap, m_PngBuffer);
 
     // Write the PNG array to disk
-    bool bDone = FFileHelper::SaveArrayToFile(m_CompressedWriteBuffer, *Filename);
+    bool bDone = FFileHelper::SaveArrayToFile(m_PngBuffer, *Filename);
 
     if (not bDone)
     {
@@ -489,6 +471,45 @@ bool FScreenshot::WritePng(const TArray<FColor>& Bitmap, const FString& Filename
     }
 
     return bDone;
+}
+
+
+bool FScreenshot::WriteBinary(const TArray<float>& Bitmap, const FString& Filename)
+{
+   // compress the data, get back the compressed size. Compression level from 0
+   // (no compression) to 9 (highest compression rate), default is 6.
+   unsigned long CompressedSize = m_BinaryBuffer.Num();
+   int CompressionLevel = 9;
+   int ret = compress2(
+      (Bytef*)m_BinaryBuffer.GetData(), &CompressedSize,
+      (Bytef*)Bitmap.GetData(), Bitmap.Num() * Bitmap.GetTypeSize(),
+      CompressionLevel);
+   if(ret != Z_OK)
+   {
+      UE_LOG(LogTemp, Error, TEXT("Failed to compress %s"), *Filename);
+      return false;
+   }
+
+   // save it as a binary file (will be read as a std::vector<float> by the
+   // postprocessor and then normalized and converted to a PNG file).
+   std::ofstream DepthFile(
+      std::string(TCHAR_TO_UTF8(*Filename)), std::ios::out | std::ofstream::binary);
+
+   // write the total size of the uncompressed data (in number of floats) as a header
+   const std::size_t Size = static_cast<std::size_t>(Bitmap.Num());
+   DepthFile.write(reinterpret_cast<const char*>(&Size), sizeof(std::size_t));
+
+   // write the compressed data
+   DepthFile.write(reinterpret_cast<const char*>(m_BinaryBuffer.GetData()), CompressedSize);
+   DepthFile.close();
+
+   if(DepthFile.fail())
+   {
+      UE_LOG(LogTemp, Error, TEXT("Failed to write %s"), *Filename);
+      return false;
+   }
+
+   return true;
 }
 
 

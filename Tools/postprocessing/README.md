@@ -19,6 +19,7 @@ make the following changes:
 First install the dependencies. On Debian/Ubuntu:
 
     sudo apt install \
+        libboost-iostreams-dev \
         libboost-filesystem-dev \
         libboost-program-options-dev \
         rapidjson-dev \

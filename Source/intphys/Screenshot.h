@@ -8,80 +8,86 @@
 class FScreenshot
 {
 public:
-    FScreenshot(const FIntVector& Size, AActor* OriginActor, bool Verbose = false);
+   FScreenshot(const FIntVector& Size, AActor* OriginActor, bool Verbose = false);
 
-    ~FScreenshot();
+   ~FScreenshot();
 
-    void SetOriginActor(AActor* Actor);
+   void SetOriginActor(AActor* Actor);
 
-    void SetActors(TArray<AActor*>& Actors);
+   void SetActors(TArray<AActor*>& Actors);
 
-    bool Capture(const TArray<AActor*>& IgnoredActors);
+   bool Capture(const TArray<AActor*>& IgnoredActors);
 
-    bool Save(const FString& Directory, float& OutMaxDepth, TMap<FString, uint8>& OutActorsMap);
+   bool Save(const FString& Directory, float& OutMaxDepth, TMap<FString, uint8>& OutActorsMap);
 
-    void Reset(bool delete_actors);
+   void Reset(bool delete_actors);
 
-    bool IsActorInFrame(const AActor* Actor, const uint FrameIndex);
+   bool IsActorInFrame(const AActor* Actor, const uint FrameIndex);
 
-    bool IsActorInLastFrame(const AActor* Actor, const TArray<AActor*>& IgnoredActors);
+   bool IsActorInLastFrame(const AActor* Actor, const TArray<AActor*>& IgnoredActors);
 
 private:
-    // Types of the captured images (they are all saved after a
-    // conversion to TArray<uint8>)
-    typedef TArray<FColor> FImageScene;
-    typedef TArray<float> FImageDepth;
-    typedef TArray<uint8> FImageMasks;
+   // Types of the captured images (they are all saved after a
+   // conversion to TArray<uint8>)
+   typedef TArray<FColor> FImageScene;
+   typedef TArray<float> FImageDepth;
+   typedef TArray<uint8> FImageMasks;
 
-    // A triplet (width, height, nimages) of captured images
-    FIntVector m_Size;
+   // A triplet (width, height, nimages) of captured images
+   FIntVector m_Size;
 
-    // The actor giving the point of view for capture
-    AActor* m_OriginActor;
+   // The actor giving the point of view for capture
+   AActor* m_OriginActor;
 
-    // Output some log messages when true
-    bool m_Verbose;
+   // Output some log messages when true
+   bool m_Verbose;
 
-    // Index of the current image (next to be captured)
-    uint m_ImageIndex;
+   // Index of the current image (next to be captured)
+   uint m_ImageIndex;
 
-    // World and scene view for depth and mask capture
-    UWorld* m_World;
-    FSceneView* m_SceneView;
+   // World and scene view for depth and mask capture
+   UWorld* m_World;
+   FSceneView* m_SceneView;
 
-    // Buffers used to store the captured images
-    TArray<FImageScene> m_Scene;
-    TArray<FImageDepth> m_Depth;
-    TArray<FImageMasks> m_Masks;
-    TArray<TMap<uint8, uint64>> m_Masks2;
+   // Buffers used to store the captured images
+   TArray<FImageScene> m_Scene;
+   FImageDepth m_Depth;
+   TArray<FImageMasks> m_Masks;
+   TArray<TMap<uint8, uint64>> m_Masks2;
 
-    // Buffers used in WritePng
-    TArray<FColor> m_WriteBuffer;
-    TArray<uint8> m_CompressedWriteBuffer;
+   // Buffers used in WritePng
+   TArray<FColor> m_WriteBuffer;
+   TArray<uint8> m_PngBuffer;
 
-    // Map the actors names to int ids
-    TSet<FString> m_ActorsSet;
-    TMap<FString, uint8> m_ActorsMap;
+   // For use in WriteBinary
+   TArray<uint8> m_BinaryBuffer;
 
-    // Take a screenshot of the scene and push it in memory
-    bool CaptureScene();
+   // Map the actors names to int ids
+   TSet<FString> m_ActorsSet;
+   TMap<FString, uint8> m_ActorsMap;
 
-    // Take the scene's depth field and object masking, push them to memory
-    bool CaptureDepthAndMasks(const TArray<AActor*>& IgnoredActors);
+   // Take a screenshot of the scene and push it in memory
+   bool CaptureScene();
 
-    // Save all the scene images to disk
-    bool SaveScene(const FString& Directory);
+   // Take the scene's depth field and object masking, push them to memory
+   bool CaptureDepthAndMasks(const TArray<AActor*>& IgnoredActors);
 
-    // Save all the depth images to disk
-    bool SaveDepth(const FString& Directory, float& OutMaxDepth);
+   // Save all the scene images to disk
+   bool SaveScene(const FString& Directory);
 
-    // Save all the masks images to disk
-    bool SaveMasks(const FString& Directory, TMap<FString, uint8>& OutMasksMap);
+   // Save all the depth images to disk
+   bool SaveDepth(const FString& Directory, float& OutMaxDepth);
 
-    // Write an image as a PNG file in RGBA format. The alpha channel
-    // of the image is forced to 255.
-    bool WritePng(const TArray<FColor>& Bitmap, const FString& Filename);
+   // Save all the masks images to disk
+   bool SaveMasks(const FString& Directory, TMap<FString, uint8>& OutMasksMap);
 
-    // Prefix the PNG filenames with zeros : 13 -> "0013"
-    FString ZeroPadding(uint Index) const;
+   // Write an image as a PNG file in RGBA format. The alpha channel
+   // of the image is forced to 255.
+   bool WritePng(const TArray<FColor>& Bitmap, const FString& Filename);
+
+   // Write a depth field as a compressed binary file. Compression with zlib.
+   bool WriteBinary(const TArray<float>& Bitmap, const FString& Filename);
+
+   // Prefix the PNG filenames with zeros : 13 -> "0013"
+   FString ZeroPadding(uint Index) const;
 };

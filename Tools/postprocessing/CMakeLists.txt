@@ -5,7 +5,7 @@ set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Boost 1.40 COMPONENTS program_options filesystem REQUIRED)
+find_package(Boost 1.40 COMPONENTS program_options filesystem iostreams REQUIRED)
 find_package(PNG REQUIRED)
 find_package(Threads REQUIRED)
 

@@ -98,6 +98,17 @@ this have not been tested.
         ./GenerateProjectFiles.sh
         make
 
+* **Install dependencies** required for intphys dataset generation and
+  postprocessing:
+
+        sudo apt-get install \
+            cmake \
+            libboost-iostreams-dev \
+            libboost-filesystem-dev \
+            libboost-program-options-dev \
+            libpng++-dev \
+            rapidjson-dev
+
 
 * **Install intphys** in a separate directory. Clone the repository and
   its UnrealEnginePython submodule from github:
@@ -166,7 +177,7 @@ program in `./Tools/postprocessing`, see README there for more information.
 
 ## Additional utils
 
-In the `Tools` directory are stored few utility scripts, see REAMDE there for
+In the `Tools` directory are stored few utility scripts, see README there for
 more information.
 
 

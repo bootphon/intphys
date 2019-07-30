@@ -13,10 +13,13 @@ datasets generation. Here is a brief description of its content:
   parallel and is usefull to speedup dataset generation on a multicore machine.
 
 * `postprocessing` contains a C++ program to postprocess a dataset after a call
-  to `inphys.py` or `intphys_parallel.sh`, see REAMDE there for more
+  to `intphys.py` or `intphys_parallel.sh`, see README there for more
   information.
 
 * `images2video.sh` generates a gif or a avi file from png images.
 
-* `make_archives.py` build the `.tar.gz` archives as published on
+* `make_archives.py` builds the `.tar.gz` archives as published on
   www.intphys.com/download.
+
+* `dataset_pipeline.sh` is a complete pipeline to generate, postprocess and archive
+  an intphys dataset.

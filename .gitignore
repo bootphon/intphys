@@ -38,8 +38,6 @@
 *.pri
 
 .kdev4
-CMakeLists.txt
-Makefile
 intphys.kdev4
 intphys.pro
 intphys.workspace
@@ -75,7 +73,4 @@ Exemples/html
 *.swo
 
 # postprocessing building files
-Tools/postprocessing/CMakeCache.txt
-Tools/postprocessing/CMakeFiles
-Tools/postprocessing/cmake_install.cmake
-Tools/postprocessing/postprocess
+Tools/postprocessing/build

@@ -4,11 +4,10 @@ import argparse
 import copy
 import json
 import os
-import sys
 
 
-def balance_int(l, n):
-    """Return a list L such as sum(L) == l and len(L) == n
+def balance_int(m, n):
+    """Return a list L such as sum(L) == m and len(L) == n
 
     L is sorted in reverse order.
 
@@ -24,15 +23,15 @@ def balance_int(l, n):
 
 
     """
-    if l == n:
+    if m == n:
         L = [1] * n
-    if l < n:
-        L = [1] * l + [0] * (n-l)
+    if m < n:
+        L = [1] * m + [0] * (n - m)
     else:
-        L = [int(l / n) for _ in range(n-1)]
-        L = [l - sum(L)] + L
+        L = [int(m / n) for _ in range(n-1)]
+        L = [m - sum(L)] + L
 
-    assert sum(L) == l
+    assert sum(L) == m
     assert len(L) == n
     assert sorted(L, reverse=True) == L
     return L
@@ -145,7 +144,7 @@ def main():
     D = json.load(open(args.json_file, 'r'))
     for i, E in enumerate(split_dict(D, args.n), start=1):
         output_json = os.path.join(args.output_dir, '{}.json'.format(i))
-        open(output_json, 'w').write(json.dumps(E) + '\n')
+        open(output_json, 'w').write(json.dumps(E, indent=4) + '\n')
 
 
 if __name__ == '__main__':

@@ -5,7 +5,11 @@ import math
 import colorsys
 from scene import Scene
 from unreal_engine import FVector, FRotator, FLinearColor
-from actors.parameters import LightParams, CameraParams, ObjectParams, OccluderParams, WallsParams
+from actors.parameters import LightParams
+from actors.parameters import CameraParams
+from actors.parameters import ObjectParams
+from actors.parameters import OccluderParams
+from actors.parameters import WallsParams
 from tools.materials import get_random_material
 from actors.object import Object
 
@@ -26,8 +30,10 @@ class Train(Scene):
         super().generate_parameters()
 
         self.params['Camera'] = CameraParams(
-                location=FVector(0, 0, random.uniform(175, 225)),
-                rotation=FRotator(0, random.uniform(-10, 10), random.uniform(-10, 10)))
+                location=FVector(
+                    0, 0, random.uniform(175, 225)),
+                rotation=FRotator(
+                    0, random.uniform(-10, 10), random.uniform(-10, 10)))
 
         self.params['Light_1'] = LightParams(
                 type='SkyLight',
@@ -60,7 +66,8 @@ class Train(Scene):
             nobjects = 3
             nobjects_r = random.randint(0, 2)
             self.generate_random_objects(nobjects_r, unsafe_zones)
-            self.objects_above_walls_scenario(nobjects - nobjects_r, nobjects_r, unsafe_zones)
+            self.objects_above_walls_scenario(
+                nobjects - nobjects_r, nobjects_r, unsafe_zones)
 
         for n in range(noccluders):
             previous_size = len(unsafe_zones)
@@ -75,7 +82,8 @@ class Train(Scene):
                 elif (moves[-1]+10) < 200:
                     moves.append(random.randint(moves[-1]+10, 200))
             self.params['occluder_{}'.format(n + 1)] = OccluderParams(
-                material=get_random_material('Wall', self.params['Floor'].material),
+                material=get_random_material(
+                    'Wall', self.params['Floor'].material),
                 location=position[0],
                 rotation=position[1],
                 scale=position[2],
@@ -140,13 +148,18 @@ class Train(Scene):
                     random.uniform(-200, 200),
                     0
                 )
-                dir_force = [collision_point.x - position[0].x,
-                             collision_point.y - position[0].y,
-                             random.randint(2, 4)]
-                intensity = [random.uniform(1.5, 1.8), random.uniform(1.5, 1.8), random.uniform(3, 4)]
-                force = FVector(dir_force[0] * math.pow(10, intensity[0]),
-                                dir_force[1] * math.pow(10, intensity[1]),
-                                dir_force[2] * math.pow(10, intensity[2]))
+                dir_force = [
+                    collision_point.x - position[0].x,
+                    collision_point.y - position[0].y,
+                    random.randint(2, 4)]
+                intensity = [
+                    random.uniform(1.5, 1.8),
+                    random.uniform(1.5, 1.8),
+                    random.uniform(3, 4)]
+                force = FVector(
+                    dir_force[0] * math.pow(10, intensity[0]),
+                    dir_force[1] * math.pow(10, intensity[1]),
+                    dir_force[2] * math.pow(10, intensity[2]))
             # if random_force == 2, the force is null
             else:
                 force = FVector(0, 0, 0)
@@ -180,13 +193,18 @@ class Train(Scene):
             position = self.find_position("obj", unsafe_zones)
             if len(unsafe_zones) == previous_size:
                 continue
-            dir_force = [collision_point.x - position[0].x,
-                         collision_point.y - position[0].y,
-                         random.randint(2, 4)]
-            intensity = [random.uniform(1.5, 1.8), random.uniform(1.5, 1.8), random.uniform(3, 4)]
-            force = FVector(dir_force[0] * math.pow(10, intensity[0]),
-                            dir_force[1] * math.pow(10, intensity[1]),
-                            dir_force[2] * math.pow(10, intensity[2]))
+            dir_force = [
+                collision_point.x - position[0].x,
+                collision_point.y - position[0].y,
+                random.randint(2, 4)]
+            intensity = [
+                random.uniform(1.5, 1.8),
+                random.uniform(1.5, 1.8),
+                random.uniform(3, 4)]
+            force = FVector(
+                dir_force[0] * math.pow(10, intensity[0]),
+                dir_force[1] * math.pow(10, intensity[1]),
+                dir_force[2] * math.pow(10, intensity[2]))
 
             mesh = random.choice([m for m in Object.shape.keys()] + ['Sphere'])
             self.params['object_{}'.format(n + 1)] = ObjectParams(
@@ -217,13 +235,18 @@ class Train(Scene):
             position = self.find_position("obj", unsafe_zones)
             if len(unsafe_zones) == previous_size:
                 continue
-            dir_force = [collision_point.x - position[0].x,
-                         collision_point.y - position[0].y,
-                         random.randint(3, 4)]
-            intensity = [random.uniform(1.5, 1.8), random.uniform(1.5, 1.8), random.uniform(3.7, 4)]
-            force = FVector(dir_force[0] * math.pow(10, intensity[0]),
-                            dir_force[1] * math.pow(10, intensity[1]),
-                            dir_force[2] * math.pow(10, intensity[2]))
+            dir_force = [
+                collision_point.x - position[0].x,
+                collision_point.y - position[0].y,
+                random.randint(3, 4)]
+            intensity = [
+                random.uniform(1.5, 1.8),
+                random.uniform(1.5, 1.8),
+                random.uniform(3.7, 4)]
+            force = FVector(
+                dir_force[0] * math.pow(10, intensity[0]),
+                dir_force[1] * math.pow(10, intensity[1]),
+                dir_force[2] * math.pow(10, intensity[2]))
 
             mesh = random.choice([m for m in Object.shape.keys()] + ['Sphere'])
             self.params['object_{}'.format(nprevious + 1)] = ObjectParams(
@@ -237,7 +260,6 @@ class Train(Scene):
                 warning=True,
                 overlap=False)
 
-
     def create_new_zone(self, location, scale, rotation, type_actor):
         """
         Create a new zone
@@ -245,33 +267,52 @@ class Train(Scene):
         #  creation of a new zone
         #  new_zone is an array of 4 3D points, the vertices
         #  of unsafe square
-        zone = [FVector(location.x - 50 * scale.x, location.y - 50 * scale.y, location.z),
-                FVector(location.x + 50 * scale.x, location.y - 50 * scale.y, location.z),
-                FVector(location.x + 50 * scale.x, location.y + 50 * scale.y, location.z),
-                FVector(location.x - 50 * scale.x, location.y + 50 * scale.y, location.z)]
+        zone = [
+            FVector(location.x - 50 * scale.x,
+                    location.y - 50 * scale.y,
+                    location.z),
+            FVector(location.x + 50 * scale.x,
+                    location.y - 50 * scale.y,
+                    location.z),
+            FVector(location.x + 50 * scale.x,
+                    location.y + 50 * scale.y,
+                    location.z),
+            FVector(location.x - 50 * scale.x,
+                    location.y + 50 * scale.y,
+                    location.z)]
         if type_actor == 'occ':
-            zone[2] = FVector(location.x + 50 * scale.x + 10, location.y + 50 * scale.y + 100 * scale.z + 10, location.z)
-            zone[3] = FVector(location.x - 50 * scale.x + 10, location.y + 50 * scale.y + 100 * scale.z + 10, location.z)
+            zone[2] = FVector(
+                location.x + 50 * scale.x + 10,
+                location.y + 50 * scale.y + 100 * scale.z + 10,
+                location.z)
+            zone[3] = FVector(
+                location.x - 50 * scale.x + 10,
+                location.y + 50 * scale.y + 100 * scale.z + 10,
+                location.z)
 
         for point in zone:
             x, y = point.x-location.x, point.y-location.y
-            point.x = x*math.cos(rotation.yaw*math.pi/180) - y*math.sin(rotation.yaw*math.pi/180)
-            point.y = x*math.sin(rotation.yaw*math.pi/180) + y*math.cos(rotation.yaw*math.pi/180)
+            point.x = (x * math.cos(rotation.yaw*math.pi/180)
+                       - y * math.sin(rotation.yaw*math.pi/180))
+            point.y = (x * math.sin(rotation.yaw*math.pi/180)
+                       + y * math.cos(rotation.yaw*math.pi/180))
             point.x += location.x
             point.y += location.y
         return zone
 
     def find_position(self, type_actor, unsafe_zones):
-        """
-        Find a safe position and return it as a tuple (location, rotation, scale)
-        type is "occ" if the actor is an occluder and "obj" if it's an object
+        """Find a safe position and return it as a tuple
+        (location, rotation, scale) type is "occ" if the actor is an occluder
+        and "obj" if it's an object
+
         """
         location = FVector()
         rotation = FVector()
         scale = FVector()
         for try_index in range(100):
             if type_actor == "occ":
-                scale = FVector(random.uniform(0.5, 1.5), 1, random.uniform(0.5, 1.5))
+                scale = FVector(
+                    random.uniform(0.5, 1.5), 1, random.uniform(0.5, 1.5))
             else:
                 # scale of an object in [1, 2]
                 s = random.uniform(1, 2)
@@ -281,7 +322,8 @@ class Train(Scene):
                         random.uniform(-500, 500),
                         0)
             rotation = FRotator(0, 0, random.uniform(-180, 180))
-            new_zone = self.create_new_zone(location, scale, rotation, type_actor)
+            new_zone = self.create_new_zone(
+                location, scale, rotation, type_actor)
             if self.check_spawning_location(new_zone, unsafe_zones):
                 unsafe_zones.append(new_zone)
                 break
@@ -293,13 +335,14 @@ class Train(Scene):
         #
         #  all_locations is an array of array same shape of new_object_location
         #
-        #  https://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other
+        #  https://stackoverflow.com/questions/306316
         #
-        #  new_top, new_bottom, new_right, new_left are the extremum of new_object_location
-        #  top and bottom are following the x axis
-        #  right and left follow the y axis
+        #  new_top, new_bottom, new_right, new_left are the extremum of
+        #  new_object_location top and bottom are following the x axis right
+        #  and left follow the y axis
         #
-        #  top, bottom, right, left are the same for each location of all_locations
+        #  top, bottom, right, left are the same for each location of
+        #  all_locations
 
         new_top = max([point.x for point in new_object_location])
         new_bottom = min([point.x for point in new_object_location])
@@ -315,14 +358,15 @@ class Train(Scene):
                 return False  # it intersect
         return True  # it doesn't intersect
 
-    def make_color(self, min_value = 0.5, max_value = 1.0):
-        h, s, v = random.uniform(0.05, 0.18), 0.3, random.uniform(min_value, max_value)
+    def make_color(self, min_value=0.5, max_value=1.0):
+        h, s, v = random.uniform(
+            0.05, 0.18), 0.3, random.uniform(min_value, max_value)
         r, g, b = colorsys.hsv_to_rgb(h, s, v)
         return FLinearColor(r, g, b, 1.0)
 
     def stop_run(self, scene_index, total):
         super().stop_run()
-        "print stop run"
+
         if not self.saver.is_dry_mode:
             self.saver.save(self.get_scene_subdir(scene_index, total))
             # reset actors if it is the last run
@@ -333,7 +377,7 @@ class Train(Scene):
     def play_run(self):
         if self.run == 1:
             return
-        # ue.log("Run 1/1: Possible run")
+
         super().play_run()
         for name, actor in self.actors.items():
             if 'object' in name.lower():

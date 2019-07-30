@@ -50,7 +50,7 @@ class AxisCylinderParams:
     down: bool = False
     moves: list = field(default_factory=list)
     obj_shape: str = random.choice(['Cube', 'Cylinder'])
-	# obj_shape: str = 'Cube'
+    # obj_shape: str = 'Cube'
 
 
 @dataclass
@@ -112,4 +112,4 @@ class OccluderParams:
 @dataclass
 class SkysphereParams:
     material: str = '/Game/Meshes/SkySphere/M_Sky_Panning_Clouds2'
-    rotation:FVector = FVector(0, 0, 0)
+    rotation: FVector = FVector(0, 0, 0)

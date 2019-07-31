@@ -44,3 +44,15 @@ class Pill(Object):
         self.mass = params.mass
         self.force = params.force
         self.initial_force = params.initial_force
+        self.y = self.location.y
+
+    def move(self):
+        # The y component is forced to stay the same
+        # The pitch component is forced to stay -90 for Capsule
+        new_location = self.actor.get_actor_location()
+        new_location.y = self.y
+        self.set_location(new_location)
+        if self.mesh_str == '/Game/Meshes/Capsule.Capsule':
+            new_rotation = self.actor.get_actor_rotation()
+            new_rotation.pitch = -90
+            self.set_rotation(new_rotation)

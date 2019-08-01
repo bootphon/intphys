@@ -211,7 +211,8 @@ def ParseArgs():
 
 
 def _Run(command, log, scenes_file, output_dir, cwd=None, seed=None,
-         pause_duration=50, resolution=DEFAULT_RESOLUTION, debug=False):
+         pause_duration=50, resolution=DEFAULT_RESOLUTION, headless=False,
+         debug=False):
     """Run `command` as a subprocess
 
     The `command` stdout and stderr are forwarded to `log`. The
@@ -234,6 +235,9 @@ def _Run(command, log, scenes_file, output_dir, cwd=None, seed=None,
     environ['INTPHYS_SCENES'] = os.path.abspath(scenes_file)
     environ['INTPHYS_RESOLUTION'] = resolution
     environ['INTPHYS_PAUSEDURATION'] = str(pause_duration)
+
+    if headless is True:
+        del environ['DISPLAY']
 
     if output_dir:
         # get the output directory as absolute path
@@ -303,12 +307,11 @@ def RunBinary(output_dir, scenes_file, seed=None,
     cwd = os.path.join(INTPHYS_ROOT, 'Package/LinuxNoEditor')
 
     res = resolution.split('x')
-    _Run(intphys_binary + ' {} -windowed ResX={} ResY={}'.format(
-        '-NullRHI' if headless else '', res[0], res[1]),
+    _Run(intphys_binary + ' -windowed ResX={} ResY={}'.format(res[0], res[1]),
          GetLogger(verbose=verbose),
          scenes_file, output_dir, seed=seed,
          pause_duration=pause_duration,
-         resolution=resolution, cwd=cwd, debug=debug)
+         resolution=resolution, cwd=cwd, headless=headless, debug=debug)
 
 
 def RunEditor(output_dir, scenes_file, seed=None,

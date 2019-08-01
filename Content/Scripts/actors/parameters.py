@@ -1,9 +1,27 @@
+import math
+import random
+
 from dataclasses import dataclass
 from dataclasses import field
 from unreal_engine import FVector, FRotator, FLinearColor
 from unreal_engine.enums import ECameraProjectionMode
 from tools.materials import get_random_material
-import random
+
+
+def theoretical_max_depth():
+    """Return the maximal depth that can be observed in a dataset
+
+    the theorical depth is obtained by looking the corner of the floor at
+    (2000, 4000, 0) from the camera at (0, 0, 225)
+
+    """
+    # the floor mesh is 400x400x20. The camera is located at the center of the
+    # floor
+    floor = FloorParams()
+    a = 400 * floor.scale.y / 2
+    b = 400 * floor.scale.x / 2
+    c = 225  # 225 is the maximum height of the camera (from train.py)
+    return math.sqrt(a**2 + b**2 + c**2)
 
 
 @dataclass

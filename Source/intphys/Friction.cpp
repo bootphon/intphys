@@ -2,15 +2,11 @@
 
 #include "Friction.h"
 #include "Runtime/Engine/Classes/PhysicalMaterials/PhysicalMaterial.h"
-#include "Runtime/Core/Public/GenericPlatform/GenericPlatformMisc.h"
+#include "Runtime/Launch/Resources/Version.h"
 #if ENGINE_MINOR_VERSION >= 21
 #include "Runtime/Engine/Public/Physics/PhysicsInterfacePhysX.h"
 #endif
 
-void UFriction::ExitEngine(bool force)
-{
-    FGenericPlatformMisc::RequestExit(force);
-}
 
 bool UpdatePhysicalMaterial(UPhysicalMaterial* PhysicalMaterial)
 {
@@ -18,7 +14,7 @@ bool UpdatePhysicalMaterial(UPhysicalMaterial* PhysicalMaterial)
     PhysicalMaterial->UpdatePhysXMaterial();
     return true;
 #else
-    // Interface changed after UE-4.20. This compile but have not been tested
+    // Interface changed after UE-4.20. This compile but has not been tested
     FPhysicsMaterialHandle PhysicalHandle = PhysicalMaterial->GetPhysicsMaterial();
     FPhysicsInterface_PhysX::UpdateMaterial(PhysicalHandle, PhysicalMaterial);
     return true;

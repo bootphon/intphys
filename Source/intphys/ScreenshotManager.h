@@ -26,6 +26,7 @@ public:
     UFUNCTION(BlueprintCallable, Category="IntPhys")
     static bool Initialize(
         int Width, int Height, int NImages,
+        float MaxDepth,
         AActor* OriginActor,
         bool Verbose = false);
 
@@ -33,7 +34,7 @@ public:
     static bool Capture(const TArray<AActor*>& IgnoredActors);
 
     UFUNCTION(BlueprintCallable, Category="IntPhys")
-    static bool Save(const FString& Directory, float& OutMaxDepth, TMap<FString, uint8>& OutActorsMap);
+    static bool Save(const FString& Directory, TArray<FString>& OutActorsMasks);
 
     UFUNCTION(BlueprintCallable, Category="IntPhys")
     static void Reset(bool delete_actors);

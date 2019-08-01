@@ -8,11 +8,12 @@ TSharedPtr<FScreenshot> UScreenshotManager::Screenshot = nullptr;
 
 bool UScreenshotManager::Initialize(
     int Width, int Height, int NImages,
+    float MaxDepth,
     AActor* OriginActor,
     bool Verbose)
 {
     FIntVector Size(Width, Height, NImages);
-    Screenshot = TSharedPtr<FScreenshot>(new FScreenshot(Size, OriginActor, Verbose));
+    Screenshot = TSharedPtr<FScreenshot>(new FScreenshot(Size, MaxDepth, OriginActor, Verbose));
 
     return true;
 }
@@ -23,9 +24,9 @@ bool UScreenshotManager::Capture(const TArray<AActor*>& IgnoredActors)
     return Screenshot->Capture(IgnoredActors);
 }
 
-bool UScreenshotManager::Save(const FString& Directory, float& OutMaxDepth, TMap<FString, uint8>& OutActorsMap)
+bool UScreenshotManager::Save(const FString& Directory, TArray<FString>& OutActorsMasks)
 {
-    return Screenshot->Save(Directory, OutMaxDepth, OutActorsMap);
+    return Screenshot->Save(Directory, OutActorsMasks);
 }
 
 

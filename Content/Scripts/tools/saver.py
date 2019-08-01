@@ -3,6 +3,7 @@ import os
 
 import unreal_engine as ue
 from unreal_engine.classes import ScreenshotManager
+import actors.parameters
 
 
 class Saver:
@@ -38,11 +39,13 @@ class Saver:
         self.status_header = {}
         self.status = []
 
+        self.max_depth = actors.parameters.theoretical_max_depth()
+
         # initialize the capture.
         verbose = False
         ScreenshotManager.Initialize(
             int(self.size[0]), int(self.size[1]), int(self.size[2]),
-            None, verbose)
+            self.max_depth, None, verbose)
 
     def set_status_header(self, header):
         self.status_header = header
@@ -69,7 +72,7 @@ class Saver:
             return True
 
         # save the captured images as PNG
-        done, max_depth, masks = ScreenshotManager.Save(output_dir)
+        done, masks = ScreenshotManager.Save(output_dir)
         if not done:
             ue.log_warning('failed to save images to {}'.format(output_dir))
             return False
@@ -95,7 +98,8 @@ class Saver:
         masks = {names_map[k]: v for k, v in masks.items()}
 
         # save images max depth and actors's masks to status
-        self.status_header.update({'max_depth': max_depth, 'masks': masks})
+        self.status_header.update(
+            {'max_depth': self.max_depth, 'masks': masks})
         status = {'header': self.status_header, 'frames': self.status}
 
         # save the status as JSON file

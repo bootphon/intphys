@@ -12,10 +12,6 @@ datasets generation. Here is a brief description of its content:
 * `parallel/intphys_parallel.sh` runs multiple instances of `intphys.py` in
   parallel and is usefull to speedup dataset generation on a multicore machine.
 
-* `postprocessing` contains a C++ program to postprocess a dataset after a call
-  to `intphys.py` or `intphys_parallel.sh`, see README there for more
-  information.
-
 * `images2video.sh` generates a gif or a avi file from png images.
 
 * `make_archives.py` builds the `.tar.gz` archives as published on

@@ -73,7 +73,7 @@ njsons=$(( $(ls -l $tmpdir | wc -l) - 1 ))
 export intphys output_dir resolution tmpdir
 run_intphys()
 {
-    $intphys -o $output_dir/parallel/$1 -r $resolution $tmpdir/$1.json
+    $intphys --headless -o $output_dir/parallel/$1 -r $resolution $tmpdir/$1.json
 }
 export -f run_intphys
 

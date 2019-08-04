@@ -10,21 +10,22 @@ from tools.saver import Saver
 
 class Director(object):
     def __init__(self, world, params_file, size, output_dir,
-                 tick_interval=2, pause_duration=30):
+                 seed, tick_interval=2, pause_duration=30):
         self.world = world
         self.scenes = []
-        self.scene = {'total': 0,
-                      'train': 0,
-                      'test': 0,
-                      'dev': 0}
+        self.scene = {
+            'total': 0,
+            'train': 0,
+            'test': 0,
+            'dev': 0}
+
         self.saver = Saver(
-                size=size,
-                dry_mode=True if output_dir is None else False,
-                output_dir=output_dir)
+            size, seed,
+            dry_mode=True if output_dir is None else False,
+            output_dir=output_dir)
 
         try:
-            self.scenarios_dict = json.loads(open(params_file, 'r').read())
-            self.generate_scenes()
+            self.generate_scenes(json.loads(open(params_file, 'r').read()))
         except ValueError as e:
             print(e)
         except BufferError as e:
@@ -42,8 +43,8 @@ class Director(object):
         tools.materials.load()
         self.restarted = 0
 
-    def generate_scenes(self):
-        for Set, d in self.scenarios_dict.items():
+    def generate_scenes(self, json_data):
+        for Set, d in json_data.items():
             if 'train' in Set:
                 module = importlib.import_module("train")
                 train_class = getattr(module, "Train")

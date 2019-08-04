@@ -3,15 +3,17 @@
 import random
 import math
 import colorsys
-from scene import Scene
+
 from unreal_engine import FVector, FRotator, FLinearColor
+from scene import Scene
+from actors.object import Object
 from actors.parameters import LightParams
 from actors.parameters import CameraParams
 from actors.parameters import ObjectParams
 from actors.parameters import OccluderParams
 from actors.parameters import WallsParams
+from actors.parameters import camera_location
 from tools.materials import get_random_material
-from actors.object import Object
 
 
 class Train(Scene):
@@ -30,8 +32,7 @@ class Train(Scene):
         super().generate_parameters()
 
         self.params['Camera'] = CameraParams(
-                location=FVector(
-                    0, 0, random.uniform(175, 225)),
+                location=camera_location(type='train'),
                 rotation=FRotator(
                     0, random.uniform(-10, 10), random.uniform(-10, 10)))
 
@@ -390,8 +391,7 @@ class Train(Scene):
         return False
 
     def capture(self):
-        ignored_actors = []
-        self.saver.capture(ignored_actors, self.get_status())
+        self.saver.capture(ignored_actors=[], status=self.get_status())
 
     def is_over(self):
         return True if self.run == 1 else False

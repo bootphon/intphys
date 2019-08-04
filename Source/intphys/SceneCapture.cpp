@@ -25,12 +25,6 @@ void SceneCapture::Reset()
 
 bool SceneCapture::Capture(const uint32& Index)
 {
-   if(Index >= m_Size.Z)
-   {
-      UE_LOG(LogTemp, Error, TEXT("Scene capture failed: too much images captured"));
-      return false;
-   }
-
    bool bDone = false;
    TSharedPtr<SWindow> WindowPtr = GEngine->GameViewport->GetWindow();
    if (WindowPtr.IsValid() && FSlateApplication::IsInitialized())
@@ -48,7 +42,6 @@ bool SceneCapture::Save(const FString& Directory)
 {
    if(not Utils::VerifyOrCreateDirectory(Directory))
    {
-      UE_LOG(LogTemp, Error, TEXT("Cannot create directory %s"), *Directory);
       return false;
    }
 

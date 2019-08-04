@@ -3,9 +3,11 @@
 #include "RayTracer.h"
 
 
-FScreenshot::FScreenshot(const FIntVector& Size, const float& MaxDepth, AActor* OriginActor, bool Verbose)
+FScreenshot::FScreenshot(
+   const FIntVector& Size, AActor* OriginActor,
+   const float& MaxDepth, const int32& RandomSeed, bool Verbose)
    : m_Size(Size), m_OriginActor(OriginActor), m_Verbose(Verbose),
-     m_ImageIndex(0), m_Scene(Size), m_Depth(Size, MaxDepth), m_Masks(Size)
+     m_FrameIndex(0), m_Scene(Size), m_Depth(Size, MaxDepth), m_Masks(Size, RandomSeed)
 {}
 
 
@@ -13,10 +15,10 @@ FScreenshot::~FScreenshot()
 {}
 
 
-void FScreenshot::SetActors(TArray<AActor*>& Actors)
-{
-   m_Masks.SetActors(Actors);
-}
+// void FScreenshot::SetActors(TArray<AActor*>& Actors)
+// {
+//    m_Masks.SetActors(Actors);
+// }
 
 
 void FScreenshot::SetOriginActor(AActor* Actor)
@@ -27,7 +29,7 @@ void FScreenshot::SetOriginActor(AActor* Actor)
 
 void FScreenshot::Reset(bool DeleteActors)
 {
-   m_ImageIndex = 0;
+   m_FrameIndex = 0;
    m_Scene.Reset();
    m_Depth.Reset();
    m_Masks.Reset(DeleteActors);
@@ -36,20 +38,20 @@ void FScreenshot::Reset(bool DeleteActors)
 
 bool FScreenshot::Capture(const TArray<AActor*>& IgnoredActors)
 {
-   if (m_ImageIndex >= m_Size.Z)
+   if (m_FrameIndex >= m_Size.Z)
    {
-      UE_LOG(LogTemp, Error, TEXT("Screen capture failed: too much images captured"));
+      UE_LOG(LogTemp, Error, TEXT("Screen capture failed: too much frames captured"));
       return false;
    }
 
    // update the location/rotation of the origin actor
    m_Depth.CaptureInit(m_OriginActor);
 
-   bool bDone1 = m_Scene.Capture(m_ImageIndex);
+   bool bDone1 = m_Scene.Capture(m_FrameIndex);
    bool bDone2 = this->CaptureDepthAndMasks(IgnoredActors);
 
-   // Update the counter
-   m_ImageIndex++;
+   // Update the frame counter
+   m_FrameIndex++;
 
    return bDone1 and bDone2;
 }
@@ -57,13 +59,12 @@ bool FScreenshot::Capture(const TArray<AActor*>& IgnoredActors)
 
 bool FScreenshot::Save(const FString& Directory, TArray<FString>& OutActorsMasks)
 {
-   // Save the captured images
    bool bScene = m_Scene.Save(FPaths::Combine(Directory, FString("scene")));
    bool bDepth = m_Depth.Save(FPaths::Combine(Directory, FString("depth")));
    bool bMasks = m_Masks.Save(FPaths::Combine(Directory, FString("masks")), OutActorsMasks);
 
    bool bDone = bScene and bDepth and bMasks;
-   if (not bDone)
+   if(not bDone)
    {
       UE_LOG(LogTemp, Error, TEXT("Failed to save captured images"));
    }
@@ -71,26 +72,26 @@ bool FScreenshot::Save(const FString& Directory, TArray<FString>& OutActorsMasks
 }
 
 
-bool FScreenshot::IsActorInFrame(const AActor* Actor, const uint32& ImageIndex)
+bool FScreenshot::IsActorInFrame(const AActor* Actor, const uint32& FrameIndex)
 {
-   if (ImageIndex >= m_ImageIndex)
+   if(FrameIndex >= m_FrameIndex)
    {
       return false;
    }
 
-   return m_Masks.IsActorInFrame(Actor, ImageIndex);
+   return m_Masks.IsActorInFrame(Actor, FrameIndex);
 }
 
 
-bool FScreenshot::IsActorInLastFrame(const AActor* Target, const TArray<AActor*>& IgnoredActors)
+bool FScreenshot::IsActorVisible(const AActor* Target, const TArray<AActor*>& IgnoredActors)
 {
-   RayTracer Tracer(m_OriginActor, IgnoredActors);
+   RayTracer Tracer(m_OriginActor->GetWorld(), IgnoredActors);
    FHitResult HitResult;
    for(uint32 y = 0; y < m_Size.Y; ++y)
    {
       for(uint32 x = 0; x < m_Size.X; ++x)
       {
-         if(Tracer.Trace(HitResult, x, y))
+         if(Tracer.Trace(HitResult, FVector2D(x, y)))
          {
             if(HitResult.GetActor() == Target)
             {
@@ -106,7 +107,7 @@ bool FScreenshot::IsActorInLastFrame(const AActor* Target, const TArray<AActor*>
 
 bool FScreenshot::CaptureDepthAndMasks(const TArray<AActor*>& IgnoredActors)
 {
-   RayTracer Tracer(m_OriginActor, IgnoredActors);
+   RayTracer Tracer(m_OriginActor->GetWorld(), IgnoredActors);
    FHitResult HitResult;
    bool bHitDetected = false;
 
@@ -114,11 +115,16 @@ bool FScreenshot::CaptureDepthAndMasks(const TArray<AActor*>& IgnoredActors)
    {
       for(uint32 x = 0; x < m_Size.X; ++x)
       {
-         if(Tracer.Trace(HitResult, x, y))
+         if(Tracer.Trace(HitResult, FVector2D(x, y)))
          {
             bHitDetected = true;
-            m_Depth.Capture(HitResult, m_ImageIndex, y * m_Size.X + x);
-            m_Masks.Capture(HitResult, m_ImageIndex, x, y);
+            m_Depth.Capture(HitResult, m_FrameIndex, y * m_Size.X + x);
+            m_Masks.Capture(HitResult, m_FrameIndex, x, y);
+         }
+         else
+         {
+            // no hit => this pixel is the sky
+            m_Masks.CaptureSky(m_FrameIndex, x, y);
          }
       }
    }

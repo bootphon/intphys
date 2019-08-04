@@ -1,13 +1,11 @@
 #include "MasksCapture.h"
 #include "Utils.h"
 
-#include <algorithm>
 
-
-MasksCapture::MasksCapture(const FIntVector& Size)
-   : m_Size(Size)
+MasksCapture::MasksCapture(const FIntVector& Size, const int32& Seed)
+   : m_Size(Size), m_Random(Seed)
 {
-   Reset(false);
+   Reset(true);
 }
 
 
@@ -17,43 +15,19 @@ MasksCapture::~MasksCapture()
 
 void MasksCapture::Reset(bool DeleteActors)
 {
+   // fill the images buffer with 0
    m_Buffer.Init(png::image<png::gray_pixel>(m_Size.X, m_Size.Y), m_Size.Z);
 
-   // delete actors only if it's last run
    if(DeleteActors)
    {
-      m_ActorsSet.Empty();
-   }
-   m_ActorsMap.Empty();
-}
-
-
-void MasksCapture::SetActors(const TArray<AActor*>& Actors)
-{
-   for(AActor* Actor : Actors)
-   {
-      if(Actor->GetName().Contains(FString(TEXT("Wall")))
-         and not m_ActorsSet.Contains(TEXT("Walls")))
-      {
-         m_ActorsSet.Add(FString(TEXT("Walls")));
-      }
-      else if(Actor->GetName().Contains(FString(TEXT("AxisCylinder")))
-              and not m_ActorsSet.Contains(TEXT("AxisCylinders")))
-      {
-         m_ActorsSet.Add(FString(TEXT("AxisCylinders")));
-      }
-      else
-      {
-         m_ActorsSet.Add(Actor->GetName());
-      }
+      m_ActorsMap.Init(TBidirMap<FString, png::gray_pixel>(), m_Size.Z);
    }
 }
 
-bool MasksCapture::Capture(
-   const FHitResult& Hit, const uint32& ImageIndex, const uint32& X, const uint32& Y)
+
+FString MasksCapture::GetActorName(const AActor* Actor)
 {
-   // retrieve the actor name from the hit
-   FString ActorName = Hit.GetActor()->GetName();
+   FString ActorName = Actor->GetName();
    if(ActorName.Contains(FString(TEXT("Wall"))))
    {
       ActorName = FString(TEXT("Walls"));
@@ -62,20 +36,56 @@ bool MasksCapture::Capture(
    {
       ActorName = FString(TEXT("AxisCylinders"));
    }
+   return ActorName;
+}
 
-   // retrieve the actor index from its name
-   int8 ActorIndex = -1;
-   ActorIndex = static_cast<uint8>(m_ActorsSet.Add(ActorName).AsInteger() + 1);
-   if(ActorIndex <= 0)
+
+bool MasksCapture::Capture(
+   const FHitResult& Hit, const uint32& FrameIndex, const uint32& X, const uint32& Y)
+{
+   return CaptureActor(GetActorName(Hit.GetActor()), FrameIndex, X, Y);
+}
+
+
+bool MasksCapture::CaptureSky(const uint32& FrameIndex, const uint32& X, const uint32& Y)
+{
+   return CaptureActor(FString(TEXT("Sky")), FrameIndex, X, Y);
+}
+
+
+bool MasksCapture::CaptureActor(const FString& Actor, const uint32& FrameIndex, const uint32& X, const uint32& Y)
+{
+   // assign a gray level for this actor in that frame
+   TBidirMap<FString, png::gray_pixel>& FrameActorsMap = m_ActorsMap[FrameIndex];
+   png::gray_pixel GrayLevel;
+
+   if(FrameActorsMap.ContainsKey(Actor))
    {
-      UE_LOG(LogTemp, Warning, TEXT("Unknown actor %s"), *ActorName);
+      // the actor already havs an ondexed gray level, just pick it
+      GrayLevel = FrameActorsMap.GetValue(Actor);
+   }
+   else
+   {
+      // the actor is not yet registered for this frame, make sure we have room to
+      // store it and pick a random unique gray level
+      if(m_ActorsMap.Num() >= 256)
+      {
+         UE_LOG(LogTemp, Error, TEXT("Too many actors: %s >= 256"), m_ActorsMap.Num());
+         return false;
+      }
+
+      // TODO very inefficient when the number of actors is large (but for
+      // intphys we have max 10 actors per frame)
+      GrayLevel = m_Random.RandRange(0, 255);
+      while(FrameActorsMap.ContainsValue(GrayLevel))
+      {
+         GrayLevel = m_Random.RandRange(0, 255);
+      }
+      FrameActorsMap.Add(Actor, GrayLevel);
    }
 
-   // update the name -> index mapping
-   m_ActorsMap.Add(ActorName, ActorIndex);
-
-   // capture the actor for the current pixel
-   m_Buffer[ImageIndex][Y][X] = ActorIndex;
+   // finally fill the buffer with the right gray level
+   m_Buffer[FrameIndex][Y][X] = GrayLevel;
 
    return true;
 }
@@ -85,64 +95,36 @@ bool MasksCapture::Save(const FString& Directory, TArray<FString>& OutActorsMask
 {
    if(not Utils::VerifyOrCreateDirectory(Directory))
    {
-      UE_LOG(LogTemp, Error, TEXT("Cannot create dircetory %s"), *Directory);
       return false;
    }
 
    // clear the output masks array
    OutActorsMasks.Empty();
 
-   // // build the (actors name -> gray level) and (actor id -> gray level)
-   // // mappings
-   // OutActorsMasks.Empty(m_ActorsSet.Num() + 1);
-   // OutActorsMasks.Add(FString(TEXT("Sky")), 0);
-   // for(const auto& Elem : m_ActorsMap)
-   // {
-   //    OutActorsMasks.Add(Elem.Key, Elem.Value * 255.0 / m_ActorsSet.Num());
-   // }
-
    for(uint32 z = 0; z < m_Size.Z; ++z)
    {
-      FString Filename = Utils::BuildFilename(Directory, "masks", z, m_Size.Z);
-      png::image<png::gray_pixel>& Image = m_Buffer[z];
-
-      // normalize masks from [0, nactors-1] to [0, 255]
-      for (uint32 j = 0; j < m_Size.Y; ++j)
-      {
-         for (uint32 i = 0; i < m_Size.X; ++i)
-         {
-            Image[j][i] *= (255.0 / m_ActorsSet.Num());
-         }
-      }
-
       // write the PNG image
-      Image.write(TCHAR_TO_UTF8(*Filename));
+      FString Filename = Utils::BuildFilename(Directory, "masks", z, m_Size.Z);
+      m_Buffer[z].write(TCHAR_TO_UTF8(*Filename));
+
+      // append the actors masks for that frame
+      TArray<FString> Masks;
+      for(auto It = m_ActorsMap[z].CreateConstIterator(); It; ++It)
+      {
+         Masks.Add(
+            FString::FromInt(z + 1) + FString(TEXT("__"))
+            + It.Key() + FString(TEXT("__"))
+            + FString::FromInt(It.Value()));
+      }
+      Masks.Sort();
+      OutActorsMasks.Append(Masks);
    }
 
    return true;
 }
 
 
-bool MasksCapture::IsActorInFrame(const AActor* Actor, const uint32& ImageIndex)
+bool MasksCapture::IsActorInFrame(const AActor* Actor, const uint32& FrameIndex) const
 {
-   int8 ActorIndex = -1;
-   ActorIndex = static_cast<uint8>(m_ActorsSet.Add(Actor->GetName()).AsInteger() + 1);
-   if (ActorIndex <= 0)
-   {
-      UE_LOG(LogTemp, Warning, TEXT("Unknown actor %s"), *Actor->GetName());
-      return false;
-   }
-
-   // look for ActorIndex in the masks image
-   for(uint32 i = 0; i < m_Buffer[ImageIndex].get_height(); ++i)
-   {
-      // Row is a std::vector<png::gray_pixel>
-      const auto& Row = m_Buffer[ImageIndex].get_row(i);
-      if(Row.end() != std::find(Row.begin(), Row.end(), ActorIndex))
-      {
-         return true;
-      }
-   }
-
-   return false;
+   return m_ActorsMap[FrameIndex].ContainsKey(GetActorName(Actor));
 }

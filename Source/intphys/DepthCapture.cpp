@@ -60,7 +60,6 @@ bool DepthCapture::Save(const FString& Directory)
 {
    if(not Utils::VerifyOrCreateDirectory(Directory))
    {
-      UE_LOG(LogTemp, Error, TEXT("Cannot create directory %s"), *Directory);
       return false;
    }
 

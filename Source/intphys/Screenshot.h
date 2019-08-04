@@ -3,21 +3,28 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "SceneCapture.h"
 #include "DepthCapture.h"
 #include "MasksCapture.h"
 
 
+/**
+ * This class implements the functions exposed in ScreenshotManager.h, see here
+ * for documentation.
+ */
 class FScreenshot
 {
 public:
-   FScreenshot(const FIntVector& Size, const float& MaxDepth, AActor* OriginActor, bool Verbose = false);
+   FScreenshot(
+      const FIntVector& Size, AActor* OriginActor,
+      const float& MaxDepth, const int32& RandomSeed, bool Verbose = false);
 
    ~FScreenshot();
 
    void SetOriginActor(AActor* Actor);
 
-   void SetActors(TArray<AActor*>& Actors);
+   // void SetActors(TArray<AActor*>& Actors);
 
    bool Capture(const TArray<AActor*>& IgnoredActors);
 
@@ -27,10 +34,10 @@ public:
 
    bool IsActorInFrame(const AActor* Actor, const uint32& ImageIndex);
 
-   bool IsActorInLastFrame(const AActor* Actor, const TArray<AActor*>& IgnoredActors);
+   bool IsActorVisible(const AActor* Actor, const TArray<AActor*>& IgnoredActors);
 
 private:
-   // A triplet (width, height, nimages) of captured images
+   // A triplet (width, height, nframes) of captured images
    FIntVector m_Size;
 
    // The actor giving the point of view for capture
@@ -39,8 +46,8 @@ private:
    // Output log messages when true (when false only output errors)
    bool m_Verbose;
 
-   // Index of the current image (next to be captured)
-   uint m_ImageIndex;
+   // Index of the current frame (next to be captured)
+   uint m_FrameIndex;
 
    // Capture screenshots of the scene, depth field and objects masks
    SceneCapture m_Scene;

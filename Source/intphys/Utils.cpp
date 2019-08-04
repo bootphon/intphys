@@ -33,6 +33,7 @@ bool Utils::VerifyOrCreateDirectory(const FString& Directory)
 
       if (not PlatformFile.DirectoryExists(*Directory))
       {
+         UE_LOG(LogTemp, Error, TEXT("Cannot create directory %s"), *Directory);
          return false;
       }
    }

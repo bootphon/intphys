@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BidirMap.h"
 
 THIRD_PARTY_INCLUDES_START
 #include "ThirdParty/libPNG/libPNG-1.5.27/png.h"
@@ -14,28 +15,44 @@ THIRD_PARTY_INCLUDES_END
 class MasksCapture
 {
 public:
-   MasksCapture(const FIntVector& Size);
+   MasksCapture(const FIntVector& Size, const int32& Seed);
 
    ~MasksCapture();
 
    void Reset(bool DeleteActors);
 
-   void SetActors(const TArray<AActor*>& Actors);
+   bool Capture(const FHitResult& Hit, const uint32& FrameIndex, const uint32& X, const uint32& Y);
 
-   bool Capture(const FHitResult& Hit, const uint32& ImageIndex, const uint32& x, const uint32& y);
+   bool CaptureSky(const uint32& FrameIndex, const uint32& X, const uint32& Y);
 
    bool Save(const FString& Directory, TArray<FString>& OutActorsMasks);
 
-   bool IsActorInFrame(const AActor* Actor, const uint32& ImageIndex);
+   bool IsActorInFrame(const AActor* Actor, const uint32& FrameIndex) const;
 
 private:
    // A triplet (width, height, nimages) of captured images
    FIntVector m_Size;
 
-   // Map the actors names to int ids
-   TSet<FString> m_ActorsSet;
-   TMap<FString, uint8> m_ActorsMap;
+   // Actors present in each frame, mapped to their gray level
+   TArray<TBidirMap<FString, png::gray_pixel>> m_ActorsMap;
+
+   // A random number generator
+   FRandomStream m_Random;
 
    // A buffer to store object masks and save PNGs
    TArray<png::image<png::gray_pixel>> m_Buffer;
+
+   // returns the normalized name of the actor
+   static FString GetActorName(const AActor* Actor);
+
+   // Returns the index of an actor in the actors map (add the actor if not
+   // already indexed)
+   uint8 GetActorIndex(const FString& Actor);
+
+   bool CaptureActor(const FString& Actor, const uint32& FrameIndex, const uint32& X, const uint32& Y);
+
+   // // Returns a map (actor index -> random gray level) and update the output masks
+   // TMap<uint8, uint8> Scramble(const uint32& FrameIndex, TArray<FString>& OutActorsMasks);
+
+   // TArray<uint8> RandomGrayLevels(const uint32& NumLevels) const;
 };

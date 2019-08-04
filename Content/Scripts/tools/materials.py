@@ -6,12 +6,14 @@ import unreal_engine as ue
 from unreal_engine.classes import Material, StaticMesh
 from tools.utils import intphys_root_directory
 
+
 # UNAUTHORIZED is a Dictionary that contains the unauthorized combinations of
 # material.
-UNAUTHORIZED = {"/Game/Materials/Floor/M_FloorTile_02.M_FloorTile_02" :
-                    ["/Game/Materials/Wall/M_Metal_Rust.M_Metal_Rust"]}
+UNAUTHORIZED = {"/Game/Materials/Floor/M_FloorTile_02.M_FloorTile_02":
+                ["/Game/Materials/Wall/M_Metal_Rust.M_Metal_Rust"]}
 
-def get_random_material(category, material = None):
+
+def get_random_material(category, material=None):
     """Return a random material for the given category
 
     Parameters
@@ -42,7 +44,8 @@ def get_random_material(category, material = None):
     # 1st element in it
     available_materials = _load_materials('Materials/' + category)
     if material in UNAUTHORIZED.keys():
-        available_materials = list(set(available_materials)-set(UNAUTHORIZED[material]))
+        available_materials = list(
+            set(available_materials) - set(UNAUTHORIZED[material]))
     random.shuffle(available_materials)  # in-place list shuffling
     return available_materials[0]
 
@@ -66,17 +69,18 @@ def _load_materials(path):
     return [_get_material_path(os.path.join(materials_dir, f))
             for f in os.listdir(materials_dir) if f.endswith('.uasset')]
 
+
 def load():
-     valid_categories = ['Floor', 'Object', 'Wall']
-     for category in valid_categories:
-         available_materials = _load_materials('Materials/' + category)
-         for material in available_materials:
-             try:
-                 ue.load_object(Material, material)
-             except Exception as e:
-                 ue.log_warning(e)
-     for mesh in _load_materials('Meshes'):
-         try:
-             ue.load_object(StaticMesh, mesh)
-         except Exception as e:
-             ue.log_warning(e)
+    valid_categories = ['Floor', 'Object', 'Wall']
+    for category in valid_categories:
+        available_materials = _load_materials('Materials/' + category)
+        for material in available_materials:
+            try:
+                ue.load_object(Material, material)
+            except Exception as e:
+                ue.log_warning(e)
+    for mesh in _load_materials('Meshes'):
+        try:
+            ue.load_object(StaticMesh, mesh)
+        except Exception as e:
+            ue.log_warning(e)

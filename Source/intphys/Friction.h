@@ -7,12 +7,12 @@
 #include "Friction.generated.h"
 
 /**
- *
+ * Modify physical properties of actors from Python code
  */
 UCLASS()
 class INTPHYS_API UFriction : public UBlueprintFunctionLibrary
 {
-    GENERATED_BODY()
+   GENERATED_BODY()
 
 public:
     UFUNCTION(BlueprintCallable, Category="IntPhys")
@@ -20,9 +20,6 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="IntPhys")
     static bool SetRestitution(UMaterial* Material, float &Restitution);
-
-    UFUNCTION(BlueprintCallable, Category="IntPhys")
-    static void ExitEngine(bool force);
 
     UFUNCTION(BlueprintCallable, Category="IntPhys")
     static void SetMassScale(UStaticMeshComponent *Component, float MAssScale);

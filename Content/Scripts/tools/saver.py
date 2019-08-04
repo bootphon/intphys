@@ -3,6 +3,7 @@ import os
 
 import unreal_engine as ue
 from unreal_engine.classes import ScreenshotManager
+import actors.parameters
 
 
 class Saver:
@@ -26,7 +27,7 @@ class Saver:
         any data.
 
     """
-    def __init__(self, size, dry_mode=False, output_dir=None):
+    def __init__(self, size, seed, dry_mode=False, output_dir=None):
         self.size = size
         self.camera = None
         if output_dir is None:
@@ -38,11 +39,13 @@ class Saver:
         self.status_header = {}
         self.status = []
 
+        self.max_depth = actors.parameters.theoretical_max_depth()
+
         # initialize the capture.
         verbose = False
         ScreenshotManager.Initialize(
             int(self.size[0]), int(self.size[1]), int(self.size[2]),
-            None, verbose)
+            None, self.max_depth, seed, verbose)
 
     def set_status_header(self, header):
         self.status_header = header
@@ -69,7 +72,7 @@ class Saver:
             return True
 
         # save the captured images as PNG
-        done, max_depth, masks = ScreenshotManager.Save(output_dir)
+        done, masks = ScreenshotManager.Save(output_dir)
         if not done:
             ue.log_warning('failed to save images to {}'.format(output_dir))
             return False
@@ -92,10 +95,15 @@ class Saver:
                 if isinstance(v, dict) and 'name' in v.keys():
                     names_map[v['name']] = k
                     del self.status[i][k]['name']
-        masks = {names_map[k]: v for k, v in masks.items()}
+
+        # postprocess the masks to make it JSON compatible
+        masks = self.parse_masks(masks, names_map)
 
         # save images max depth and actors's masks to status
-        self.status_header.update({'max_depth': max_depth, 'masks': masks})
+        self.status_header.update(
+            {'max_depth': self.max_depth})
+        for i in range(len(self.status)):
+            self.status[i].update({'masks': masks[i]})
         status = {'header': self.status_header, 'frames': self.status}
 
         # save the status as JSON file
@@ -108,12 +116,13 @@ class Saver:
     def update(self, actors):
         self.camera = actors['Camera']
         ScreenshotManager.SetOriginActor(self.camera.actor)
-        res = []
-        for name, actor in actors.items():
-            if 'wall' in name.lower():
-                res.append(actor.left.actor)
-                res.append(actor.right.actor)
-                res.append(actor.front.actor)
-            else:
-                res.append(actor.actor)
-        ScreenshotManager.SetActors(res)
+
+    def parse_masks(self, masks, names_map):
+        parsed = [{} for _ in range(self.size[2])]
+        for mask in masks:
+            frame, actor, gray_level = tuple(mask.split('__'))
+            frame = int(frame) - 1
+            actor = names_map[actor]
+            gray_level = int(gray_level)
+            parsed[frame].update({actor: gray_level})
+        return parsed

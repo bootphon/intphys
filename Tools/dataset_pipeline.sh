@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# This script illustrates the complete pipeline used to generate, postprocess
-# and archive an intphys database.
+# This script illustrates the complete pipeline used to generate and archive an
+# intphys database.
 
 
 # a usage message displayed on bad params or --help
@@ -11,8 +11,7 @@ usage()
     echo
     echo "This script does the following (using $(nproc) jobs):"
     echo "1 - generate a dataset in <output-dir> based on the scenes defined in <json-file>"
-    echo "2 - postprocess the dataset"
-    echo "3 - generate the .tar.gz archives"
+    echo "2 - generate the .tar.gz archives"
 }
 
 # display usage if needed
@@ -32,9 +31,6 @@ json=$(readlink -f $1)
 
 # generate the dataset
 $(dirname $0)/parallel/intphys_parallel.sh $json $output_dir $(nproc) || exit 1
-
-# postprocess it
-$(dirname $0)/postprocessing/build/postprocess $output_dir -j $(nproc) || exit 1
 
 # build the archives
 $(dirname $0)/make_archives.py $output_dir || exit 1

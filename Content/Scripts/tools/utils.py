@@ -1,11 +1,14 @@
 """Defines general utility functions used by intphys"""
 
 import json
+
 import os
 
 import unreal_engine as ue
 from unreal_engine import FVector, FRotator
-from unreal_engine.classes import KismetSystemLibrary, GameplayStatics, Friction
+from unreal_engine.classes import KismetSystemLibrary
+from unreal_engine.classes import GameplayStatics
+from unreal_engine.classes import Exit
 
 
 def as_dict(value):
@@ -32,9 +35,7 @@ def exit_ue(message=None):
     if message:
         ue.log(message)
 
-    # KismetSystemLibrary.QuitGame(world)
-    #world.quit_game()
-    Friction.ExitEngine()
+    Exit.ExitEngine()
 
 
 def set_game_paused(world, paused):

@@ -7,7 +7,6 @@ from actors.base_actor import BaseActor
 from tools.utils import as_dict
 
 
-
 class BaseMesh(BaseActor):
     """
     BaseMesh inherits from BaseActor.

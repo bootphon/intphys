@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ScreenshotManager.h"
 
 
@@ -7,14 +5,16 @@ TSharedPtr<FScreenshot> UScreenshotManager::Screenshot = nullptr;
 
 
 bool UScreenshotManager::Initialize(
-    int Width, int Height, int NImages,
+    int Width, int Height, int NumFrames,
     AActor* OriginActor,
+    float MaxDepth,
+    int32 RandomSeed,
     bool Verbose)
 {
-    FIntVector Size(Width, Height, NImages);
-    Screenshot = TSharedPtr<FScreenshot>(new FScreenshot(Size, OriginActor, Verbose));
-
-    return true;
+   FIntVector Size(Width, Height, NumFrames);
+   Screenshot = TSharedPtr<FScreenshot>(
+      new FScreenshot(Size, OriginActor,  MaxDepth, RandomSeed, Verbose));
+   return true;
 }
 
 
@@ -23,15 +23,15 @@ bool UScreenshotManager::Capture(const TArray<AActor*>& IgnoredActors)
     return Screenshot->Capture(IgnoredActors);
 }
 
-bool UScreenshotManager::Save(const FString& Directory, float& OutMaxDepth, TMap<FString, uint8>& OutActorsMap)
+bool UScreenshotManager::Save(const FString& Directory, TArray<FString>& OutActorsMasks)
 {
-    return Screenshot->Save(Directory, OutMaxDepth, OutActorsMap);
+    return Screenshot->Save(Directory, OutActorsMasks);
 }
 
 
-void UScreenshotManager::Reset(bool delete_actors)
+void UScreenshotManager::Reset(bool DeleteActors)
 {
-    Screenshot->Reset(delete_actors);
+    Screenshot->Reset(DeleteActors);
 }
 
 
@@ -40,17 +40,20 @@ void UScreenshotManager::SetOriginActor(AActor* Actor)
     Screenshot->SetOriginActor(Actor);
 }
 
-void UScreenshotManager::SetActors(TArray<AActor*>& Actors)
-{
-    Screenshot->SetActors(Actors);
-}
+
+// void UScreenshotManager::SetActors(TArray<AActor*>& Actors)
+// {
+//     Screenshot->SetActors(Actors);
+// }
+
 
 bool UScreenshotManager::IsActorInFrame(AActor* Actor, int FrameIndex)
 {
     return Screenshot->IsActorInFrame(Actor, static_cast<uint>(FrameIndex));
 }
 
-bool UScreenshotManager::IsActorInLastFrame(AActor* Actor, const TArray<AActor*>& IgnoredActors)
+
+bool UScreenshotManager::IsActorVisible(AActor* Actor, const TArray<AActor*>& IgnoredActors)
 {
-    return Screenshot->IsActorInLastFrame(Actor, IgnoredActors);
+    return Screenshot->IsActorVisible(Actor, IgnoredActors);
 }

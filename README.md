@@ -98,6 +98,9 @@ this have not been tested.
         ./GenerateProjectFiles.sh
         make
 
+* **Install dependencies** required for intphys dataset generation:
+
+        sudo apt-get install libpng++-dev
 
 * **Install intphys** in a separate directory. Clone the repository and
   its UnrealEnginePython submodule from github:
@@ -135,8 +138,6 @@ this have not been tested.
 
 ## Usage
 
-### Scenes generation
-
 * Use the `intphys.py` program to run the game and generate data. To
   discover the arguments, have a:
 
@@ -154,19 +155,16 @@ this have not been tested.
   (`--editor` option) or as a standalone game (`--standalone-game`
   option). The `--verbose` option is usefull for dev as well.
 
+* Use the `--headless` option to disable direct rendering on screen (the game
+  will be rendered in a frame buffer instead).
+
 * You can also use `Tools/parallel/intphys_parallel.sh` to call several
   instances of `intphys.py` in parallel and speedup the dataset generation.
-
-### Postprocessing
-
-The generated scenes require a postprocessing step (reduce the size of PNG
-images, scramble the masks and normalize the depth). This is done by the C++
-program in `./Tools/postprocessing`, see README there for more information.
 
 
 ## Additional utils
 
-In the `Tools` directory are stored few utility scripts, see REAMDE there for
+In the `Tools` directory are stored few utility scripts, see README there for
 more information.
 
 

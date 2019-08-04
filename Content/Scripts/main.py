@@ -4,6 +4,8 @@ import unreal_engine as ue
 from tools.director import Director
 from tools.utils import exit_ue, set_game_resolution
 from unreal_engine.enums import ETickingGroup
+
+
 # the default game resolution, for both scene rendering and saved
 # images (width * height in pixels)
 DEFAULT_RESOLUTION = (288, 288)
@@ -28,7 +30,7 @@ class Main:
 
         # init random number generator
         try:
-            seed = os.environ['INTPHYS_SEED']
+            seed = int(os.environ['INTPHYS_SEED'])
         except KeyError:
             seed = None
         random.seed(seed)
@@ -61,7 +63,7 @@ class Main:
         size = (resolution[0], resolution[1], 100)
         self.director = Director(
             world, scenes_json, size, output_dir,
-            pause_duration=pause_duration)
+            seed or random.randint(0, 1e9), pause_duration=pause_duration)
 
     def tick(self, dt):
         # let the director handle the tick

@@ -114,9 +114,12 @@ class Saver:
     def parse_masks(self, masks, names_map):
         parsed = [{} for _ in range(self.size[2])]
         for mask in masks:
-            frame, actor, gray_level = tuple(mask.split('__'))
-            frame = int(frame) - 1
-            actor = names_map[actor]
-            gray_level = int(gray_level)
-            parsed[frame].update({actor: gray_level})
+            try:
+                frame, actor, gray_level = tuple(mask.split('__'))
+                frame = int(frame) - 1
+                actor = names_map[actor]
+                gray_level = int(gray_level)
+                parsed[frame].update({actor: gray_level})
+            except KeyError:  # this is the magic actor, it may disapear
+                continue
         return parsed

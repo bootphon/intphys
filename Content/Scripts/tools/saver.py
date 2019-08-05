@@ -138,9 +138,13 @@ class Saver:
         program.
 
         """
+        if not self.output_dir:
+            # dry mode, nothing to do
+            return
+
         test_dir = os.path.join(self.output_dir, 'test')
         if not os.path.isdir(test_dir):
-            # no test scene
+            # no test scene, nothing to do
             return
 
         # retrieve the list od directories to shuffle, those are 'test_dir/*/*'

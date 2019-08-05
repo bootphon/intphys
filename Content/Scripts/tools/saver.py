@@ -1,5 +1,8 @@
+import glob
 import json
 import os
+import random
+import shutil
 
 import unreal_engine as ue
 from unreal_engine.classes import ScreenshotManager
@@ -123,3 +126,49 @@ class Saver:
             except KeyError:  # this is the magic actor, it may disapear
                 continue
         return parsed
+
+    def shuffle_test_scenes(self):
+        """Shuffle possible/impossible runs in test scenes
+
+        The test scenes are saved in 4 subdirectories 1, 2, 3 and 4, where 1
+        and 2 are possible, 3 and 4 are impossible. This method simply shuffle
+        in a random way the subdirectories.
+
+        The method is called once by the director, at the very end of the
+        program.
+
+        """
+        test_dir = os.path.join(self.output_dir, 'test')
+        if not os.path.isdir(test_dir):
+            # no test scene
+            return
+
+        # retrieve the list od directories to shuffle, those are 'test_dir/*/*'
+        scenes = glob.glob('{}/*/*'.format(test_dir))
+        ue.log('Shuffling possible/impossible runs for {} test scenes'
+               .format(len(scenes)))
+
+        for scene in scenes:
+            subdirs = sorted(os.listdir(scene))
+
+            # make sure we have the expected subdirectories to shuffle
+            if not subdirs == ['1', '2', '3', '4']:
+                raise ValueError(
+                    'unexpected subdirectories in {}: {}'
+                    .format(scene, subdirs))
+
+            # shuffle the subdirs (suffix with _tmp to avoid race conditions)
+            shuffled = [s + '_tmp' for s in subdirs]
+            random.shuffle(shuffled)
+
+            # move original to shuffled
+            for i in range(4):
+                shutil.move(
+                    os.path.join(scene, subdirs[i]),
+                    os.path.join(scene, shuffled[i]))
+
+            # remove the _tmp suffix
+            for subdir in os.listdir(scene):
+                shutil.move(
+                    os.path.join(scene, subdir),
+                    os.path.join(scene, subdir[0]))

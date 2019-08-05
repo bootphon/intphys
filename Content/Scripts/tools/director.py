@@ -215,6 +215,9 @@ class Director(object):
                 ue.log("Generated {}% more scenes due to restarted scenes".
                        format(int((self.restarted / self.total_scenes) * 100)))
 
+            # shuffle possible/impossible runs in test scenes
+            self.saver.shuffle_test_scenes()
+
             # exit the program
             exit_ue()
 

@@ -43,9 +43,12 @@ class BaseMesh(BaseActor):
         self.mesh_str = mesh_str
 
     def set_parameters(self):
-        """ Sets the parameters : set location, rotation, mesh, scale,
-        friction, restitution and call the methods on_actor_hit (resp.
-        on_actor_overlap) if an actor is hit (resp. overlapped).
+        """Sets the parameters
+
+        Set location, rotation, mesh, scale, friction, restitution and call the
+        methods on_actor_hit (resp. on_actor_overlap) if an actor is hit (resp.
+        overlapped).
+
         """
         super().set_parameters()
         self.set_mesh()
@@ -56,9 +59,7 @@ class BaseMesh(BaseActor):
             self.mesh.call('SetCollisionProfileName BlockAll')
 
     def set_mesh(self):
-        """
-        Sets the mesh and set the material.
-        """
+        """Sets the mesh and set the material"""
         self.mesh = self.actor.get_actor_component_by_type(
             ue.find_class('StaticMeshComponent'))
         # setup mesh and material

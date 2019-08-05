@@ -1,6 +1,6 @@
 import os
 import importlib
-from unreal_engine import FVector, FRotator
+from unreal_engine import FRotator
 from actors.parameters import FloorParams
 from actors.parameters import CameraParams
 from actors.parameters import LightParams

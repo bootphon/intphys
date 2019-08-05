@@ -21,18 +21,15 @@ class Saver:
         in a single scene.
     camera : AActor
         The camera actor from which to capture screenshots.
-    dry_mode : bool, optional
-        When False (default), capture PNG images and metadata from the
-        rendered scenes. When True, do not take any captures nor save
-        any data.
+    output_dir : string, optional
+        The directory where to save captured images, if None (default) does not
+        save anything.
 
     """
-    def __init__(self, size, seed, dry_mode=False, output_dir=None):
+    def __init__(self, size, seed, output_dir=None):
         self.size = size
         self.camera = None
-        if output_dir is None:
-            dry_mode = True
-        self.is_dry_mode = dry_mode
+        self.is_dry_mode = True if output_dir is None else False
         self.output_dir = output_dir
 
         # an empty list to append status along the run

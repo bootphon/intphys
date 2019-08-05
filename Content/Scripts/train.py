@@ -4,6 +4,7 @@ import random
 import math
 import colorsys
 
+import unreal_engine as ue
 from unreal_engine import FVector, FRotator, FLinearColor
 from scene import Scene
 from actors.object import Object
@@ -47,9 +48,10 @@ class Train(Scene):
         self.is_occluded = True if noccluders != 0 else False
 
         prob_walls = random.uniform(0, 1)
-        scenarios = ['random', 'collision']
-        scenarios = 2*scenarios+['wall']
+
+        scenarios = 2 * ['random', 'collision'] + ['wall']
         scenario = random.choice(scenarios)
+
         if scenario == 'random':
             # random scenario
             nobjects = random.randint(1, 3)
@@ -59,10 +61,10 @@ class Train(Scene):
             # scenario that maximizes collision between objects
             self.generate_walls(prob_walls, 4, 2000, unsafe_zones)
             self.generate_collision_objects(unsafe_zones)
-        else:
-            # scenario with the objects going above the Walls
-            # always 3 objects, nobjects-nobjects_r are going above the Wall
-            # nobjects_r are placed randomly
+        else:  # scenario is 'wall'
+            # scenario with the objects going above the Walls always 3 objects,
+            # nobjects-nobjects_r are going above the Wall nobjects_r are
+            # placed randomly
             self.generate_walls(0, 0.7, 900, unsafe_zones)
             nobjects = 3
             nobjects_r = random.randint(0, 2)
@@ -80,7 +82,7 @@ class Train(Scene):
             for m in range(nmoves):
                 if len(moves) == 0:
                     moves.append(random.randint(0, 200))
-                elif (moves[-1]+10) < 200:
+                elif moves[-1] + 10 < 200:
                     moves.append(random.randint(moves[-1]+10, 200))
             self.params['occluder_{}'.format(n + 1)] = OccluderParams(
                 material=get_random_material(
@@ -97,19 +99,19 @@ class Train(Scene):
         return True
 
     def generate_walls(self, prob_walls, max_height, max_depth, unsafe_zones):
-        """Generate walls
-        """
+        """Generate walls"""
         if prob_walls <= 0.3:
             self.params['walls'] = WallsParams(
                 material=get_random_material('Wall'),
                 height=random.uniform(0.3, max_height),
                 length=random.uniform(1500, 5000),
-                depth=random.uniform(800, max_depth)
-            )
-            unsafe_zones.append([FVector(self.params['walls'].depth, -600, 0),
-                                 FVector(3000, -600, 0),
-                                 FVector(3000, 600, 0),
-                                 FVector(self.params['walls'].depth, 600, 0)])
+                depth=random.uniform(800, max_depth))
+
+            unsafe_zones.append(
+                [FVector(self.params['walls'].depth, -600, 0),
+                 FVector(3000, -600, 0),
+                 FVector(3000, 600, 0),
+                 FVector(self.params['walls'].depth, 600, 0)])
 
     def generate_random_objects(self, nobjects, unsafe_zones):
         """Generate random objects at random positions
@@ -147,8 +149,8 @@ class Train(Scene):
                 collision_point = FVector(
                     random.uniform(300, 700),
                     random.uniform(-200, 200),
-                    0
-                )
+                    0)
+
                 dir_force = [
                     collision_point.x - position[0].x,
                     collision_point.y - position[0].y,
@@ -178,10 +180,11 @@ class Train(Scene):
                 overlap=False)
 
     def generate_collision_objects(self, unsafe_zones):
-        """
-        Generate 3 objects in order to maximize collision
+        """Generate 3 objects in order to maximize collision
+
         A collision point is randomly chosen, the 3 objects have an initial
-        force in the direction of the collision point
+        force in the direction of the collision point.
+
         """
         nobjects = 3
         collision_point = FVector(
@@ -220,17 +223,12 @@ class Train(Scene):
                 overlap=False)
 
     def objects_above_walls_scenario(self, nobjects, nprevious, unsafe_zones):
-        """
-        Generate objects, maximize objects being thrown above
-        walls.
-        """
-        # nobjects = random.randint(1,3)
-
+        """Generate objects, maximize objects being thrown above walls"""
         collision_point = FVector(
             random.uniform(800, 1000),
             random.uniform(-300, 300),
-            0
-        )
+            0)
+
         for n in range(nobjects):
             previous_size = len(unsafe_zones)
             position = self.find_position("obj", unsafe_zones)
@@ -262,12 +260,12 @@ class Train(Scene):
                 overlap=False)
 
     def create_new_zone(self, location, scale, rotation, type_actor):
+        """Create a new zone
+
+         new_zone is an array of 4 3D points, the vertices
+         of unsafe square
+
         """
-        Create a new zone
-        """
-        #  creation of a new zone
-        #  new_zone is an array of 4 3D points, the vertices
-        #  of unsafe square
         zone = [
             FVector(location.x - 50 * scale.x,
                     location.y - 50 * scale.y,
@@ -281,6 +279,7 @@ class Train(Scene):
             FVector(location.x - 50 * scale.x,
                     location.y + 50 * scale.y,
                     location.z)]
+
         if type_actor == 'occ':
             zone[2] = FVector(
                 location.x + 50 * scale.x + 10,
@@ -303,8 +302,9 @@ class Train(Scene):
 
     def find_position(self, type_actor, unsafe_zones):
         """Find a safe position and return it as a tuple
-        (location, rotation, scale) type is "occ" if the actor is an occluder
-        and "obj" if it's an object
+
+        (location, rotation, scale). Type is "occ" if the actor is an occluder
+        and "obj" if it's an object.
 
         """
         location = FVector()
@@ -331,20 +331,19 @@ class Train(Scene):
         return location, rotation, scale
 
     def check_spawning_location(self, new_object_location, all_locations):
-        #  new_object_location is an array of 4 3D points, the vertices
-        #  of unsafe square
+        # new_object_location is an array of 4 3D points, the vertices
+        # of unsafe square
         #
-        #  all_locations is an array of array same shape of new_object_location
+        # all_locations is an array of array same shape of new_object_location
         #
-        #  https://stackoverflow.com/questions/306316
+        # https://stackoverflow.com/questions/306316
         #
-        #  new_top, new_bottom, new_right, new_left are the extremum of
-        #  new_object_location top and bottom are following the x axis right
-        #  and left follow the y axis
+        # new_top, new_bottom, new_right, new_left are the extremum of
+        # new_object_location top and bottom are following the x axis right
+        # and left follow the y axis
         #
-        #  top, bottom, right, left are the same for each location of
-        #  all_locations
-
+        # top, bottom, right, left are the same for each location of
+        # all_locations
         new_top = max([point.x for point in new_object_location])
         new_bottom = min([point.x for point in new_object_location])
         new_right = max([point.y for point in new_object_location])
@@ -376,7 +375,7 @@ class Train(Scene):
         self.run += 1
 
     def play_run(self):
-        if self.run == 1:
+        if self.is_over():
             return
 
         super().play_run()

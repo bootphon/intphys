@@ -39,13 +39,13 @@ class Saver:
         self.status_header = {}
         self.status = []
 
-        self.max_depth = actors.parameters.theoretical_max_depth()
-
         # initialize the capture.
         verbose = False
         ScreenshotManager.Initialize(
             int(self.size[0]), int(self.size[1]), int(self.size[2]),
-            None, self.max_depth, seed, verbose)
+            None,
+            actors.parameters.theoretical_max_depth(),
+            seed, verbose)
 
     def set_status_header(self, header):
         self.status_header = header
@@ -96,12 +96,9 @@ class Saver:
                     names_map[v['name']] = k
                     del self.status[i][k]['name']
 
-        # postprocess the masks to make it JSON compatible
+        # postprocess the masks to make it JSON compatible and save it to
+        # status
         masks = self.parse_masks(masks, names_map)
-
-        # save images max depth and actors's masks to status
-        self.status_header.update(
-            {'max_depth': self.max_depth})
         for i in range(len(self.status)):
             self.status[i].update({'masks': masks[i]})
         status = {'header': self.status_header, 'frames': self.status}

@@ -24,20 +24,28 @@ merge_datasets=$(readlink -f $(dirname $0)/merge_datasets.py)
 # a usage message displayed on bad params or --help
 usage()
 {
-    echo "Usage: $0 <json-file> <output-dir> [<njobs>] [<height>x<width>]"
+    echo "Usage: $0 <json-file> <output-dir> [<njobs>] [<height>x<width>] [--headless]"
     echo
     echo "The default <njobs> is $(nproc), the default resolution is 288x288."
+    echo "Use --headless as 5th argument to disable rendering in a X window."
+    echo
     echo "This script does the following:"
-    echo "1 - split the json file into n balanced subparts"
-    echo "2 - call n instances of intphys.py in parallel on each of the sub-json"
-    echo "3 - merge the n resulted dirs into a single output-dir"
+    echo "1 - split the json file into 'n' balanced subparts"
+    echo "2 - call 'n' instances of 'intphys.py' in parallel on each of the sub-json"
+    echo "3 - merge the 'n' resulted dirs into a single output-dir"
 
     exit 1
 }
 
 # display usage if needed
-[ $# -le 1 -o $# -gt 4 ] && usage
+[ $# -le 1 -o $# -gt 5 ] && usage
 [[ $1 == "-h" || $1 == "-help" || $1 == "--help" ]] && usage
+
+
+# parse headless option
+headless=$5
+[[ $headless != "" && $headless != "--headless" ]] \
+    && echo "error: invalid option $headless, you want --headless" && exit 1
 
 
 # parse resolution
@@ -70,10 +78,10 @@ njsons=$(( $(ls -l $tmpdir | wc -l) - 1 ))
 
 
 # a function to run a single intphys instance
-export intphys output_dir resolution tmpdir
+export intphys output_dir resolution tmpdir headless
 run_intphys()
 {
-    $intphys --headless -o $output_dir/parallel/$1 -r $resolution $tmpdir/$1.json
+    $intphys $headless -o $output_dir/parallel/$1 -r $resolution $tmpdir/$1.json
 }
 export -f run_intphys
 

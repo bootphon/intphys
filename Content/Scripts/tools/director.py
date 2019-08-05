@@ -10,7 +10,7 @@ from tools.saver import Saver
 
 class Director(object):
     def __init__(self, world, params_file, size, output_dir,
-                 seed, tick_interval=2, pause_duration=30):
+                 seed, pause_duration=30):
         self.world = world
         self.scenes = []
         self.scene = {
@@ -22,30 +22,27 @@ class Director(object):
         self.saver = Saver(size, seed, output_dir=output_dir)
 
         try:
-            self.generate_scenes(json.loads(open(params_file, 'r').read()))
-        except ValueError as e:
-            print(e)
-        except BufferError as e:
-            print(e)
+            self.generate_scenes(json.load(open(params_file, 'r')))
+        except ValueError as err:
+            exit_ue(
+                'fatal error: failed to parse {}: {}'
+                .format(params_file, str(err)))
 
-        # start the ticker, take a screen capture each 2 game ticks
-        # self.ticker = Tick(tick_interval=tick_interval)
-        # self.ticker.start()
+        # preload the actors materials
+        tools.materials.load()
+
         self.ticker = 0
-
         self.pause_duration = pause_duration
         self.pause_remaining = 0
         self.is_paused = False
-
-        tools.materials.load()
         self.restarted = 0
 
     def generate_scenes(self, json_data):
         for Set, d in json_data.items():
             if 'train' in Set:
-                module = importlib.import_module("train")
-                train_class = getattr(module, "Train")
-                for i in range(d):
+                train_class = getattr(
+                    importlib.import_module("train"), "Train")
+                for _ in range(d):
                     self.scenes.append(
                         train_class(self.world, self.saver, Set))
             else:
@@ -59,16 +56,16 @@ class Director(object):
                         elif ('visible' in scene):
                             is_occluded = False
                         else:
-                            raise BufferError(
-                                "Didn't find 'occluded' nor 'visi" +
-                                "ble' in one scene of the json file")
+                            raise ValueError(
+                                "Didn't find 'occluded' nor 'visible' " +
+                                "in one scene of the json file")
 
                         for movement, nb in b.items():
                             if (
                                     'static' not in movement and
                                     'dynamic_1' not in movement and
                                     'dynamic_2' not in movement):
-                                raise BufferError(
+                                raise ValueError(
                                     "Didn't find 'static', " +
                                     "'dynamic_1' nor 'dynamic_2' " +
                                     "in one scene of the json file")

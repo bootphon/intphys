@@ -1,7 +1,10 @@
 import os
 import importlib
 from unreal_engine import FVector, FRotator
-from actors.parameters import FloorParams, CameraParams, LightParams
+from actors.parameters import FloorParams
+from actors.parameters import CameraParams
+from actors.parameters import LightParams
+from actors.parameters import camera_location
 from tools.materials import get_random_material
 
 
@@ -38,17 +41,17 @@ class Scene:
 
     def generate_parameters(self):
         self.params['Camera'] = CameraParams(
-                location=FVector(0, 0, 200),
-                rotation=FRotator(0, 0, 0))
+            location=camera_location(),
+            rotation=FRotator(0, 0, 0))
 
         # self.params['Skysphere'] = \
         #     SkysphereParams(rotation=FRotator(180, 180, 180))
 
         self.params['Floor'] = FloorParams(
-                material=get_random_material('Floor'))
+            material=get_random_material('Floor'))
 
         self.params['Light'] = LightParams(
-                type='SkyLight')
+            type='SkyLight')
 
         # prob_walls = 0.3
         # if random.uniform(0, 1) <= prob_walls:

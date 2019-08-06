@@ -1,9 +1,50 @@
+import math
+import random
+
 from dataclasses import dataclass
 from dataclasses import field
 from unreal_engine import FVector, FRotator, FLinearColor
 from unreal_engine.enums import ECameraProjectionMode
 from tools.materials import get_random_material
-import random
+
+
+def camera_location(type=None):
+    """Return the camera location parameter
+
+    If type is 'train', this is for a train scene, if type is 'O0' this is for
+    a O0 test, else this is for a non-specified test scene.
+
+    """
+    # the default, when type is None
+    X = 0
+    Y = 0
+    Z = 200
+
+    if type in ('train', 'O3'):
+        Z = random.uniform(175, 225)
+    elif type == 'O0':
+        X = 60
+        Z = 275
+
+    return FVector(X, Y, Z)
+
+
+def theoretical_max_depth():
+    """Return the maximal depth that can be observed in a dataset
+
+    the theorical depth is obtained by looking the corner of the floor at
+    (2000, 4000, 0) from the camera at (0, 0, 275)
+
+    """
+    # the floor mesh is 400x400x20. The camera is located at the center of the
+    # floor
+    floor = FloorParams()
+    a = 400 * floor.scale.y / 2
+    b = 400 * floor.scale.x / 2
+    # the maximum height of the camera (from camera_location() above)
+    c = 275
+
+    return math.sqrt(a**2 + b**2 + c**2)
 
 
 @dataclass
@@ -50,7 +91,7 @@ class AxisCylinderParams:
     down: bool = False
     moves: list = field(default_factory=list)
     obj_shape: str = random.choice(['Cube', 'Cylinder'])
-	# obj_shape: str = 'Cube'
+    # obj_shape: str = 'Cube'
 
 
 @dataclass
@@ -112,4 +153,4 @@ class OccluderParams:
 @dataclass
 class SkysphereParams:
     material: str = '/Game/Meshes/SkySphere/M_Sky_Panning_Clouds2'
-    rotation:FVector = FVector(0, 0, 0)
+    rotation: FVector = FVector(0, 0, 0)

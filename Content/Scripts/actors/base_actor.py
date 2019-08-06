@@ -60,9 +60,7 @@ class BaseActor():
             self.actor.bind_event('OnActorHit', self.on_actor_hit)
 
     def set_location(self, location):
-        """ Sets the location of the actor and raise a warning if the setting
-        failed.
-        """
+        """Sets the location of the actor and raise a warning if failed"""
         self.location = location
         if not self.actor.set_actor_location(self.location, False):
             ue.log_warning('Failed to set the location of an actor')
@@ -70,20 +68,14 @@ class BaseActor():
         return True
 
     def set_rotation(self, rotation):
-        """ Sets the rotation of the actor.
-        """
-        # if not self.actor.set_actor_rotation(rotation):
-        # the set_actor_rotation is very strict, looks for
-        # equality in asked and obtained rotation. We tolerate an
-        # epsilon of e-3.
-        # r0 = self.actor.get_actor_rotation()
+        """Sets the rotation of the actor"""
         self.actor.set_actor_rotation(rotation)
         self.rotation = self.actor.get_actor_rotation()
         return True
 
     def on_actor_overlap(self, me, other):
-        """
-        Actors can't overlap.
+        """Actors can't overlap.
+
         When an the actor is overlapping another actor, self.is_valid is
         set at False, and a message is printed.
 
@@ -93,26 +85,25 @@ class BaseActor():
             The current actor
         othe: AActor
             The actor overlapping the current actor
+
         """
-        if (me == other):
-            return
-        message = '{} overlapping {}'.format(
-            self.actor.get_name(), other.get_name())
-        ue.log(message)
-        self.is_valid = False
+        if me != other:
+            message = '{} overlapping {}'.format(
+                self.actor.get_name(), other.get_name())
+            ue.log(message)
+            self.is_valid = False
 
     def on_actor_hit(self, me, other, *args):
-        pass
-        # """
-        # When an the actor is hitting another actor a message is printed.
+        """When an the actor is hitting another actor a message is printed.
 
-        # Parameters
-        # ----------
-        # me: AActor
-        #     The current actor
-        # othe: AActor
-        #     The actor hitting the current actor
-        # """
+        Parameters
+        ----------
+        me: AActor
+            The current actor
+        othe: AActor
+            The actor hitting the current actor
+        """
+        pass
         # if (other.get_name()[:5] == "Floor" or me == other):
         #     return
         # message = '{} hitting {}'.format(

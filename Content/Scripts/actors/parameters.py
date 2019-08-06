@@ -87,13 +87,10 @@ class AxisCylinderParams:
     overlap: bool = False
     warning: bool = False
     mesh: str = 'Lollipop'
-    material_cube: str = get_random_material('Object')
-    material_cylinder: str = get_random_material('AxisCylinder')
+    material: str = get_random_material('Object')
     is_long: bool = False
     down: bool = False
     moves: list = field(default_factory=list)
-    obj_shape: str = random.choice(['Cube', 'Cylinder'])
-    # obj_shape: str = 'Cube'
 
 
 @dataclass

@@ -13,11 +13,11 @@ from tools.utils import as_dict
 
 
 class Object(BaseMesh):
-    """
-    Object inherits from BaseMesh.
-    The objects are the actors that roll and bounce. One of them is a
-    magic actor in the impossible events.
-    The objects can be sphere, cubes or cones.
+    """An object is an actor submited to the physical laws
+
+    One object is a magic actor in the test/dev scenes, on why an impossible
+    event is applied. An object can be a sphere, a cube or a cone.
+
     """
 
     # shape is a dictionnary with the path of every
@@ -28,7 +28,7 @@ class Object(BaseMesh):
         'Cone': '/Game/Meshes/Cone.Cone',
         # we exclude cylinder because it looks like a cube (from a face)
         # or like a sphere (from the other face)
-        # 'Cylinder': '/Game/Meshes/Cylinder.Cylinder'
+        # 'Cylinder': '/Game/Meshes/Cylinder.Cylinder'
     }
 
     # factor to normalize the mass of meshes wrt the mass of a sphere
@@ -38,7 +38,6 @@ class Object(BaseMesh):
         'Sphere': 1.0,
         'Cube': 0.6155297517867,
         'Cone': 1.6962973279499}
-
 
     def __init__(self, world, params=ObjectParams()):
         super().__init__(

@@ -92,36 +92,28 @@ class BaseMesh(BaseActor):
         ----------
         material_str: str
             Material to set
+
         """
         self.material = ue.load_object(Material, material_str)
         self.mesh.set_material(0, self.material)
 
     def set_scale(self, scale):
-        """ Sets the scale
-        """
+        """ Sets the scale"""
         self.scale = scale
         self.actor.set_actor_scale(self.scale)
 
     def set_friction(self, friction):
-        """ Sets the coefficient of friction
-        """
+        """ Sets the coefficient of friction"""
         self.friction = friction
         Friction.SetFriction(self.material, friction)
 
     def set_restitution(self, restitution):
-        """ Sets the coefficient of restitution
-        """
+        """ Sets the coefficient of restitution"""
         self.restitution = restitution
         Friction.SetRestitution(self.material, self.restitution)
 
     def get_status(self):
-        """ Get the status
-
-        Returns
-        -------
-        dict
-            Status of the actor
-        """
+        """ Returns the current status of the actor"""
         status = super().get_status()
         status['scale'] = as_dict(self.scale)
         status['friction'] = self.friction
@@ -129,7 +121,7 @@ class BaseMesh(BaseActor):
         return status
 
     def reset(self, params):
-        """ Resets the actor with the parametres of parameters.py, hidden is
+        """Resets the actor with the parametres of parameters.py, hidden is
         set at False.
         """
         super().reset(params)

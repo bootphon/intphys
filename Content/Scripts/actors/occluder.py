@@ -12,8 +12,8 @@ The occluder spawns verticaly.
 About the moves variable: it is an array which shall contain the frames when
 you want the occluder to initiate a movement (it moves at 1 degree per frame).
 ergo, if you want the occluder to move at the first frame, put 0 in the array.
-The occluder will come down. If you put 50, it won't have time to fully go down
-: it will rise again at the 50th frame
+The occluder will come down. If you put 50, it won't have time to fully go
+down: it will rise again at the 50th frame
 
 """
 

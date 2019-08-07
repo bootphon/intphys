@@ -98,13 +98,6 @@ class Scene:
             module = importlib.import_module(module_path)
             self.actors[actor] = getattr(module, class_name)(
                 world=self.world, params=actor_params)
-        """
-        found_actors = self.world.all_actors()
-        for actors in found_actors:
-            actors.get_name()
-        self.actors["Skysphere"] = \
-            Skysphere(self.world, self.world.find_object("BP_Sky_Sphere"))
-        """
 
     def reset_actors(self):
         if self.actors is None:

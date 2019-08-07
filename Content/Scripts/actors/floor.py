@@ -28,7 +28,7 @@ class Floor(BaseMesh):
 
     def get_parameters(self, params):
         location = FVector(
-            params.location.x,
+            params.location.x - 200,
             params.location.y - (400 * params.scale.y / 2),
             params.location.z)
         rotation = FRotator(

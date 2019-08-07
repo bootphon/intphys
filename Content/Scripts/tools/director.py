@@ -1,5 +1,7 @@
 import importlib
 import json
+import os
+import random
 import shutil
 
 import unreal_engine as ue
@@ -70,13 +72,21 @@ class Director(object):
                                     "'dynamic_1' nor 'dynamic_2' " +
                                     "in one scene of the json file")
                             else:
-                                for i in range(nb):
-                                    try:
-                                        self.scenes.append(test_class(
-                                            self.world, self.saver, Set,
-                                            is_occluded, movement))
-                                    except NotImplementedError:
-                                        continue
+                              for i in range(nb):
+                                  try:
+                                      if scenario == 'O0' and movement == 'dynamic_1':
+                                          sub_scenario = random.choice(['O0a', 'O0b'])
+                                          module = importlib.import_module(
+                                                "test.{}".format(sub_scenario))
+                                          test_class = getattr(module, "{}Test".format(sub_scenario))
+                                      elif scenario == 'O0':
+                                          module = importlib.import_module("test.O0a")
+                                          test_class = getattr(module, "O0aTest")
+                                      self.scenes.append(test_class(
+                                          self.world, self.saver, Set,
+                                          is_occluded, movement))
+                                  except NotImplementedError:
+                                      continue
 
         self.total_scenes = len(self.scenes)
 

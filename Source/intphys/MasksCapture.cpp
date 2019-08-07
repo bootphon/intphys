@@ -36,6 +36,10 @@ FString MasksCapture::GetActorName(const AActor* Actor)
    {
       ActorName = FString(TEXT("AxisCylinders"));
    }
+   else if(ActorName.Contains(FString(TEXT("Pill"))))
+   {
+      ActorName = FString(TEXT("Pills"));
+   }
    return ActorName;
 }
 

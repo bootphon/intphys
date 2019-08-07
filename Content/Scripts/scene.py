@@ -150,5 +150,6 @@ class Scene:
                         'object' in actor_name
                         or 'occluder' in actor_name
                         or 'axiscylinder' in actor_name
+                        or 'pill' in actor_name
                 ):
                     actor.move()

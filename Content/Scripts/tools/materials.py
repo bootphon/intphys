@@ -9,8 +9,12 @@ from tools.utils import intphys_root_directory
 
 # UNAUTHORIZED is a Dictionary that contains the unauthorized combinations of
 # material.
-UNAUTHORIZED = {"/Game/Materials/Floor/M_FloorTile_02.M_FloorTile_02":
+UNAUTHORIZED = {"/Game/Materials/Floor/M_FloorTile_02.M_FloorTile_02" :
                 ["/Game/Materials/Wall/M_Metal_Rust.M_Metal_Rust"]}
+PILL_UNAUTHORIZED = {'/Game/Materials/Object/M_Tech_Hex_Tile.M_Tech_Hex_Tile',
+                     '/Game/Materials/Object/M_Metal_Gold.M_Metal_Gold',
+                     '/Game/Materials/Object/M_Metal_Copper.M_Metal_Copper',
+                     '/Game/Materials/Object/M_Metal_Steel.M_Metal_Steel'}
 
 
 def get_random_material(category, material=None):
@@ -35,17 +39,23 @@ def get_random_material(category, material=None):
 
     """
     # the list of valid actor categories
-    valid_categories = ['Floor', 'Object', 'Wall', 'AxisCylinder']
+    valid_categories = ['Floor', 'Object', 'Wall', 'AxisCylinder', 'Pill']
     if category not in valid_categories:
         raise ValueError(
             f'category {category} unknown, must be in {valid_categories}')
 
     # build the list of possible materials and shuffle it, return the
     # 1st element in it
-    available_materials = _load_materials('Materials/' + category)
-    if material in UNAUTHORIZED.keys():
+    if category == 'Pill':
+        available_materials = _load_materials('Materials/Object')
         available_materials = list(
-            set(available_materials) - set(UNAUTHORIZED[material]))
+            set(available_materials) - PILL_UNAUTHORIZED)
+    else:
+        available_materials = _load_materials('Materials/' + category)
+        if material in UNAUTHORIZED.keys():
+            available_materials = list(
+                set(available_materials) - set(UNAUTHORIZED[material]))
+
     random.shuffle(available_materials)  # in-place list shuffling
     return available_materials[0]
 

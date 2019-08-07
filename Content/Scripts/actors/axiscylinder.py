@@ -21,12 +21,8 @@ where locN is the y-location where the object changes speed to speedN+1
 
 class Axiscylinder(BaseMesh):
 
-	length = {'Cube':
-				{'Lollipop': '/Game/Meshes/Cube_Lollipop.Cube_Lollipop',
-		         'RollingPin': '/Game/Meshes/Cube_Rolling_Pin.Cube_Rolling_Pin'},
-			  'Cylinder':
-			  	{'Lollipop': '/Game/Meshes/Lollipop.Lollipop',
-		         'RollingPin': '/Game/Meshes/Rolling_Pin.Rolling_Pin'}}
+	length = {'Lollipop': '/Game/Meshes/Cube_Lollipop.Cube_Lollipop',
+		      'RollingPin': '/Game/Meshes/Cube_Rolling_Pin.Cube_Rolling_Pin'}
 
 	def __init__(self, world, params=AxisCylinderParams()):
 		super().__init__(
@@ -35,9 +31,6 @@ class Axiscylinder(BaseMesh):
 		self.set_parameters()
 
 	def get_parameters(self, params):
-		# cube or cylinder
-		self.shape = params.obj_shape
-
 		super().get_parameters(
 			params.location,
 			params.rotation,
@@ -46,12 +39,9 @@ class Axiscylinder(BaseMesh):
 			params.restitution,
 			params.overlap,
 			params.warning,
-			self.length[self.shape][params.mesh]
+			self.length[params.mesh]
 		)
-		if self.shape == 'Cube':
-			self.material = ue.load_object(Material, params.material_cube)
-		else:
-			self.material = ue.load_object(Material, params.material_cylinder)
+		self.material = ue.load_object(Material, params.material)
 		self.is_long = params.is_long
 		self.down = params.down
 		self.moves = params.moves
@@ -61,14 +51,14 @@ class Axiscylinder(BaseMesh):
 
 		self.location.z += 50
 		if not self.is_long: # short axis-cylinder
-			self.mesh_str = self.length[self.shape]['Lollipop']
+			self.mesh_str = self.length['Lollipop']
 			if not self.down:
 				self.rotation.pitch = 0
 				self.location.z += 100
 			else:
 				self.rotation.pitch = 180
 		else: # long axis-cylinder
-			self.mesh_str = self.length[self.shape]['RollingPin']
+			self.mesh_str = self.length['RollingPin']
 
 	def set_parameters(self):
 		super().set_parameters()

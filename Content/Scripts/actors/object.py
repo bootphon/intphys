@@ -25,7 +25,7 @@ class Object(BaseMesh):
     shape = {
         'Sphere': '/Game/Meshes/Sphere.Sphere',
         'Cube': '/Game/Meshes/Cube.Cube',
-        'Cone': '/Game/Meshes/Cone.Cone',
+        'Cone': '/Game/Meshes/Cone.Cone'
         # we exclude cylinder because it looks like a cube (from a face)
         # or like a sphere (from the other face)
         # 'Cylinder': '/Game/Meshes/Cylinder.Cylinder'

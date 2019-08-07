@@ -9,3 +9,15 @@ void UExit::ExitEngine(bool force)
 {
    FGenericPlatformMisc::RequestExit(force);
 }
+
+
+bool UExit::Intersect(AActor* Actor, AActor* Other)
+{
+   FBox Box = Actor->GetComponentsBoundingBox(false);
+   FBox OtherBox = Other->GetComponentsBoundingBox(false);
+   if(Box.Intersect(OtherBox))
+   {
+      return true;
+   }
+   return false;
+}

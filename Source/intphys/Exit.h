@@ -17,4 +17,7 @@ class INTPHYS_API UExit : public UBlueprintFunctionLibrary
 public:
    UFUNCTION(BlueprintCallable, Category="IntPhys")
    static void ExitEngine(bool force);
+
+   UFUNCTION(BlueprintCallable, Category="IntPhys")
+   static bool Intersect(AActor* Actor, AActor* Other);
 };

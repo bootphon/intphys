@@ -1,5 +1,4 @@
-# coding: utf-8
-
+import itertools
 import random
 import math
 import colorsys
@@ -313,7 +312,8 @@ class Train(Scene):
         location = FVector()
         rotation = FVector()
         scale = FVector()
-        for try_index in range(100):
+
+        while(True):  # for _ in range(100):
             if type_actor == "occ":
                 scale = FVector(
                     random.uniform(0.5, 1.5), 1, random.uniform(0.5, 1.5))
@@ -397,3 +397,26 @@ class Train(Scene):
 
     def is_over(self):
         return True if self.run == 1 else False
+
+    # def is_valid(self):
+    #     # build the list of actors
+    #     actors = []
+    #     for k, v in self.actors.items():
+    #         # if k == 'walls':
+    #         #     actors += [v.front.actor, v.right.actor, v.left.actor]
+    #         if 'object' in k.lower() or 'occluder' in k.lower():
+    #             actors.append(v.actor)
+    #     ue.log('validating {}'.format(', '.join(a.get_name() for a in actors)))
+
+    #     pairs = itertools.combinations(actors, 2)
+    #     for pair in pairs:
+    #         # if 'wall' in pair[0].get_name() and 'Wall' in pair[1].get_name():
+    #         #     continue
+
+    #         overlap = Exit.Intersect(pair[0], pair[1])
+    #         if overlap:
+    #             ue.log('{} overlap {}'.format(
+    #                 pair[0].get_name(), pair[1].get_name()))
+    #             return False
+
+    #     return super().is_valid()

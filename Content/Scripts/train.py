@@ -141,9 +141,11 @@ class Train(Scene):
                     vforce.append(random.uniform(3, 4))
                 # the vertical force is necessarly positive
                 vforce[4] = abs(vforce[4])
-                force = FVector(vforce[0] * math.pow(10, vforce[1]),
-                                vforce[2] * math.pow(10, vforce[3]),
-                                vforce[4] * math.pow(10, vforce[5]))
+                force = FVector(
+                    vforce[0] * math.pow(10, vforce[1]),
+                    vforce[2] * math.pow(10, vforce[3]),
+                    vforce[4] * math.pow(10, vforce[5]))
+
             # if random_force == 1, the force is directed in the camera range
             elif random_force == 1:
                 collision_point = FVector(
@@ -163,6 +165,7 @@ class Train(Scene):
                     dir_force[0] * math.pow(10, intensity[0]),
                     dir_force[1] * math.pow(10, intensity[1]),
                     dir_force[2] * math.pow(10, intensity[2]))
+
             # if random_force == 2, the force is null
             else:
                 force = FVector(0, 0, 0)
@@ -190,8 +193,8 @@ class Train(Scene):
         collision_point = FVector(
             random.uniform(200, 700),
             random.uniform(-300, 300),
-            0
-        )
+            0)
+
         for n in range(nobjects):
             previous_size = len(unsafe_zones)
             position = self.find_position("obj", unsafe_zones)

@@ -4,7 +4,6 @@ import os
 
 import unreal_engine as ue
 from unreal_engine import FVector, FRotator
-from unreal_engine.classes import KismetSystemLibrary
 from unreal_engine.classes import GameplayStatics
 from unreal_engine.classes import Exit
 
@@ -43,22 +42,6 @@ def set_game_paused(world, paused):
 
     """
     GameplayStatics.SetGamePaused(world, paused)
-
-
-def set_game_resolution(world, resolution):
-    """Set the game and captured images resolution
-
-    `resolution` is a tuple of (width, height) in pixels
-
-    """
-    # cast resolution to string
-    resolution = (str(r) for r in resolution)
-
-    # command that change the resolution
-    command = 'r.SetRes {}'.format('x'.join(resolution))
-
-    # execute the command
-    KismetSystemLibrary.ExecuteConsoleCommand(world, command)
 
 
 def intphys_root_directory():

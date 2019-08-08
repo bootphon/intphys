@@ -4,7 +4,6 @@ import os
 
 import unreal_engine as ue
 from unreal_engine import FVector, FRotator
-from unreal_engine.classes import GameplayStatics
 from unreal_engine.classes import Exit
 
 
@@ -33,15 +32,6 @@ def exit_ue(message=None):
         ue.log(message)
 
     Exit.ExitEngine()
-
-
-def set_game_paused(world, paused):
-    """Pause/unpause the game
-
-    `paused` is a boolean value
-
-    """
-    GameplayStatics.SetGamePaused(world, paused)
 
 
 def intphys_root_directory():

@@ -78,19 +78,3 @@ def _load_materials(path):
 
     return [_get_material_path(os.path.join(materials_dir, f))
             for f in os.listdir(materials_dir) if f.endswith('.uasset')]
-
-
-def load():
-    valid_categories = ['Floor', 'Object', 'Wall']
-    for category in valid_categories:
-        available_materials = _load_materials('Materials/' + category)
-        for material in available_materials:
-            try:
-                ue.load_object(Material, material)
-            except Exception as e:
-                ue.log_warning(e)
-    for mesh in _load_materials('Meshes'):
-        try:
-            ue.load_object(StaticMesh, mesh)
-        except Exception as e:
-            ue.log_warning(e)

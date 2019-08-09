@@ -111,7 +111,7 @@ class ScenesJsonParser:
     def parse_train(self, num_scenes):
         train_class = self.import_class('train', 'Train')
         for _ in range(num_scenes):
-            yield train_class(self.world, self.saver, 'train')
+            yield train_class(self.world, self.saver)
 
     def parse_test(self, data, category):
         for scenario, scenes in data.items():
@@ -245,7 +245,7 @@ class Director(object):
             return
 
         run_stopped = self.current_scene.stop_run(
-            self.counter[self.current_scene.set], self.total_scenes)
+            self.counter[self.current_scene.category], self.total_scenes)
         if run_stopped is False:
             self.restart_scene()
 
@@ -254,9 +254,9 @@ class Director(object):
             if (self.current_scene.name !=
                 self.scenes[
                     (self.current_scene_index + 1) % self.total_scenes].name):
-                self.counter[self.current_scene.set] = 0
+                self.counter[self.current_scene.category] = 0
             else:
-                self.counter[self.current_scene.set] += 1
+                self.counter[self.current_scene.category] += 1
             self.counter['total'] += 1
 
         self.ticker = 0
@@ -270,7 +270,7 @@ class Director(object):
         self.saver.reset(True)
         if not self.saver.is_dry_mode:
             output_dir = self.current_scene.get_scene_subdir(
-                self.counter[self.current_scene.set],
+                self.counter[self.current_scene.category],
                 self.total_scenes)
             if self.current_scene.is_test_scene():
                 output_dir = '/'.join(output_dir.split('/')[:-1])
@@ -285,7 +285,7 @@ class Director(object):
             self.scenes.insert(
                 self.current_scene_index + 1,
                 test_class(
-                    self.world, self.saver, self.current_scene.set,
+                    self.world, self.saver, self.current_scene.category,
                     self.current_scene.is_occluded,
                     self.current_scene.movement))
 
@@ -295,7 +295,7 @@ class Director(object):
             train_class = getattr(module, "Train")
             self.scenes.insert(
                 self.current_scene_index + 1,
-                train_class(self.world, self.saver, 'train'))
+                train_class(self.world, self.saver))
 
         self.scenes.pop(0)
 
@@ -324,7 +324,8 @@ class Director(object):
         try:
             if not self.current_scene.is_valid():
                 self.current_scene.stop_run(
-                    self.counter[self.current_scene.set], self.total_scenes)
+                    self.counter[self.current_scene.category],
+                    self.total_scenes)
                 self.restart_scene()
                 self.ticker = 0
                 self.start_scene()

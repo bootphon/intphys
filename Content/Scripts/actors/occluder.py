@@ -78,6 +78,8 @@ class Occluder(BaseMesh):
                 rotation.roll -= self.speed
         else:
             return
+
+        # switch rotation direction downward if roll is 90 or upward if 0
         if rotation.roll >= 90:
             rotation.roll = 90
             self.up = False
@@ -86,6 +88,7 @@ class Occluder(BaseMesh):
             rotation.roll = 0
             self.up = True
             self.moving = False
+
         self.set_rotation(rotation)
         self.location = self.actor.get_actor_location()
 

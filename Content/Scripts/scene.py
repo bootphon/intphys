@@ -1,5 +1,6 @@
 import os
 import importlib
+
 from unreal_engine import FRotator
 from actors.parameters import FloorParams
 from actors.parameters import CameraParams
@@ -9,14 +10,16 @@ from tools.materials import get_random_material
 
 
 class Scene:
-    def __init__(self, world, saver, Set):
+    def __init__(self, world, saver, category):
         self.world = world
         self.params = {}
         self.saver = saver
-        self.set = Set
+        self.category = category
+
         while not self.generate_parameters():
             print("Regenerated parameters")
             continue
+
         self.actors = None
         self.run = 0
         self.last_locations = []
@@ -52,14 +55,6 @@ class Scene:
 
         self.params['Light'] = LightParams(
             type='SkyLight')
-
-        # prob_walls = 0.3
-        # if random.uniform(0, 1) <= prob_walls:
-        #     self.params['Walls'] = WallsParams(
-        #         material=get_random_material('Wall'),
-        #         height=random.uniform(0.4, 7),
-        #         length=random.uniform(3000, 5000),
-        #         depth=random.uniform(1500, 3000))
 
         return True
 
@@ -108,7 +103,7 @@ class Scene:
 
     def del_actors(self):
         if self.actors is not None:
-            for actor_name, actor in self.actors.items():
+            for actor in self.actors.values():
                 actor.actor_destroy()
             self.actors = None
 
@@ -125,13 +120,13 @@ class Scene:
         # putting as much zeroes as necessary according
         # to the total number of scenes
         padded_idx = str(idx).zfill(len(str(total)))
-        if 'train' in self.set:
+        if 'train' in self.category:
             scene_name = (
                 'train/' +
                 padded_idx)
         else:
             scene_name = (
-                self.set + '/' +
+                self.category + '/' +
                 self.name +
                 '/' + padded_idx)
         out = os.path.join(self.saver.output_dir, scene_name)

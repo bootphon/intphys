@@ -61,9 +61,10 @@ class Wall(BaseMesh):
         self.z = z
         self.side = side
         self.sides[self.side]()
-        super().get_parameters(self.location, self.rotation, self.scale,
-                               0.5, 0.5, overlap, warning,
-                               '/Game/Meshes/Wall_400x400')
+        super().get_parameters(
+            self.location, self.rotation, self.scale,
+            0.5, 0.5, overlap, warning,
+            '/Game/Meshes/Wall_400x400')
         self.material = ue.load_object(Material, material)
 
     def set_parameters(self):

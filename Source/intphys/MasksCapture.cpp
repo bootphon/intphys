@@ -65,14 +65,14 @@ bool MasksCapture::CaptureActor(const FString& Actor, const uint32& FrameIndex, 
 
    if(FrameActorsMap.ContainsKey(Actor))
    {
-      // the actor already havs an ondexed gray level, just pick it
+      // the actor already has an indexed gray level, just pick it
       GrayLevel = FrameActorsMap.GetValue(Actor);
    }
    else
    {
       // the actor is not yet registered for this frame, make sure we have room to
       // store it and pick a random unique gray level
-      if(m_ActorsMap.Num() >= 256)
+      if(FrameActorsMap.Num() >= 256)
       {
          UE_LOG(LogTemp, Error, TEXT("Too many actors: %s >= 256"), m_ActorsMap.Num());
          return false;

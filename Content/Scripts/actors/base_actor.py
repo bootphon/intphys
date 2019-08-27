@@ -2,7 +2,7 @@ import unreal_engine as ue
 from tools.utils import as_dict
 
 
-class BaseActor():
+class BaseActor:
     """BaseActor is the very base of the actors inheritance tree
 
     It is the base class of every python component build with an actor
@@ -22,7 +22,7 @@ class BaseActor():
         self.is_valid = True
 
     def actor_destroy(self):
-        """ Destroys the actor. """
+        """Destroys the actor"""
         self.actor.actor_destroy()
         self.actor = None
 
@@ -137,8 +137,10 @@ class BaseActor():
         return status
 
     def reset(self, params):
-        """ Resets the actor with the parametres of parameters.py, hidden is
-        set at False.
+        """Resets the actor with the parameters of parameters.py
+
+        hidden is set at False.
+
         """
         self.set_location(params.location)
         self.set_rotation(params.rotation)

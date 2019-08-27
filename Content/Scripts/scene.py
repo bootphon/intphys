@@ -1,12 +1,8 @@
 import os
 import importlib
 
-from unreal_engine import FRotator
-from actors.parameters import FloorParams
-from actors.parameters import CameraParams
-from actors.parameters import LightParams
-from actors.parameters import camera_location
-from tools.materials import get_random_material
+import unreal_engine as ue
+from tools.utils import as_dict
 
 
 class Scene:
@@ -16,9 +12,7 @@ class Scene:
         self.saver = saver
         self.category = category
 
-        while not self.generate_parameters():
-            print("Regenerated parameters")
-            continue
+        self.generate_parameters()
 
         self.actors = None
         self.run = 0
@@ -43,20 +37,7 @@ class Scene:
         return header
 
     def generate_parameters(self):
-        self.params['Camera'] = CameraParams(
-            location=camera_location(),
-            rotation=FRotator(0, 0, 0))
-
-        # self.params['Skysphere'] = \
-        #     SkysphereParams(rotation=FRotator(180, 180, 180))
-
-        self.params['Floor'] = FloorParams(
-            material=get_random_material('Floor'))
-
-        self.params['Light'] = LightParams(
-            type='SkyLight')
-
-        return True
+        raise NotImplementedError
 
     def play_run(self):
         if self.run == 0:
@@ -87,8 +68,8 @@ class Scene:
             else:
                 class_name = actor.split('_')[0].title()
 
-            # dynamically import and instantiate
-            # the class corresponding to the actor
+            # dynamically import and instantiate the class corresponding to the
+            # actor
             module_path = "actors.{}".format(actor.lower().split('_')[0])
             module = importlib.import_module(module_path)
             self.actors[actor] = getattr(module, class_name)(
@@ -113,10 +94,11 @@ class Scene:
 
     def get_scene_subdir(self, scene_index, total):
         # build the scene sub-directory name, for exemple
-        # 'test/O1/06' or
+        # 'test/O1/006' or
         # 'dev/O4/39' or
-        # 'train/29'
+        # 'train/1029'
         idx = scene_index + 1
+
         # putting as much zeroes as necessary according
         # to the total number of scenes
         padded_idx = str(idx).zfill(len(str(total)))

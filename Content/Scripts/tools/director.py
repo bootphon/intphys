@@ -33,8 +33,9 @@ class PauseManager:
         GameplayStatics.SetGamePaused(self._world, True)
 
     def unpause(self):
-        self._is_paused = False
-        GameplayStatics.SetGamePaused(self._world, False)
+        if self._is_paused:
+            self._is_paused = False
+            GameplayStatics.SetGamePaused(self._world, False)
 
 
 class ScenesJsonParser:
@@ -172,8 +173,8 @@ class Director(object):
         self.world = world
 
         # count the number of scenes rendered for each category 'train', 'test'
-        # and 'dev', this is usefull to name the subdirectory where the scenes
-        # are saved.
+        # and 'dev', this is usefull to name the subdirectories where the
+        # scenes are saved.
         self.counter = {
             'total': 0,
             'train': 0,
@@ -229,16 +230,15 @@ class Director(object):
                     'occluded' if self.current_scene.is_occluded is True
                     else 'visible'))
             else:
-                ue.log('Scene {}/{}: Train / scenario {}'.format(
-                    self.current_scene_index + 1, self.total_scenes,
-                    self.current_scene.name))
+                ue.log('Scene {}/{}: Train scenario'.format(
+                    self.current_scene_index + 1, self.total_scenes))
 
         self.current_scene.play_run()
 
-        # for train only, 'warmup' the scene to settle the physics simulation
-        if 'train' in self.current_scene.name:
-            for _ in range(1, 10):
-                self.current_scene.tick()
+        # # for train only, 'warmup' the scene to settle the physics simulation
+        # if 'train' in self.current_scene.name:
+        #     for _ in range(1, 10):
+        #         self.current_scene.tick()
 
     def stop_scene(self):
         if self.current_scene_index >= self.total_scenes:
@@ -302,6 +302,22 @@ class Director(object):
     def capture(self):
         self.current_scene.capture()
 
+    def terminate(self):
+        """Gently exit the program when all the scenes have been generated"""
+        # we generated all the requested scenes, gently exit the program
+        if self.num_restarted_scenes:
+            # informs on the amount of restarted scenes
+            percent_restarted = (
+                self.num_restarted_scenes / self.total_scenes)
+            ue.log("Generated {}% more scenes due to restarted scenes".
+                   format(int(percent_restarted * 100)))
+
+        # shuffle possible/impossible runs in test scenes
+        self.saver.shuffle_test_scenes()
+
+        # exit the program
+        exit_ue()
+
     def tick(self, dt):
         """this method is called at each game tick by UE"""
         if self.pauser.remaining != 0:
@@ -334,25 +350,14 @@ class Director(object):
         except IndexError:
             pass
 
-        self.pauser.unpause()
+        if self.pauser.is_paused():
+            self.pauser.unpause()
 
         if self.current_scene_index < self.total_scenes:
             self.current_scene.tick()
             if self.ticker % 2 == 1:
                 self.capture()
         else:
-            # we generated all the requested scenes, gently exit the program
-            if self.num_restarted_scenes:
-                # informs on the amount of restarted scenes
-                percent_restarted = (
-                    self.num_restarted_scenes / self.total_scenes)
-                ue.log("Generated {}% more scenes due to restarted scenes".
-                       format(int(percent_restarted * 100)))
-
-            # shuffle possible/impossible runs in test scenes
-            self.saver.shuffle_test_scenes()
-
-            # exit the program
-            exit_ue()
+            self.terminate()
 
         self.ticker += 1

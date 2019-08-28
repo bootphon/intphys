@@ -86,8 +86,10 @@ bool DepthCapture::Save(const FString& Directory)
                Depth = m_MaxDepth;
             }
 
+            // m_Png[y][x] = static_cast<png::gray_pixel>(
+            //    255.f - 255.f * FMath::Sqrt(Depth / m_MaxDepth));
             m_Png[y][x] = static_cast<png::gray_pixel>(
-               255.f - 255.f * FMath::Sqrt(Depth / m_MaxDepth));
+               255.f - 255.f * Depth / m_MaxDepth);
          }
       }
 

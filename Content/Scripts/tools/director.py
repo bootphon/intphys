@@ -6,6 +6,7 @@ import shutil
 
 import unreal_engine as ue
 from unreal_engine.classes import GameplayStatics
+from actors.camera import Camera
 from tools.utils import exit_ue
 from tools.saver import Saver
 
@@ -149,6 +150,8 @@ class Director(object):
     The scenes can be 'train', 'test' or 'dev' scenes. Each scene is rendered
     during `2 * size[2]` ticks and captured on even ticks.
 
+    The director owns the camera.
+
     Parameters
     ----------
     world : ue.UWorld
@@ -193,8 +196,11 @@ class Director(object):
         # manage the pauses at the beginning of each scene
         self.pauser = PauseManager(self.world, pause_duration)
 
+        # create the camera
+        self.camera = Camera(self.world)
+
         # manage the scenes capture and saving to disk
-        self.saver = Saver(size, seed, output_dir=output_dir)
+        self.saver = Saver(self.camera, size, seed, output_dir=output_dir)
 
         # the list of the scenes being rendered by the director, as instances
         # of the class Scene.
@@ -217,40 +223,44 @@ class Director(object):
         return len(self.scenes)
 
     def start_scene(self):
+        # TODO must be check before, not in this method
         if self.current_scene_index >= self.total_scenes:
             # no more scene to start
             return
 
+        # log a brief description of the scene being started
         if self.current_scene.run == 0:
-            if hasattr(self.current_scene, 'movement'):
+            if 'train' in self.current_scene.name:
+                ue.log('Scene {}/{}: Train scenario'.format(
+                    self.current_scene_index + 1, self.total_scenes))
+            else:
                 ue.log('Scene {}/{}: Test / scenario {} / {} / {}'.format(
                     self.current_scene_index + 1, self.total_scenes,
                     self.current_scene.name,
                     self.current_scene.movement,
                     'occluded' if self.current_scene.is_occluded is True
                     else 'visible'))
-            else:
-                ue.log('Scene {}/{}: Train scenario'.format(
-                    self.current_scene_index + 1, self.total_scenes))
 
+        # setup the camera parameters and setup the new scene (spawn actors)
+        self.camera.set_parameters(self.current_scene.params['Camera'])
         self.current_scene.play_run()
 
-        # # for train only, 'warmup' the scene to settle the physics simulation
-        # if 'train' in self.current_scene.name:
-        #     for _ in range(1, 10):
-        #         self.current_scene.tick()
+        # for train only, 'warmup' the scene to settle the physics simulation
+        if 'train' in self.current_scene.name:
+            for _ in range(1, 10):
+                self.current_scene.tick()
 
     def stop_scene(self):
         if self.current_scene_index >= self.total_scenes:
             return
 
         run_stopped = self.current_scene.stop_run(
-            self.counter[self.current_scene.category], self.total_scenes)
+            self.counter[self.current_scene.category],
+            self.total_scenes)
         if run_stopped is False:
             self.restart_scene()
 
-        elif (self.current_scene.is_over()
-              and self.current_scene_index < self.total_scenes):
+        elif self.current_scene.is_over():
             if (self.current_scene.name !=
                 self.scenes[
                     (self.current_scene_index + 1) % self.total_scenes].name):
@@ -303,7 +313,7 @@ class Director(object):
         self.current_scene.capture()
 
     def terminate(self):
-        """Gently exit the program when all the scenes have been generated"""
+        """Conclude operations: shuffle the test scenes"""
         # we generated all the requested scenes, gently exit the program
         if self.num_restarted_scenes:
             # informs on the amount of restarted scenes
@@ -314,9 +324,6 @@ class Director(object):
 
         # shuffle possible/impossible runs in test scenes
         self.saver.shuffle_test_scenes()
-
-        # exit the program
-        exit_ue()
 
     def tick(self, dt):
         """this method is called at each game tick by UE"""
@@ -350,6 +357,8 @@ class Director(object):
         except IndexError:
             pass
 
+        # we have no remaining pause ticks and a scene is running, we can
+        # safely unpause the rendering
         if self.pauser.is_paused():
             self.pauser.unpause()
 
@@ -358,6 +367,8 @@ class Director(object):
             if self.ticker % 2 == 1:
                 self.capture()
         else:
+            # all the scenes are rendered, terminate and exit the program
             self.terminate()
+            exit_ue()
 
         self.ticker += 1

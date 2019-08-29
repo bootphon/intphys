@@ -42,7 +42,6 @@ class Scene:
     def play_run(self):
         if self.run == 0:
             self.spawn_actors()
-            self.saver.update(self.actors)
 
     def stop_run(self):
         self.saver.set_status_header(self.get_status_header())
@@ -65,15 +64,23 @@ class Scene:
         for actor, actor_params in self.params.items():
             if ('magic' in actor):
                 continue
+            elif actor == 'Camera':
+                # the camera is managed by the director, not by the scene
+                continue
             else:
                 class_name = actor.split('_')[0].title()
 
+            ue.log('spawning {}'.format(actor))
             # dynamically import and instantiate the class corresponding to the
             # actor
             module_path = "actors.{}".format(actor.lower().split('_')[0])
             module = importlib.import_module(module_path)
-            self.actors[actor] = getattr(module, class_name)(
-                world=self.world, params=actor_params)
+
+            try:
+                self.actors[actor] = getattr(module, class_name)(
+                    world=self.world, params=actor_params)
+            except RuntimeError:
+                ue.log('failed to spawn {}'.format(actor))
 
     def reset_actors(self):
         if self.actors is None:

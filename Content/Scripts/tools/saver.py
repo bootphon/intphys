@@ -29,9 +29,9 @@ class Saver:
         save anything.
 
     """
-    def __init__(self, size, seed, output_dir=None):
+    def __init__(self, camera, size, seed, output_dir=None):
         self.size = size
-        self.camera = None
+        self.camera = camera
         self.is_dry_mode = True if output_dir is None else False
         self.output_dir = output_dir
 
@@ -46,9 +46,11 @@ class Saver:
             None,
             actors.parameters.theoretical_max_depth(),
             seed, verbose)
+        ScreenshotManager.SetOriginActor(self.camera.actor)
 
     def set_status_header(self, header):
         self.status_header = header
+        self.status_header['camera'] = self.camera.get_status()
 
     def capture(self, ignored_actors, status):
         """Push the scene's current screenshot and status to memory"""
@@ -110,10 +112,6 @@ class Saver:
             fin.write(json.dumps(status, indent=4))
 
         return True
-
-    def update(self, actors):
-        self.camera = actors['Camera']
-        ScreenshotManager.SetOriginActor(self.camera.actor)
 
     def parse_masks(self, masks, names_map):
         parsed = [{} for _ in range(self.size[2])]

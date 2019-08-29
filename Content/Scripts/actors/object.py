@@ -2,7 +2,10 @@
 
 import unreal_engine as ue
 from unreal_engine.classes import Material, Friction
-from unreal_engine import FVector
+from unreal_engine import FVector, FTransform
+# from unreal_engine.enums import ESpawnActorCollisionHandlingMethod
+
+from unreal_engine.classes import SpawnManager
 
 from actors.base_mesh import BaseMesh
 from actors.parameters import ObjectParams
@@ -40,8 +43,19 @@ class Object(BaseMesh):
         'Cone': 1.6962973279499}
 
     def __init__(self, world, params=ObjectParams()):
-        super().__init__(
-            world.actor_spawn(ue.load_class('/Game/Object.Object_C')))
+        # spawn_parameters = ue.find_struct('FActorSpawnParameters')
+        # ue.log(spawn_parameters)
+
+        transform = FTransform()
+        transform.translation = params.location
+        transform.rotation = params.rotation
+        transform.scale = params.scale
+        actor = SpawnManager.Spawn(
+            world, ue.load_class('/Game/Object.Object_C'), transform)
+        if actor is None:
+            raise RuntimeError('failed to spawn object')
+        super().__init__(actor)
+        # world.actor_spawn(ue.load_class('/Game/Object.Object_C')))
         self.get_parameters(params)
         self.set_parameters()
 

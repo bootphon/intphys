@@ -1,58 +1,101 @@
 import unreal_engine as ue
 from unreal_engine.classes import CameraComponent
-from unreal_engine.classes import GameplayStatics
 
-from actors.base_actor import BaseActor
 from actors.parameters import CameraParams
+from tools.utils import as_dict
 
 
-class Camera(BaseActor):
+class Camera:
+    _camera_class = ue.load_class('/Game/Camera.Camera_C')
+
     def __init__(self, world, params=CameraParams()):
-        super().__init__(world.actor_spawn(
-                ue.load_class('/Game/Camera.Camera_C')))
-        self.get_parameters(params)
-        self.set_parameters(world)
+        ue.log('camera spawn')
+        self._actor = world.actor_spawn(self._camera_class)
 
-    def get_parameters(self, params):
+        # # Attach the viewport to the camera. This initialization was present
+        # # in the intphys-1.0 blueprint but seems to be useless in UE-4.17.
+        # # This is maybe done by default.
+        # from unreal_engine.classes import GameplayStatics
+        # player_controller = GameplayStatics.GetPlayerController(world, 0)
+        # player_controller.SetViewTargetWithBlend(NewViewTarget=self.actor)
+
+        self._actor.SetTickableWhenPaused(True)
+        self._actor.bind_event('OnActorBeginOverlap', self._on_overlap)
+        self._component = self._actor.get_component_by_type(CameraComponent)
+        self._is_valid = True
+
+        self.set_parameters(params)
+
+    def _on_overlap(self, me, other):
+        if me != other:
+            message = '{} overlapping {}'.format(
+                self._actor.get_name(), other.get_name())
+            ue.log(message)
+            self._is_valid = False
+
+    @property
+    def actor(self):
+        return self._actor
+
+    @property
+    def is_valid(self):
+        return self._is_valid
+
+    @property
+    def location(self):
+        return self._actor.get_actor_location()
+
+    @location.setter
+    def location(self, value):
+        ue.log('change camera location')
+        if not self._actor.set_actor_location(value):
+            ue.log_warning('Failed to set the camera location')
+
+    @property
+    def rotation(self):
+        return self._actor.get_actor_rotation()
+
+    @rotation.setter
+    def rotation(self, value):
+        if not self._actor.set_actor_rotation(value):
+            ue.log_warning('Failed to set the camera rotation')
+
+    @property
+    def field_of_view(self):
+        return self._component.FieldOfView
+
+    @field_of_view.setter
+    def field_of_view(self, value):
+        self._component.SetFieldOfView(value)
+
+    @property
+    def aspect_ratio(self):
+        return self._component.AspectRatio
+
+    @aspect_ratio.setter
+    def aspect_ratio(self, value):
+        self._component.SetAspectRatio(value)
+
+    @property
+    def projection_mode(self):
+        return self._component.ProjectionMode
+
+    @projection_mode.setter
+    def projection_mode(self, value):
+        self._component.SetProjectionMode(value)
+
+    def set_parameters(self, params):
+        self.location = params.location
+        self.rotation = params.rotation
         self.field_of_view = params.field_of_view
         self.aspect_ratio = params.aspect_ratio
         self.projection_mode = params.projection_mode
-        super().get_parameters(params.location, params.rotation, True, True)
-
-    def set_parameters(self, world):
-        super().set_parameters()
-
-        # Attach the viewport to the camera. This initialization
-        # was present in the intphys-1.0 blueprint but seems to be
-        # useless in UE-4.17. This is maybe done by default.
-        player_controller = GameplayStatics.GetPlayerController(world, 0)
-        player_controller.SetViewTargetWithBlend(NewViewTarget=self.actor)
-
-        self.camera_component = self.actor.get_component_by_type(
-            CameraComponent)
-        self.camera_component.SetFieldOfView(self.field_of_view)
-        self.camera_component.SetAspectRatio(self.aspect_ratio)
-        self.camera_component.SetProjectionMode(self.projection_mode)
-
-    def set_field_of_view(self, field_of_view):
-        self.field_of_view = field_of_view
-        self.camera_component.SetFieldOfView(self.field_of_view)
-
-    def set_aspect_ratio(self, aspect_ratio):
-        self.aspect_ratio = aspect_ratio
-        self.camera_component.SetAspectRatio(self.aspect_ratio)
-
-    def set_projection_mode(self, projection_mode):
-        self.projection_mode = projection_mode
-        self.camera_component.SetProjectionMode(self.projection_mode)
 
     def get_status(self):
-        status = super().get_status()
-        status['field_of_view'] = self.field_of_view
-        status['aspect_ratio'] = self.aspect_ratio
-        status['projection_mode'] = self.projection_mode
-        return status
-
-    def on_actor_overlap(self, me, other):
-        super().on_actor_overlap(me, other)
-        self.is_valid = False
+        return {
+            'name': self._actor.get_name(),
+            'location': as_dict(self.location),
+            'rotation': as_dict(self.rotation),
+            'field_of_view': self.field_of_view,
+            'aspect_ratio': self.aspect_ratio,
+            'projection_mode': self.projection_mode}

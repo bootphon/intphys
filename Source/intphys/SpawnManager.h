@@ -16,4 +16,7 @@ class INTPHYS_API USpawnManager : public UBlueprintFunctionLibrary
 
   UFUNCTION(BlueprintCallable, Category="IntPhys")
   static AActor* Spawn(UWorld* World, UClass* Class, const FTransform& Transform);
+
+  UFUNCTION(BlueprintCallable, Category="IntPhys")
+  static bool IsOverlapping(const AActor* Actor, const AActor* Other);
 };

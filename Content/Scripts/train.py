@@ -6,6 +6,7 @@ import random
 
 import unreal_engine as ue
 from unreal_engine import FLinearColor, FRotator, FVector
+from unreal_engine.classes import SpawnManager
 
 from scene import Scene
 from actors.object import Object
@@ -50,6 +51,7 @@ class Train(Scene):
 
     def __init__(self, world, saver):
         super().__init__(world, saver, 'train')
+        self._is_valid = True
 
         # # the bounding box of each actor, for overlap detection at spawn time
         # self.bounding_boxes = {}
@@ -320,9 +322,34 @@ class Train(Scene):
             return
 
         super().play_run()
+
+        # make sure there is no overlap between objects at spawn time
+        actors_to_check = [
+            actor.actor for name, actor in self.actors.items()
+            if 'object' in name.lower() or 'occluder' in name.lower()]
+
+        actors_overlapped = actors_to_check.copy()
+        if 'walls' in self.actors:
+            actors_overlapped += [
+                self.actors['walls'].front.actor,
+                self.actors['walls'].left.actor,
+                self.actors['walls'].right.actor]
+
+        for actor in actors_to_check:
+            for other in actors_overlapped:
+                if SpawnManager.IsOverlapping(actor, other):
+                    ue.log(f'ERROR: overlapping actors detected: '
+                           f'{actor.get_name()} and {other.get_name()}')
+                    self._is_valid = False
+                    return
+
+        # apply force on moving objects
         for name, actor in self.actors.items():
             if 'object' in name.lower():
                 actor.set_force(actor.initial_force)
+
+    def is_valid(self):
+        return self._is_valid and super().is_valid()
 
     def is_possible(self):
         return True

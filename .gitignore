@@ -41,8 +41,13 @@
 intphys.kdev4
 intphys.pro
 intphys.workspace
+intphys.code-workspace
 intphysCodeCompletionFolders.txt
 intphysCodeLitePreProcessor.txt
+Makefile
+CMakeLists.txt
+.idea/
+RunUAT
 
 # generated when the program crashes
 core
@@ -71,6 +76,3 @@ Exemples/html
 # Vim
 *.swp
 *.swo
-
-# postprocessing building files
-Tools/postprocessing/build

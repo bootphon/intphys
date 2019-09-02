@@ -1,8 +1,6 @@
 import os
 import importlib
-
 import unreal_engine as ue
-from tools.utils import as_dict
 
 
 class Scene:
@@ -63,6 +61,7 @@ class Scene:
         self.actors = {}
         for actor, actor_params in self.params.items():
             if ('magic' in actor):
+                # the magic trick is managed by test classes
                 continue
             elif actor == 'Camera':
                 # the camera is managed by the director, not by the scene
@@ -71,8 +70,7 @@ class Scene:
                 class_name = actor.split('_')[0].title()
 
             ue.log('spawning {}'.format(actor))
-            # dynamically import and instantiate the class corresponding to the
-            # actor
+            # dynamically import and instantiate the actor's class
             module_path = "actors.{}".format(actor.lower().split('_')[0])
             module = importlib.import_module(module_path)
 
@@ -83,17 +81,14 @@ class Scene:
                 ue.log('failed to spawn {}'.format(actor))
 
     def reset_actors(self):
-        if self.actors is None:
-            return
         for name, actor in self.actors.items():
             if 'object' in name.lower() or 'occluder' in name.lower():
                 actor.reset(self.params[name])
 
     def del_actors(self):
-        if self.actors is not None:
-            for actor in self.actors.values():
-                actor.actor_destroy()
-            self.actors = None
+        for actor in self.actors.values():
+            actor.actor_destroy()
+        self.actors = None
 
     def get_nobjects(self):
         """Return the number of objetcs in the scene"""

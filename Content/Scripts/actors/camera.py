@@ -1,5 +1,6 @@
 import unreal_engine as ue
 from unreal_engine.classes import CameraComponent
+from unreal_engine.classes import GameplayStatics
 
 from actors.parameters import CameraParams
 from tools.utils import as_dict
@@ -10,21 +11,25 @@ class Camera:
 
     def __init__(self, world, params=CameraParams()):
         ue.log('camera spawn')
-        self._actor = world.actor_spawn(self._camera_class)
+        self._actor = world.actor_spawn(
+            self._camera_class, params.location, params.rotation)
 
-        # # Attach the viewport to the camera. This initialization was present
-        # # in the intphys-1.0 blueprint but seems to be useless in UE-4.17.
-        # # This is maybe done by default.
-        # from unreal_engine.classes import GameplayStatics
-        # player_controller = GameplayStatics.GetPlayerController(world, 0)
-        # player_controller.SetViewTargetWithBlend(NewViewTarget=self.actor)
-
-        self._actor.SetTickableWhenPaused(True)
         self._actor.bind_event('OnActorBeginOverlap', self._on_overlap)
         self._component = self._actor.get_component_by_type(CameraComponent)
-        self._is_valid = True
 
-        self.set_parameters(params)
+        # Attach the viewport to the camera. This initialization was present
+        # in the intphys-1.0 blueprint but seems to be useless in UE-4.17.
+        # This is maybe done by default.
+        player_controller = GameplayStatics.GetPlayerController(world, 0)
+        player_controller.SetViewTargetWithBlend(NewViewTarget=self._actor)
+
+        self._actor.SetTickableWhenPaused(True)
+        self._component.SetTickableWhenPaused(True)
+
+        self.field_of_view = params.field_of_view
+        self.aspect_ratio = params.aspect_ratio
+        self.projection_mode = params.projection_mode
+        self._is_valid = True
 
     def _on_overlap(self, me, other):
         if me != other:
@@ -48,7 +53,7 @@ class Camera:
     @location.setter
     def location(self, value):
         ue.log('change camera location')
-        if not self._actor.set_actor_location(value):
+        if not self._actor.set_actor_location(value, False):
             ue.log_warning('Failed to set the camera location')
 
     @property
@@ -57,7 +62,7 @@ class Camera:
 
     @rotation.setter
     def rotation(self, value):
-        if not self._actor.set_actor_rotation(value):
+        if not self._actor.set_actor_rotation(value, False):
             ue.log_warning('Failed to set the camera rotation')
 
     @property
@@ -84,7 +89,7 @@ class Camera:
     def projection_mode(self, value):
         self._component.SetProjectionMode(value)
 
-    def set_parameters(self, params):
+    def setup(self, params=CameraParams()):
         self.location = params.location
         self.rotation = params.rotation
         self.field_of_view = params.field_of_view

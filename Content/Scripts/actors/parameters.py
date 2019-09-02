@@ -51,7 +51,7 @@ def theoretical_max_depth():
 
 @dataclass
 class CameraParams:
-    location: FVector = FVector(0, 0, 0)
+    location: FVector = camera_location(type=None)
     rotation: FRotator = FRotator(0, 0, 0)
     field_of_view: float = 90
     aspect_ratio: float = 1

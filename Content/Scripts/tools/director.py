@@ -269,8 +269,8 @@ class Director(object):
         self.ticker = 0
 
         # setup the camera parameters and setup the new scene (spawn actors)
+        self.camera.setup(self.current_scene.params['Camera'])
         self.current_scene.play_run()
-        self.camera.set_parameters(self.current_scene.params['Camera'])
 
         # for train only, 'warmup' the scene to settle the physics simulation
         if 'train' in self.current_scene.name:

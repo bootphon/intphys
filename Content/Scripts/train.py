@@ -20,26 +20,6 @@ from actors.parameters import camera_location
 from tools.materials import get_random_material
 
 
-# def just_a_try():
-#     from unreal_engine import FTransform
-#     from unreal_engine.classes import StaticMesh
-
-#     mesh_name = '/Game/Meshes/Wall_400x400'
-#     mesh = ue.load_object(StaticMesh, mesh_name)
-#     box = mesh.GetBoundingBox()
-#     print(f'box = {box}')
-
-#     trans = FTransform()
-#     trans.rotation = FRotator(0, 15, 0)
-#     trans.scale = FVector(1, 2, 1)
-#     print(f'trans = {trans}')
-
-#     print(box.__dict__)
-
-#     tbox = box.TransformBy(trans.ToMatrixWithScale())
-#     print(f'tbox = {tbox}')
-
-
 class Train(Scene):
     @property
     def name(self):
@@ -52,9 +32,6 @@ class Train(Scene):
     def __init__(self, world, saver):
         super().__init__(world, saver, 'train')
         self._is_valid = True
-
-        # # the bounding box of each actor, for overlap detection at spawn time
-        # self.bounding_boxes = {}
 
     def generate_parameters(self):
         """Pick random parameters for all the objects in the scene"""

@@ -14,7 +14,7 @@ from actors.parameters import camera_location
 from tools.materials import get_random_material
 
 
-class Train(Scene):
+class Sandbox(Scene):
     @property
     def name(self):
         return 'train sandbox'
@@ -54,26 +54,26 @@ class Train(Scene):
         self.params['object_1'] = ObjectParams(
             mesh='Sphere',
             material=get_random_material('Object'),
-            location=FVector(500, 0, 0),
+            location=FVector(300, 0, 0),
             rotation=FRotator(0, 0, 0),
             scale=FVector(2, 2, 2),
             mass=1,
-            # initial_force=FVector(-10**4, 0, 0),
             initial_force=FVector(0, 0, 0),
+            # initial_force=FVector(-10**4, 0, 0),
             warning=True,
-            overlap=True)
+            overlap=False)
 
         self.params['object_2'] = ObjectParams(
             mesh='Sphere',
             material=get_random_material('Object'),
-            location=FVector(500, 100, 100),
+            location=FVector(500, 300, 0),
             rotation=FRotator(0, 0, 0),
             scale=FVector(2, 2, 2),
             mass=1,
-            # initial_force=FVector(-10**4, 0, 0),
-            initial_force=FVector(0, 0, 0),
+            initial_force=FVector(-10**4, -10**4, 0),
+            # initial_force=FVector(0, 0, 0),
             warning=True,
-            overlap=True)
+            overlap=False)
 
     @staticmethod
     def make_color(min_value=0.5, max_value=1.0):
@@ -114,9 +114,9 @@ class Train(Scene):
         return self.run == 1
 
     def tick(self):
-        o1 = self.actors['object_1']
-        overlapping = []
-        overlapping = o1.actor.GetOverlappingActors()
-        ue.log(overlapping)
+        # o1 = self.actors['object_1']
+        # overlapping = []
+        # overlapping = o1.actor.GetOverlappingActors()
+        # ue.log(overlapping)
 
         super().tick()

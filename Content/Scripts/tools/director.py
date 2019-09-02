@@ -57,6 +57,11 @@ class SceneFactory:
         train_class = self._import_class('train', 'Train')
         return train_class(self._world, self._saver)
 
+    def get_sandbox(self):
+        """Returns an instance of a sandbox scene"""
+        train_class = self._import_class('sandbox', 'Sandbox')
+        return train_class(self._world, self._saver)
+
     def get_test(self, category, scenario, is_occluded, movement):
         """Returns an instance of a test scene"""
         if scenario == 'O0' and movement == 'dynamic_1':
@@ -112,7 +117,7 @@ class SceneFactory:
                     'in one JSON scene')
 
     def _parse_category(self, category, data):
-        if category not in ('train', 'test', 'dev'):
+        if category not in ('train', 'test', 'dev', 'sandbox'):
             exit_ue(
                 f'error: category must be train, test or dev '
                 'but is {category}')
@@ -121,6 +126,8 @@ class SceneFactory:
         if 'train' in category:
             # data is here the number of train scenes to generate
             scenes = (self.get_train() for _ in range(data))
+        elif 'sandbox' in category:
+            scenes = (self.get_sandbox() for _ in range(data))
         else:
             # category is either 'test' or 'dev'
             scenes = self._parse_test(data, category)
@@ -309,6 +316,8 @@ class Director(object):
                 self.current_scene.category,
                 self.current_scene.is_occluded,
                 self.current_scene.movement)
+        elif 'sandbox' in self.current_scene.name:
+            scene = self.scene_factory.get_sandbox()
         else:
             # we are restarting a train scene
             scene = self.scene_factory.get_train()

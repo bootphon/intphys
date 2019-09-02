@@ -373,7 +373,7 @@ class Director(object):
         # parameters. In a try/catch to deals with the very last scene once it
         # have been stopped
         try:
-            if not self.current_scene.is_valid():
+            if not self.current_scene.is_valid() or not self.camera.is_valid:
                 self.restart_scene()
                 self.pauser.pause()
                 return

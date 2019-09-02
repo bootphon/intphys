@@ -90,6 +90,7 @@ class Camera:
         self.field_of_view = params.field_of_view
         self.aspect_ratio = params.aspect_ratio
         self.projection_mode = params.projection_mode
+        self._is_valid = True
 
     def get_status(self):
         return {

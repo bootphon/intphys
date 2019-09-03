@@ -15,12 +15,6 @@ FScreenshot::~FScreenshot()
 {}
 
 
-// void FScreenshot::SetActors(TArray<AActor*>& Actors)
-// {
-//    m_Masks.SetActors(Actors);
-// }
-
-
 void FScreenshot::SetOriginActor(AActor* Actor)
 {
    m_OriginActor = Actor;

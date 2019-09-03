@@ -24,8 +24,6 @@ public:
 
    void SetOriginActor(AActor* Actor);
 
-   // void SetActors(TArray<AActor*>& Actors);
-
    bool Capture(const TArray<AActor*>& IgnoredActors);
 
    bool Save(const FString& Directory, TArray<FString>& OutActorsMasks);

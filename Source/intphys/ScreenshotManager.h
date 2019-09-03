@@ -106,9 +106,6 @@ public:
     UFUNCTION(BlueprintCallable, Category="IntPhys")
     static void SetOriginActor(AActor* Actor);
 
-    // UFUNCTION(BlueprintCallable, Category="IntPhys")
-    // static void SetActors(TArray<AActor*>& Actors);
-
     /**
      * Returns true if the Actor is visible in the captured frame indexed by
      * FrameIndex.

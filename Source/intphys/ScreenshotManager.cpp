@@ -41,12 +41,6 @@ void UScreenshotManager::SetOriginActor(AActor* Actor)
 }
 
 
-// void UScreenshotManager::SetActors(TArray<AActor*>& Actors)
-// {
-//     Screenshot->SetActors(Actors);
-// }
-
-
 bool UScreenshotManager::IsActorInFrame(AActor* Actor, int FrameIndex)
 {
     return Screenshot->IsActorInFrame(Actor, static_cast<uint>(FrameIndex));

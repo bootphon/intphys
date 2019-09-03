@@ -351,7 +351,8 @@ class Director(object):
             ue.log("Generated {}% more scenes due to restarted scenes".
                    format(int(percent_restarted * 100)))
 
-        self.saver.shuffle_test_scenes()
+        self.saver.shuffle_test_scenes(dataset='test')
+        self.saver.shuffle_test_scenes(dataset='dev')
 
     def tick(self, dt):
         """this method is called at each game tick by UE"""

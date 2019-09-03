@@ -43,10 +43,9 @@ class Saver:
         verbose = False
         ScreenshotManager.Initialize(
             int(self.size[0]), int(self.size[1]), int(self.size[2]),
-            None,
+            self.camera.actor,
             actors.parameters.theoretical_max_depth(),
             seed, verbose)
-        ScreenshotManager.SetOriginActor(self.camera.actor)
 
     def set_status_header(self, header):
         self.status_header = header
@@ -126,22 +125,27 @@ class Saver:
                 continue
         return parsed
 
-    def shuffle_test_scenes(self):
+    def shuffle_test_scenes(self, dataset='test'):
         """Shuffle possible/impossible runs in test scenes
 
         The test scenes are saved in 4 subdirectories 1, 2, 3 and 4, where 1
         and 2 are possible, 3 and 4 are impossible. This method simply shuffle
         in a random way the subdirectories.
 
-        The method is called once by the director, at the very end of the
-        program.
+        The method is called by the director, at the very end of the program.
+
+        Dataset can be 'test' or 'dev' to shuffle the test dataset or the dev
+        dataset respectively.
 
         """
+        if dataset not in ('test', 'dev'):
+            raise ValueError(f'dataset must be test or dev, it is {dataset}')
+
         if not self.output_dir:
             # dry mode, nothing to do
             return
 
-        test_dir = os.path.join(self.output_dir, 'test')
+        test_dir = os.path.join(self.output_dir, dataset)
         if not os.path.isdir(test_dir):
             # no test scene, nothing to do
             return

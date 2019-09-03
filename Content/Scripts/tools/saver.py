@@ -152,8 +152,8 @@ class Saver:
 
         # retrieve the list od directories to shuffle, those are 'test_dir/*/*'
         scenes = glob.glob('{}/*/*'.format(test_dir))
-        ue.log('Shuffling possible/impossible runs for {} test scenes'
-               .format(len(scenes)))
+        ue.log('Shuffling possible/impossible runs for {} {} scenes'
+               .format(len(scenes), dataset))
 
         for scene in scenes:
             subdirs = sorted(os.listdir(scene))

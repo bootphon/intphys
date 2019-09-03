@@ -14,6 +14,8 @@ class Scene:
 
         self.actors = None
         self.run = 0
+
+        # TODO move in test scene, useless here
         self.last_locations = []
 
     def get_status(self):
@@ -69,7 +71,6 @@ class Scene:
             else:
                 class_name = actor.split('_')[0].title()
 
-            ue.log('spawning {}'.format(actor))
             # dynamically import and instantiate the actor's class
             module_path = "actors.{}".format(actor.lower().split('_')[0])
             module = importlib.import_module(module_path)

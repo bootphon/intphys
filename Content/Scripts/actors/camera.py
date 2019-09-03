@@ -52,7 +52,6 @@ class Camera:
 
     @location.setter
     def location(self, value):
-        ue.log('change camera location')
         if not self._actor.set_actor_location(value, False):
             ue.log_warning('Failed to set the camera location')
 

@@ -22,21 +22,21 @@ class PauseManager:
     def __init__(self, world, duration):
         self._world = world
         self._duration = duration
-        self._is_paused = False
-        self.remaining = 0
+        self._remaining = 0
+
+    def tick(self):
+        if self._remaining == 0:
+            GameplayStatics.SetGamePaused(self._world, False)
+
+        if self.is_paused():
+            self._remaining -= 1
 
     def is_paused(self):
-        return self._is_paused
+        return self._remaining > 0
 
     def pause(self):
-        self.remaining = self._duration
-        self._is_paused = True
+        self._remaining = self._duration
         GameplayStatics.SetGamePaused(self._world, True)
-
-    def unpause(self):
-        if self._is_paused:
-            self._is_paused = False
-            GameplayStatics.SetGamePaused(self._world, False)
 
 
 class SceneFactory:
@@ -232,26 +232,7 @@ class Director(object):
         """The total number of scene to render"""
         return len(self.scenes)
 
-    def erase_current_scene_capture(self):
-        """Remove from disk any saved content for the current scenes
-
-        This is needed if the scene failed and must be restarted
-
-        """
-        if not self.saver.is_dry_mode:
-            output_dir = self.current_scene.get_scene_subdir(
-                self.counter[self.current_scene.category],
-                self.total_scenes)
-            if self.current_scene.is_test_scene():
-                output_dir = '/'.join(output_dir.split('/')[:-1])
-            shutil.rmtree(output_dir)
-
     def start_scene(self):
-        # TODO must be check before, not in this method
-        if self.current_scene_index >= self.total_scenes:
-            # no more scene to start
-            return
-
         # log a brief description of the scene being started
         if self.current_scene.run == 0:
             if 'train' in self.current_scene.name:
@@ -265,22 +246,21 @@ class Director(object):
                     'occluded' if self.current_scene.is_occluded is True
                     else 'visible'))
 
-        # begin the new with ticks counter at zero
-        self.ticker = 0
-
         # setup the camera parameters and setup the new scene (spawn actors)
         self.camera.setup(self.current_scene.params['Camera'])
         self.current_scene.play_run()
 
-        # for train only, 'warmup' the scene to settle the physics simulation
-        if 'train' in self.current_scene.name:
-            for _ in range(1, 10):
-                self.current_scene.tick()
+        # if the scene is not valid (because of overlapping actors for
+        # instance) it will be immediatly restarted, so the pause is useless
+        if self.current_scene.is_valid():
+            self.pauser.pause()
+
+        # # for train only, 'warmup' the scene to settle the physics simulation
+        # if 'train' in self.current_scene.name:
+        #     for _ in range(1, 10):
+        #         self.current_scene.tick()
 
     def stop_scene(self):
-        if self.current_scene_index >= self.total_scenes:
-            return
-
         run_stopped = self.current_scene.stop_run(
             self.counter[self.current_scene.category],
             self.total_scenes)
@@ -308,7 +288,13 @@ class Director(object):
         # clear the saver from any saved content and delete the output
         # directory of the failed scene (if any)
         self.saver.reset(True)
-        self.erase_current_scene_capture()
+        if not self.saver.is_dry_mode:
+            output_dir = self.current_scene.get_scene_subdir(
+                self.counter[self.current_scene.category],
+                self.total_scenes)
+            if self.current_scene.is_test_scene():
+                output_dir = '/'.join(output_dir.split('/')[:-1])
+            shutil.rmtree(output_dir)
 
         if self.current_scene.is_test_scene():
             # we are restarting a test scene
@@ -323,26 +309,13 @@ class Director(object):
             scene = self.scene_factory.get_train()
 
         # insert the new scene in the list and erase the current one
-        self.scenes.insert(self.current_scene_index + 1, scene)
-        self.scenes.pop(0)
-
-    def restart_scene(self):
-        """Resarts a failed scene with new parameters"""
-        self.current_scene.stop_run(
-            self.counter[self.current_scene.category],
-            self.total_scenes)
-        self.regenerate_scene()
-        self.start_scene()
-
-    def capture(self):
-        """Take screenshot of the current scene"""
-        self.current_scene.capture()
+        self.scenes[self.current_scene_index] = scene
 
     def terminate(self):
         """Conclude operations once all the scenes have been rendered
 
         informs on the amount of restarted scenes and shuffle the
-        possible/impossible runs in test scenes
+        possible/impossible runs in test and dev scenes
 
         """
         if self.num_restarted_scenes:
@@ -356,43 +329,41 @@ class Director(object):
 
     def tick(self, dt):
         """this method is called at each game tick by UE"""
-        if self.pauser.remaining != 0:
-            self.pauser.remaining -= 1
-            return
-
-        # launch new scene every 2 * num_frames tick except if a pause just
-        # finished
-        if not self.pauser.is_paused() and self.ticker % self.max_tick == 0:
-            if self.ticker != 0:
-                # if this is not the first tick, stop the previous scene
-                self.stop_scene()
-            self.start_scene()
-            self.pauser.pause()
-            return
-
-        # if one of the actors is not valid, restart the scene with new
-        # parameters. In a try/catch to deals with the very last scene once it
-        # have been stopped
-        try:
-            if not self.current_scene.is_valid() or not self.camera.is_valid:
-                self.restart_scene()
-                self.pauser.pause()
-                return
-        except IndexError:
-            pass
-
-        # we have no remaining pause ticks and a scene is running, we can
-        # safely unpause the rendering
+        # if the renderer is paused, just wait the end of the pause
+        self.pauser.tick()
         if self.pauser.is_paused():
-            self.pauser.unpause()
+            return
 
-        if self.current_scene_index < self.total_scenes:
-            self.current_scene.tick()
-            if self.ticker % 2 == 1:
-                self.capture()
+        # the ticker at 0 means we terminate a scene at the previous call to
+        # the tick() method (or the is the very first tick)
+        if self.ticker == 0:
+            if self.current_scene_index < self.total_scenes:
+                # we need to start a new scene
+                self.start_scene()
+                self.ticker += 1
+            else:
+                # we rendered all the scenes, exiting
+                self.terminate()
+                exit_ue()
+
+        # we reach the end of a scene, stop it and prepare for the next one
+        elif self.ticker > self.max_tick:
+            self.stop_scene()
+            self.ticker = 0
+
+        # a scene is running, if it is valid, simply continue and capture
+        # screenshots, if it becomes invalid, restart it
         else:
-            # all the scenes are rendered, terminate and exit the program
-            self.terminate()
-            exit_ue()
-
-        self.ticker += 1
+            if self.current_scene.is_valid() and self.camera.is_valid:
+                self.current_scene.tick()
+                if self.ticker % 2 == 1:
+                    self.current_scene.capture()
+                self.ticker += 1
+            else:
+                # the scene is not valid, reschedule it with new parameters and
+                # prepare for the next scene
+                self.current_scene.stop_run(
+                    self.counter[self.current_scene.category],
+                    self.total_scenes)
+                self.regenerate_scene()
+                self.ticker = 0

@@ -1,5 +1,3 @@
-# coding: utf-8
-
 import unreal_engine as ue
 from unreal_engine.classes import Material
 from actors.base_mesh import BaseMesh
@@ -19,9 +17,10 @@ down: it will rise again at the 50th frame
 
 
 class Occluder(BaseMesh):
+    class_name = '/Game/Occluder.Occluder_C'
+
     def __init__(self, world, params=OccluderParams()):
-        super().__init__(
-            world.actor_spawn(ue.load_class('/Game/Occluder.Occluder_C')))
+        super().__init__(world.actor_spawn(ue.load_class(self.class_name)))
         self.get_parameters(params)
         self.set_parameters()
 
@@ -49,6 +48,7 @@ class Occluder(BaseMesh):
 
     def set_parameters(self):
         super().set_parameters()
+        # self.get_mesh().set_simulate_physics(True)
 
     def move(self):
         """Make the Occluder fall and get up when called"""

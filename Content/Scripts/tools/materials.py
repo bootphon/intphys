@@ -9,7 +9,7 @@ from tools.utils import intphys_root_directory
 
 # UNAUTHORIZED is a Dictionary that contains the unauthorized combinations of
 # material.
-UNAUTHORIZED = {"/Game/Materials/Floor/M_FloorTile_02.M_FloorTile_02" :
+UNAUTHORIZED = {"/Game/Materials/Floor/M_FloorTile_02.M_FloorTile_02":
                 ["/Game/Materials/Wall/M_Metal_Rust.M_Metal_Rust"]}
 PILL_UNAUTHORIZED = {'/Game/Materials/Object/M_Tech_Hex_Tile.M_Tech_Hex_Tile',
                      '/Game/Materials/Object/M_Metal_Gold.M_Metal_Gold',

@@ -108,8 +108,6 @@ class Train(Scene):
             length=random.uniform(1500, 5000),
             depth=random.uniform(800, max_depth))
 
-        # TODO add the bounding boxes of the 3 walls
-
     def generate_occluder(self, n):
         nmoves = random.randint(0, 3)
         moves = []
@@ -133,12 +131,6 @@ class Train(Scene):
             warning=True,
             overlap=True,
             start_up=random.choice([True, False]))
-
-        # self.bounding_boxes[f'occluder_{n+1}'] = (
-        #     '/Game/Meshes/OccluderWall',
-        #     self.params[f'occluder_{n+1}'].location,
-        #     self.params[f'occluder_{n+1}'].rotation,
-        #     self.params[f'occluder_{n+1}'].scale)
 
     def generate_random_objects(self, nobjects):
         """Generate random objects at random positions"""

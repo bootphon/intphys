@@ -87,15 +87,17 @@ class Train(Scene):
                 random.uniform(0.5, 1.5),
                 1,
                 random.uniform(0.5, 1.5))
+            location = FVector(
+                random.uniform(200, 700),
+                random.uniform(-600, 600),
+                0)
         else:
-            # scale of an object in [1, 2]
-            s = random.uniform(1, 2)
+            s = random.uniform(0.8, 2.5)
             scale = FVector(s, s, s)
-
-        location = FVector(
-            random.uniform(200, 700),
-            random.uniform(-500, 500),
-            0)
+            location = FVector(
+                random.uniform(200, 900),
+                random.uniform(-800, 800),
+                0)
 
         rotation = FRotator(0, 0, random.uniform(-180, 180))
 
@@ -114,8 +116,8 @@ class Train(Scene):
         for m in range(nmoves):
             if len(moves) == 0:
                 moves.append(random.randint(0, 200))
-            elif moves[-1] + 10 < 200:
-                moves.append(random.randint(moves[-1]+10, 200))
+            elif moves[-1] + 20 < 200:
+                moves.append(random.randint(moves[-1] + 20, 200))
 
         position = self.generate_random_position(
             '/Game/Meshes/OccluderWall', is_occluder=True)

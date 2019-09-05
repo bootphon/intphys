@@ -5,7 +5,7 @@ import math
 import random
 
 import unreal_engine as ue
-from unreal_engine import FLinearColor, FRotator, FVector
+from unreal_engine import FLinearColor, FRotator, FVector, FTransform
 from unreal_engine.classes import SpawnManager
 
 from scene import Scene
@@ -18,6 +18,32 @@ from actors.parameters import OccluderParams
 from actors.parameters import WallsParams
 from actors.parameters import camera_location
 from tools.materials import get_random_material
+
+
+class BoundingBox:
+    def __init__(self, params):
+        if isinstance(params, OccluderParams):
+            if params.start_up:
+                self._min = FVector(-200, 0, 0)
+                self._max = FVector(200, 10, 0)
+            else:
+                self._min = FVector(-200, 0, 0)
+                self._max = FVector(200, 200, 0)
+        elif isinstance(params, ObjectParams):
+            self._min = FVector(-50, -50, 0)
+            self._max = FVector(50, 50, 0)
+        else:
+            raise ValueError('unsuported params for bounding box')
+
+        self._transform = FTransform()
+        self._transform.translation = params.location
+        self._transform.rotation = params.rotation
+        self._transform.scale = params.scale
+
+    def intersect(self, other):
+        return SpawnManager.Intersect(
+            self._min, self._max, self._transform,
+            other._min, other._max, other._transform)
 
 
 class Train(Scene):
@@ -60,6 +86,9 @@ class Train(Scene):
         scenarios = 2 * ['random', 'collision'] + ['wall']
         scenario = random.choice(scenarios)
 
+        # the bounding boxes of each actor
+        self._boxes = {}
+
         # generate the walls
         if scenario == 'wall':
             self.generate_walls(0.7, 900)
@@ -69,10 +98,12 @@ class Train(Scene):
         # generate the occluders
         noccluders = random.randint(0, 2)
         for n in range(noccluders):
-            self.generate_occluder(n)
+            while self.generate_occluder(n) is False:
+                pass
 
         # generate the objects
         if scenario == 'random':
+
             self.generate_random_objects(random.randint(1, 3))
         elif scenario == 'collision':
             self.generate_collision_objects()
@@ -86,16 +117,16 @@ class Train(Scene):
             scale = FVector(
                 random.uniform(0.5, 1.5),
                 1,
-                random.uniform(0.5, 1.5))
+                random.uniform(0.5, 3))
             location = FVector(
                 random.uniform(200, 700),
-                random.uniform(-600, 600),
+                random.uniform(-500, 500),
                 0)
         else:
             s = random.uniform(0.8, 2.5)
             scale = FVector(s, s, s)
             location = FVector(
-                random.uniform(200, 900),
+                random.uniform(200, 800),
                 random.uniform(-800, 800),
                 0)
 
@@ -133,6 +164,16 @@ class Train(Scene):
             warning=True,
             overlap=True,
             start_up=random.choice([True, False]))
+
+        # compute the bounding box of the occluder and make sure it does not
+        # overlap any other object
+        box = BoundingBox(self.params[f'occluder_{n+1}'])
+        for b in self._boxes.values():
+            if box.intersect(b):
+                return False
+        # no overlap, add the bounding box for further intersection checks
+        self._boxes[f'occluder_{n+1}'] = box
+        return True
 
     def generate_random_objects(self, nobjects):
         """Generate random objects at random positions"""
@@ -179,7 +220,7 @@ class Train(Scene):
             else:
                 force = FVector(0, 0, 0)
 
-            self.params['object_{}'.format(n + 1)] = ObjectParams(
+            self.params[f'object_{n+1}'] = ObjectParams(
                 mesh=mesh,
                 material=get_random_material('Object'),
                 location=position[0],
@@ -189,6 +230,8 @@ class Train(Scene):
                 initial_force=force,
                 warning=True,
                 overlap=False)
+            self._boxes[f'object_{n+1}'] = BoundingBox(
+                self.params[f'object_{n+1}'])
 
     def generate_collision_objects(self):
         """Generate 3 objects in order to maximize collision
@@ -221,7 +264,7 @@ class Train(Scene):
                 dir_force[1] * math.pow(10, intensity[1]),
                 dir_force[2] * math.pow(10, intensity[2]))
 
-            self.params['object_{}'.format(n + 1)] = ObjectParams(
+            self.params[f'object_{n+1}'] = ObjectParams(
                 mesh=mesh,
                 material=get_random_material('Object'),
                 location=position[0],
@@ -231,6 +274,8 @@ class Train(Scene):
                 initial_force=force,
                 warning=True,
                 overlap=False)
+            self._boxes[f'object_{n+1}'] = BoundingBox(
+                self.params[f'object_{n+1}'])
 
     def generate_above_wall_objects(self):
         nobjects = 3
@@ -270,6 +315,8 @@ class Train(Scene):
                 initial_force=force,
                 warning=True,
                 overlap=False)
+            self._boxes[f'object_{n+nobjects_r+1}'] = BoundingBox(
+                self.params[f'object_{n+nobjects_r+1}'])
 
     @staticmethod
     def make_color(min_value=0.5, max_value=1.0):

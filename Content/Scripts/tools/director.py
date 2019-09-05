@@ -232,7 +232,48 @@ class Director(object):
         """The total number of scene to render"""
         return len(self.scenes)
 
-    def start_scene(self):
+    def tick(self, dt):
+        """this method is called at each game tick by UE"""
+        # if the renderer is paused, just wait the end of the pause
+        self.pauser.tick()
+        if self.pauser.is_paused():
+            return
+
+        # the ticker at 0 means we terminate a scene at the previous call to
+        # the tick() method (or the is the very first tick)
+        if self.ticker == 0:
+            if self.current_scene_index < self.total_scenes:
+                # we need to start a new scene
+                self._start_scene()
+                self.ticker += 1
+            else:
+                # we rendered all the scenes, exiting
+                self._terminate()
+                exit_ue()
+
+        # we reach the end of a scene, stop it and prepare for the next one
+        elif self.ticker > self.max_tick:
+            self._stop_scene()
+            self.ticker = 0
+
+        # a scene is running, if it is valid, simply continue and capture
+        # screenshots, if it becomes invalid, restart it
+        else:
+            if self.current_scene.is_valid() and self.camera.is_valid:
+                self.current_scene.tick()
+                if self.ticker % 2 == 1:
+                    self.current_scene.capture()
+                self.ticker += 1
+            else:
+                # the scene is not valid, reschedule it with new parameters and
+                # prepare for the next scene
+                self.current_scene.stop_run(
+                    self.counter[self.current_scene.category],
+                    self.total_scenes)
+                self._regenerate_scene()
+                self.ticker = 0
+
+    def _start_scene(self):
         # log a brief description of the scene being started
         if self.current_scene.run == 0:
             if 'train' in self.current_scene.name:
@@ -260,7 +301,7 @@ class Director(object):
         #     for _ in range(1, 10):
         #         self.current_scene.tick()
 
-    def stop_scene(self):
+    def _stop_scene(self):
         run_stopped = self.current_scene.stop_run(
             self.counter[self.current_scene.category],
             self.total_scenes)
@@ -268,7 +309,7 @@ class Director(object):
         # a test scene has been stopped before all the runs have been rendered,
         # we need to restart it
         if run_stopped is False:
-            self.regenerate_scene()
+            self._regenerate_scene()
 
         # the scene has been completely rendered, just increment the counters
         elif self.current_scene.is_over():
@@ -280,7 +321,7 @@ class Director(object):
                 self.counter[self.current_scene.category] += 1
             self.counter['total'] += 1
 
-    def regenerate_scene(self):
+    def _regenerate_scene(self):
         """Generate new parameters for the current scene"""
         ue.log('Restarting scene')
         self.num_restarted_scenes += 1
@@ -311,7 +352,7 @@ class Director(object):
         # insert the new scene in the list and erase the current one
         self.scenes[self.current_scene_index] = scene
 
-    def terminate(self):
+    def _terminate(self):
         """Conclude operations once all the scenes have been rendered
 
         informs on the amount of restarted scenes and shuffle the
@@ -326,44 +367,3 @@ class Director(object):
 
         self.saver.shuffle_test_scenes(dataset='test')
         self.saver.shuffle_test_scenes(dataset='dev')
-
-    def tick(self, dt):
-        """this method is called at each game tick by UE"""
-        # if the renderer is paused, just wait the end of the pause
-        self.pauser.tick()
-        if self.pauser.is_paused():
-            return
-
-        # the ticker at 0 means we terminate a scene at the previous call to
-        # the tick() method (or the is the very first tick)
-        if self.ticker == 0:
-            if self.current_scene_index < self.total_scenes:
-                # we need to start a new scene
-                self.start_scene()
-                self.ticker += 1
-            else:
-                # we rendered all the scenes, exiting
-                self.terminate()
-                exit_ue()
-
-        # we reach the end of a scene, stop it and prepare for the next one
-        elif self.ticker > self.max_tick:
-            self.stop_scene()
-            self.ticker = 0
-
-        # a scene is running, if it is valid, simply continue and capture
-        # screenshots, if it becomes invalid, restart it
-        else:
-            if self.current_scene.is_valid() and self.camera.is_valid:
-                self.current_scene.tick()
-                if self.ticker % 2 == 1:
-                    self.current_scene.capture()
-                self.ticker += 1
-            else:
-                # the scene is not valid, reschedule it with new parameters and
-                # prepare for the next scene
-                self.current_scene.stop_run(
-                    self.counter[self.current_scene.category],
-                    self.total_scenes)
-                self.regenerate_scene()
-                self.ticker = 0

@@ -1,10 +1,6 @@
-import colorsys
 import random
 
-import unreal_engine as ue
-from unreal_engine import FLinearColor, FRotator, FVector
-
-from train import Train
+from unreal_engine import FRotator, FVector
 from actors.parameters import CameraParams
 from actors.parameters import FloorParams
 from actors.parameters import LightParams
@@ -13,6 +9,7 @@ from actors.parameters import OccluderParams
 from actors.parameters import WallsParams
 from actors.parameters import camera_location
 from tools.materials import get_random_material
+from train import Train
 
 
 class Sandbox(Train):
@@ -26,11 +23,8 @@ class Sandbox(Train):
 
     def generate_parameters(self):
         self.params['Camera'] = CameraParams(
-            location=camera_location(type='train'),
-            rotation=FRotator(
-                0,
-                random.uniform(-10, 10),
-                random.uniform(-10, 10)))
+            location=FVector(0, 0, 180),
+            rotation=FRotator(0, 0, 0))
 
         self.params['Floor'] = FloorParams(
             material=get_random_material('Floor'))
@@ -43,10 +37,11 @@ class Sandbox(Train):
             color=self.make_color(0.9, 1.0),
             varIntensity=random.uniform(-0.2, 0.9))
 
-        self.case_two_occluders_colliding()
+        # self.case_two_occluders_colliding()
         # self.case_ball_on_camera()
         # self.case_one_occluder()
-        # self.case_one_object()
+        self.case_one_object()
+        # self.case_walls_overlap()
 
     def case_two_occluders_colliding(self):
         """A static occluder and a second one hitting/overlapping the first"""
@@ -114,9 +109,27 @@ class Sandbox(Train):
     def case_one_object(self):
         """A static object"""
         self.params['object_1'] = ObjectParams(
+            mesh='Cube',
+            material=get_random_material('Object'),
+            location=FVector(100, 200, 0),
+            rotation=FRotator(0, 0, 0),
+            scale=FVector(1, 1, 1),
+            mass=1,
+            initial_force=FVector(0, 0, 0),
+            warning=True,
+            overlap=False)
+
+    def case_walls_overlap(self):
+        self.params['walls'] = WallsParams(
+            material=get_random_material('Wall'),
+            height=20,
+            length=1000,
+            depth=800)
+
+        self.params['object_1'] = ObjectParams(
             mesh='Sphere',
             material=get_random_material('Object'),
-            location=FVector(300, 0, 0),
+            location=FVector(800, 0, 0),
             rotation=FRotator(0, 0, 0),
             scale=FVector(2, 2, 2),
             mass=1,

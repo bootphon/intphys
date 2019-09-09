@@ -280,7 +280,7 @@ class Director(object):
                 ue.log('Scene {}/{}: Train scenario'.format(
                     self.current_scene_index + 1, self.total_scenes))
             else:
-                ue.log('Scene {}/{}: Test / scenario {} / {} / {}'.format(
+                ue.log('Scene {}/{}: Test scenario {} / {} / {}'.format(
                     self.current_scene_index + 1, self.total_scenes,
                     self.current_scene.name,
                     self.current_scene.movement,

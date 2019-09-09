@@ -23,13 +23,3 @@ bool USpawnManager::IsOverlapping(const AActor* Actor, const AActor* Other)
    FBox OtherBox = Other->GetComponentsBoundingBox(true);
    return ActorBox.Intersect(OtherBox);
 }
-
-
-bool USpawnManager::Intersect(
-   const FVector& Min, const FVector& Max, const FTransform& Transform,
-   const FVector& OtherMin, const FVector& OtherMax, const FTransform& OtherTransform)
-{
-   FBox Box = FBox(Min, Max).TransformBy(Transform);
-   FBox OtherBox = FBox(OtherMin, OtherMax).TransformBy(OtherTransform);
-   return Box.Intersect(OtherBox);
-}

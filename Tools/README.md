@@ -17,5 +17,5 @@ datasets generation. Here is a brief description of its content:
 * `make_archives.py` builds the `.tar.gz` archives as published on
   www.intphys.com/download.
 
-* `dataset_pipeline.sh` is a complete pipeline to generate, postprocess and archive
-  an intphys dataset.
+* `dataset_pipeline.sh` is a complete pipeline to generate and archive an
+  intphys dataset.

@@ -341,6 +341,8 @@ class Director(object):
             # we are restarting a test scene
             scene = self.scene_factory.get_test(
                 self.current_scene.category,
+                # scenario is guessed from class name: O1Test -> O1
+                type(self.current_scene).__name__.replace('Test', ''),
                 self.current_scene.is_occluded,
                 self.current_scene.movement)
         elif 'sandbox' in self.current_scene.name:

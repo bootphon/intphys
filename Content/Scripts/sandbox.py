@@ -7,12 +7,20 @@ from actors.parameters import LightParams
 from actors.parameters import ObjectParams
 from actors.parameters import OccluderParams
 from actors.parameters import WallsParams
-from actors.parameters import camera_location
 from tools.materials import get_random_material
 from train import Train
 
 
 class Sandbox(Train):
+    """Implements constrained scenarios for development/debugging
+
+    The methods case_* are all invalid videos, they must fail for the program
+    to be correct.
+
+    TODO implement a method to automatically pass all the tests and make sure
+    they all fail.
+
+    """
     @property
     def name(self):
         return 'train sandbox'
@@ -20,6 +28,18 @@ class Sandbox(Train):
     @property
     def description(self):
         return 'for debugging only'
+
+    def play_run(self):
+        if self.is_over():
+            return
+
+        self.generate_moving_actors_parameters()
+        super().spawn_actors()
+
+        # apply force on moving objects
+        for name, actor in self.actors.items():
+            if 'object' in name.lower():
+                actor.set_force(actor.initial_force)
 
     def generate_parameters(self):
         self.params['Camera'] = CameraParams(
@@ -37,10 +57,11 @@ class Sandbox(Train):
             color=self.make_color(0.9, 1.0),
             varIntensity=random.uniform(-0.2, 0.9))
 
-        # self.case_two_occluders_colliding()
+    def generate_moving_actors_parameters(self):
+        self.case_two_occluders_colliding()
         # self.case_ball_on_camera()
         # self.case_one_occluder()
-        self.case_one_object()
+        # self.case_one_object()
         # self.case_walls_overlap()
 
     def case_two_occluders_colliding(self):

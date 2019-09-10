@@ -65,37 +65,9 @@ class Train(Scene):
         if not self.saver.is_dry_mode:
             self.saver.save(self.get_scene_subdir(scene_index, total))
             self.saver.reset(True)
+
         self.del_actors()
         self.run += 1
-
-    def generate_parameters(self):
-        """Generates only non-mobile actors
-
-        To deal with potential ovelaping of actors during spawn, the parameters
-        for mobile actors (objects and occluders) are generated during the call
-        to play_run().
-
-        This method generates random parameters for camera, lights and floor of
-        a train scene.
-
-        """
-        self.params['Camera'] = CameraParams(
-            location=camera_location(type='train'),
-            rotation=FRotator(
-                0,
-                random.uniform(-10, 10),
-                random.uniform(-10, 10)))
-
-        self.params['Floor'] = FloorParams(
-            material=get_random_material('Floor'))
-
-        self.params['Light'] = LightParams(type='SkyLight')
-
-        self.params['Light_1'] = LightParams(
-            type='SkyLight',
-            location=FVector(0, 0, 30),
-            color=self.make_color(0.9, 1.0),
-            varIntensity=random.uniform(-0.2, 0.9))
 
     def play_run(self):
         """Spawn the actors and starts the movie
@@ -103,13 +75,6 @@ class Train(Scene):
         This method generates parameters for the dynamic actors (objects and
         occluders), making sure there is no overlap between actors. It spawns
         each actor and apply a physical force to objects.
-
-        The objects are generated according to 3 scenarios: random, collision
-        and walls. Random generates completely random parameters. Collision
-        maximize the probabilty for a collision to appens between the actors
-        (by generating a collision point and related actors forces). Walls
-        scenario maximize the probability that actors jump above the background
-        wall.
 
         """
         # a safe guard to avoid regenerating a scene is already spawned
@@ -119,35 +84,7 @@ class Train(Scene):
         # spawn the static actors (lights, floor)
         super().spawn_actors()
 
-        # choose the train scenario to render
-        scenario = random.choice(2 * ['random', 'collision'] + ['walls'])
-
-        # generate the walls
-        if scenario == 'walls' or random.uniform(0, 1) <= 0.3:
-            params = self.generate_walls(scenario)
-            self.spawn('walls', params, check_overlap=False)
-
-        # generate the occluders
-        noccluders = random.randint(0, 2)
-        for n in range(noccluders):
-            is_ok = False
-            while is_ok is False:
-                params = self.generate_occluder()
-                is_ok = self.spawn(f'occluder_{n+1}', params)
-
-        # generate the objects
-        collision = self.generate_collision_point(scenario)
-        nobjects = self.generate_nobjects()
-        for n in range(nobjects):
-            is_ok = False
-            while is_ok is False:
-                if scenario == 'random':
-                    params = self.generate_object_random()
-                elif scenario == 'collision':
-                    params = self.generate_object_collision(collision)
-                else:
-                    params = self.generate_object_wall(collision)
-                is_ok = self.spawn(f'object_{n+1}', params)
+        self.generate_spawn_moving_actors()
 
         # apply force on moving objects
         for name, actor in self.actors.items():
@@ -215,6 +152,76 @@ class Train(Scene):
         self.params[name] = params
         self.actors[name] = actor
         return True
+
+    def generate_parameters(self):
+        """Generates only non-mobile actors
+
+        To deal with potential ovelaping of actors during spawn, the parameters
+        for mobile actors (objects and occluders) are generated during the call
+        to play_run().
+
+        This method generates random parameters for camera, lights and floor of
+        a train scene.
+
+        """
+        self.params['Camera'] = CameraParams(
+            location=camera_location(type='train'),
+            rotation=FRotator(
+                0,
+                random.uniform(-10, 10),
+                random.uniform(-10, 10)))
+
+        self.params['Floor'] = FloorParams(
+            material=get_random_material('Floor'))
+
+        self.params['Light'] = LightParams(type='SkyLight')
+
+        self.params['Light_1'] = LightParams(
+            type='SkyLight',
+            location=FVector(0, 0, 30),
+            color=self.make_color(0.9, 1.0),
+            varIntensity=random.uniform(-0.2, 0.9))
+
+    def generate_spawn_moving_actors(self):
+        """Manages moving actors in the scene (actors and occluders)
+
+        The objects are generated according to 3 scenarios: random, collision
+        and walls. Random generates completely random parameters. Collision
+        maximize the probabilty for a collision to appens between the actors
+        (by generating a collision point and related actors forces). Walls
+        scenario maximize the probability that actors jump above the background
+        wall.
+
+        """
+        # choose the train scenario to render
+        scenario = random.choice(2 * ['random', 'collision'] + ['walls'])
+
+        # generate the walls
+        if scenario == 'walls' or random.uniform(0, 1) <= 0.3:
+            params = self.generate_walls(scenario)
+            self.spawn('walls', params, check_overlap=False)
+
+        # generate the occluders
+        noccluders = random.randint(0, 2)
+        for n in range(noccluders):
+            is_ok = False
+            while is_ok is False:
+                params = self.generate_occluder()
+                is_ok = self.spawn(f'occluder_{n+1}', params)
+
+        # generate the objects
+        collision = self.generate_collision_point(scenario)
+        nobjects = self.generate_nobjects()
+        for n in range(nobjects):
+            is_ok = False
+            while is_ok is False:
+                if scenario == 'random':
+                    params = self.generate_object_random()
+                elif scenario == 'collision':
+                    params = self.generate_object_collision(collision)
+                else:
+                    params = self.generate_object_wall(collision)
+                is_ok = self.spawn(f'object_{n+1}', params)
 
     @staticmethod
     def generate_nobjects():

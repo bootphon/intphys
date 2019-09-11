@@ -14,7 +14,7 @@ THIRD_PARTY_INCLUDES_END
 class DepthCapture
 {
 public:
-   DepthCapture(const FIntVector& Size, const float& MaxDepth);
+   DepthCapture(const FIntVector& Size);
 
    ~DepthCapture();
 
@@ -22,30 +22,21 @@ public:
 
    void CaptureInit(AActor* OriginActor);
 
-   bool Capture(const FHitResult& Hit, const uint32& ImageIndex, const uint32& PixelIndex);
+   bool Capture(const FHitResult& Hit, const uint32& ImageIndex, const uint32& X, const uint32& Y);
 
    bool Save(const FString& Directory);
 
 private:
+   // the maximal distance that can be encoded is (2^16 - 1) / 10 (in cm)
+   static const float MaxDepth;
+
    // A triplet (width, height, nimages) of captured images
    FIntVector m_Size;
-
-   // The number of pixels in an image (m_Size.X * m_Size.Y)
-   uint32 m_NumPixels;
-
-   // The theoretical maximal depth in the scene
-   float m_MaxDepth;
-
-   // The maximal depth encountered during capture
-   float m_CurrentMaxDepth;
 
    // The current location and rotation of the origin actor
    FVector m_OriginLocation;
    FVector m_OriginRotation;
 
-   // A buffer to store the captured depth field
-   TArray<TArray<float>> m_Buffer;
-
-   // A buffer to build a grayscale PNG for saving
-   png::image<png::gray_pixel> m_Png;
+   // A buffer to store the captured depth field and save PNGs
+   TArray<png::image<png::gray_pixel_16>> m_Buffer;
 };

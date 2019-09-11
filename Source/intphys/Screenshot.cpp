@@ -4,10 +4,9 @@
 
 
 FScreenshot::FScreenshot(
-   const FIntVector& Size, AActor* OriginActor,
-   const float& MaxDepth, const int32& RandomSeed, bool Verbose)
+   const FIntVector& Size, AActor* OriginActor, const int32& RandomSeed, bool Verbose)
    : m_Size(Size), m_OriginActor(OriginActor), m_Verbose(Verbose),
-     m_FrameIndex(0), m_Scene(Size), m_Depth(Size, MaxDepth), m_Masks(Size, RandomSeed)
+     m_FrameIndex(0), m_Scene(Size), m_Depth(Size), m_Masks(Size, RandomSeed)
 {}
 
 
@@ -112,7 +111,7 @@ bool FScreenshot::CaptureDepthAndMasks(const TArray<AActor*>& IgnoredActors)
          if(Tracer.Trace(HitResult, FVector2D(x, y)))
          {
             bHitDetected = true;
-            m_Depth.Capture(HitResult, m_FrameIndex, y * m_Size.X + x);
+            m_Depth.Capture(HitResult, m_FrameIndex, x, y);
             m_Masks.Capture(HitResult, m_FrameIndex, x, y);
          }
          else

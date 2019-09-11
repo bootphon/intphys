@@ -17,8 +17,8 @@ class FScreenshot
 {
 public:
    FScreenshot(
-      const FIntVector& Size, AActor* OriginActor,
-      const float& MaxDepth, const int32& RandomSeed, bool Verbose = false);
+      const FIntVector& Size, AActor* OriginActor, const int32& RandomSeed,
+      bool Verbose = false);
 
    ~FScreenshot();
 

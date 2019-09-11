@@ -41,9 +41,6 @@ public:
      * @param OriginActor - the actor from which point of view to capture the
      * scene (usually a camera).
      *
-     * @param MaxDepth - the maximal depth expected in the scene, observed from
-     * OriginActor.
-     *
      * @param RandomSeed - the seed to initialize a random number generator
      *
      * @param Verbose - when true, display log messages. When false, only
@@ -53,7 +50,6 @@ public:
     static bool Initialize(
         int Width, int Height, int NumFrames,
         AActor* OriginActor,
-        float MaxDepth,
         int32 RandomSeed,
         bool Verbose = false);
 

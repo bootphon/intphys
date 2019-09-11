@@ -16,7 +16,6 @@ from actors.parameters import LightParams
 from actors.parameters import ObjectParams
 from actors.parameters import OccluderParams
 from actors.parameters import WallsParams
-from actors.parameters import camera_location
 from tools.materials import get_random_material
 
 
@@ -165,11 +164,10 @@ class Train(Scene):
 
         """
         self.params['Camera'] = CameraParams(
-            location=camera_location(type='train'),
+            location=FVector(
+                0, 0, random.uniform(175, 225)),
             rotation=FRotator(
-                0,
-                random.uniform(-10, 10),
-                random.uniform(-10, 10)))
+                0, random.uniform(-10, 10), random.uniform(-10, 10)))
 
         self.params['Floor'] = FloorParams(
             material=get_random_material('Floor'))

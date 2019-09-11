@@ -2,12 +2,15 @@
 #include "Utils.h"
 
 
-DepthCapture::DepthCapture(const FIntVector& Size, const float& MaxDepth)
-   : m_Size(Size), m_NumPixels(Size.X * Size.Y),
-     m_MaxDepth(MaxDepth), m_CurrentMaxDepth(0.0), m_Png(Size.X, Size.Y)
+// 65.535 m is the maximal distance that can be encoded on 16 bits with a
+// resolution of 1mm per gray level)
+const float DepthCapture::MaxDepth = 6553.5;
+
+
+DepthCapture::DepthCapture(const FIntVector& Size)
+   : m_Size(Size)
 {
-   m_Buffer.SetNum(m_Size.Z);
-   Reset();
+   m_Buffer.Init(png::image<png::gray_pixel_16>(m_Size.X, m_Size.Y), m_Size.Z);
 }
 
 
@@ -17,11 +20,16 @@ DepthCapture::~DepthCapture()
 
 void DepthCapture::Reset()
 {
-   m_CurrentMaxDepth = 0.0;
-
-   for(TArray<float>& Image : m_Buffer)
+   // fill the images buffer with 0
+   for(uint32 z = 0; z < m_Size.Z; ++z)
    {
-      Image.Init(0.0, m_NumPixels);
+      for(uint32 y = 0; y < m_Size.Y; ++y)
+      {
+         for(uint32 x = 0; x < m_Size.X; ++x)
+         {
+            m_Buffer[z][y][x] = 0;
+         }
+      }
    }
 }
 
@@ -34,7 +42,7 @@ void DepthCapture::CaptureInit(AActor* OriginActor)
 }
 
 bool DepthCapture::Capture(
-   const FHitResult& Hit, const uint32& ImageIndex, const uint32& PixelIndex)
+   const FHitResult& Hit, const uint32& ImageIndex, const uint32& X, const uint32& Y)
 {
    if(ImageIndex >= m_Size.Z)
    {
@@ -42,15 +50,28 @@ bool DepthCapture::Capture(
       return false;
    }
 
-   if(PixelIndex >= m_NumPixels)
+   if(X >= m_Size.X or Y >= m_Size.Y)
    {
       UE_LOG(LogTemp, Error, TEXT("Depth capture failed: too much pixels captured"));
       return false;
    }
 
    float Depth = FVector::DotProduct(Hit.Location - m_OriginLocation, m_OriginRotation);
-   m_CurrentMaxDepth = FMath::Max(m_CurrentMaxDepth, Depth);
-   m_Buffer[ImageIndex][PixelIndex] = Depth;
+   if(Depth > MaxDepth)
+   {
+      UE_LOG(
+         LogTemp, Warning,
+         TEXT("Max depth in scene exceed expected max depth (capping): %f > %f"),
+         Depth, MaxDepth);
+      Depth = MaxDepth;
+   }
+   else if(Depth <= 0.0)
+   {
+      Depth = MaxDepth;
+   }
+
+   m_Buffer[ImageIndex][Y][X] = static_cast<png::gray_pixel_16>(
+      65535 * (1 - Depth / MaxDepth));
 
    return true;
 }
@@ -63,36 +84,10 @@ bool DepthCapture::Save(const FString& Directory)
       return false;
    }
 
-   if(m_CurrentMaxDepth > m_MaxDepth)
-   {
-      UE_LOG(
-         LogTemp, Warning,
-         TEXT("Max depth in scene exceed expected max depth: %f > %f"),
-         m_CurrentMaxDepth, m_MaxDepth);
-   }
-
    for(uint32 z = 0; z < m_Size.Z; ++z)
    {
-      for(uint32 y = 0; y < m_Size.Y; ++y)
-      {
-         const uint32 Y = y * m_Size.X;
-         for(uint32 x = 0; x < m_Size.X; ++x)
-         {
-            // depth normalization, depth field is from white (close) to
-            // black (far). A depth at 0 is assumed to be maximal depth.
-            float Depth = m_Buffer[z][Y + x];
-            if(Depth <= 0.0 or Depth > m_MaxDepth)
-            {
-               Depth = m_MaxDepth;
-            }
-
-            m_Png[y][x] = static_cast<png::gray_pixel>(
-               255.f - 255.f * Depth / m_MaxDepth);
-         }
-      }
-
       FString Filename = Utils::BuildFilename(Directory, "depth", z, m_Size.Z);
-      m_Png.write(TCHAR_TO_UTF8(*Filename));
+      m_Buffer[z].write(TCHAR_TO_UTF8(*Filename));
    }
 
    return true;

@@ -74,7 +74,7 @@ bool MasksCapture::CaptureActor(const FString& Actor, const uint32& FrameIndex, 
       // store it and pick a random unique gray level
       if(FrameActorsMap.Num() >= 256)
       {
-         UE_LOG(LogTemp, Error, TEXT("Too many actors: %s >= 256"), m_ActorsMap.Num());
+         UE_LOG(LogTemp, Error, TEXT("Too many actors: %d >= 256"), m_ActorsMap.Num());
          return false;
       }
 

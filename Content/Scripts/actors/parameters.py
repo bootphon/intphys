@@ -35,7 +35,7 @@ def theoretical_max_depth():
     the theorical depth is obtained by looking the corner of the floor at
     (2000, 4000, 0) from the camera at (0, 0, 275)
 
-    This function returns 4480.583109373154
+    This function returns 4570,194771561
 
     """
     # the floor mesh is 400x400x20. The camera is located at the center of the
@@ -46,7 +46,7 @@ def theoretical_max_depth():
     # the maximum height of the camera (from camera_location() above)
     c = 275
 
-    return math.sqrt(a**2 + b**2 + c**2)
+    return math.sqrt(a**2 + b**2 + c**2) * 1.02  # add 2% for safety
 
 
 @dataclass

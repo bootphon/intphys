@@ -1,13 +1,16 @@
+import math
+import random
+
 from dataclasses import dataclass
 from dataclasses import field
-from unreal_engine import FVector, FRotator
+from unreal_engine import FVector, FRotator, FLinearColor
 from unreal_engine.enums import ECameraProjectionMode
 from tools.materials import get_random_material
 
 
 @dataclass
 class CameraParams:
-    location: FVector = FVector(0, 0, 0)
+    location: FVector = FVector(0, 0, 200)
     rotation: FRotator = FRotator(0, 0, 0)
     field_of_view: float = 90
     aspect_ratio: float = 1
@@ -28,7 +31,38 @@ class FloorParams:
 class LightParams:
     location: FVector = FVector(0, 0, 0)
     rotation: FRotator = FRotator(0, 0, 0)
+    color: FLinearColor = FLinearColor(1, 1, 1, 1)
     type: str = 'SkyLight'
+    varIntensity: float = 0
+
+
+@dataclass
+class AxisCylinderParams:
+    location: FVector = FVector(0, 0, 0)
+    rotation: FRotator = FRotator(0, 0, 0)
+    scale: FVector = FVector(1, 1, 1)
+    friction: float = 0.5
+    restitution: float = 0.5
+    overlap: bool = False
+    warning: bool = False
+    mesh: str = 'Lollipop'
+    material: str = get_random_material('Object')
+    is_long: bool = False
+    down: bool = False
+    moves: list = field(default_factory=list)
+
+
+@dataclass
+class PaneHandlesParams:
+    location: FVector = FVector(0, 0, 0)
+    rotation: FRotator = FRotator(0, 0, 0)
+    scale: FVector = FVector(1, 1, 1)
+    friction: float = 0.5
+    restitution: float = 0.5
+    overlap: bool = False
+    warning: bool = False
+    # mesh: str = 'PaneHandles'
+    material: str = get_random_material('Object')
 
 
 @dataclass
@@ -37,6 +71,7 @@ class WallsParams:
     length: float = 2000
     depth: float = 1000
     height: float = 1
+    z: float = 0
     overlap: bool = False
     warning: bool = False
 
@@ -76,4 +111,4 @@ class OccluderParams:
 @dataclass
 class SkysphereParams:
     material: str = '/Game/Meshes/SkySphere/M_Sky_Panning_Clouds2'
-    rotation:FVector = FVector(0, 0, 0)
+    rotation: FVector = FVector(0, 0, 0)

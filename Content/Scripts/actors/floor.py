@@ -1,14 +1,9 @@
-# coding: utf-8
-
 import unreal_engine as ue
 from unreal_engine import FVector, FRotator
 from unreal_engine.classes import Material
 
 from actors.base_mesh import BaseMesh
 from actors.parameters import FloorParams
-
-# Floor is the plane thing which is the ground of the magic tricks.
-# It inherits from BaseMesh.
 
 
 class Floor(BaseMesh):
@@ -33,7 +28,7 @@ class Floor(BaseMesh):
 
     def get_parameters(self, params):
         location = FVector(
-            params.location.x,
+            params.location.x - 200,
             params.location.y - (400 * params.scale.y / 2),
             params.location.z)
         rotation = FRotator(

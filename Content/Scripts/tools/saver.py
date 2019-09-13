@@ -1,8 +1,12 @@
+import glob
 import json
 import os
+import random
+import shutil
 
 import unreal_engine as ue
 from unreal_engine.classes import ScreenshotManager
+import actors.parameters
 
 
 class Saver:
@@ -20,18 +24,15 @@ class Saver:
         in a single scene.
     camera : AActor
         The camera actor from which to capture screenshots.
-    dry_mode : bool, optional
-        When False (default), capture PNG images and metadata from the
-        rendered scenes. When True, do not take any captures nor save
-        any data.
+    output_dir : string, optional
+        The directory where to save captured images, if None (default) does not
+        save anything.
 
     """
-    def __init__(self, size, dry_mode=False, output_dir=None):
+    def __init__(self, camera, size, seed, output_dir=None):
         self.size = size
-        self.camera = None
-        if output_dir is None:
-            dry_mode = True
-        self.is_dry_mode = dry_mode
+        self.camera = camera
+        self.is_dry_mode = True if output_dir is None else False
         self.output_dir = output_dir
 
         # an empty list to append status along the run
@@ -42,10 +43,12 @@ class Saver:
         verbose = False
         ScreenshotManager.Initialize(
             int(self.size[0]), int(self.size[1]), int(self.size[2]),
-            None, verbose)
+            self.camera.actor,
+            seed, verbose)
 
     def set_status_header(self, header):
         self.status_header = header
+        self.status_header['camera'] = self.camera.get_status()
 
     def capture(self, ignored_actors, status):
         """Push the scene's current screenshot and status to memory"""
@@ -69,7 +72,7 @@ class Saver:
             return True
 
         # save the captured images as PNG
-        done, max_depth, masks = ScreenshotManager.Save(output_dir)
+        done, masks = ScreenshotManager.Save(output_dir)
         if not done:
             ue.log_warning('failed to save images to {}'.format(output_dir))
             return False
@@ -78,7 +81,12 @@ class Saver:
         # not UE names (to be 'object_1' instead of eg
         # 'Object_C_126'), as well suppress the 'name' field in actor
         # status
-        names_map = {'Sky': 'sky'}
+        names_map = {
+            'Sky': 'sky',
+            'Walls': 'walls',
+            'AxisCylinders': 'axiscylinders',
+            'Pills': 'pills'}
+
         for k, v in self.status_header.items():
             if isinstance(v, dict) and 'name' in v.keys():
                 names_map[v['name']] = k
@@ -88,10 +96,12 @@ class Saver:
                 if isinstance(v, dict) and 'name' in v.keys():
                     names_map[v['name']] = k
                     del self.status[i][k]['name']
-        masks = {names_map[k]: v for k, v in masks.items()}
 
-        # save images max depth and actors's masks to status
-        self.status_header.update({'max_depth': max_depth, 'masks': masks})
+        # postprocess the masks to make it JSON compatible and save it to
+        # status
+        masks = self.parse_masks(masks, names_map)
+        for i in range(len(self.status)):
+            self.status[i].update({'masks': masks[i]})
         status = {'header': self.status_header, 'frames': self.status}
 
         # save the status as JSON file
@@ -99,18 +109,72 @@ class Saver:
         with open(json_file, 'w') as fin:
             fin.write(json.dumps(status, indent=4))
 
-        # ue.log('saved captures to {}'.format(output_dir))
         return True
 
-    def update(self, actors):
-        self.camera = actors['Camera']
-        ScreenshotManager.SetOriginActor(self.camera.actor)
-        res = []
-        for name, actor in actors.items():
-            if 'wall' in name.lower():
-                res.append(actor.left.actor)
-                res.append(actor.right.actor)
-                res.append(actor.front.actor)
-            else:
-                res.append(actor.actor)
-        ScreenshotManager.SetActors(res)
+    def parse_masks(self, masks, names_map):
+        parsed = [{} for _ in range(self.size[2])]
+        for mask in masks:
+            try:
+                frame, actor, gray_level = tuple(mask.split('__'))
+                frame = int(frame) - 1
+                actor = names_map[actor]
+                gray_level = int(gray_level)
+                parsed[frame].update({actor: gray_level})
+            except KeyError:  # this is the magic actor, it may disapear
+                continue
+        return parsed
+
+    def shuffle_test_scenes(self, dataset='test'):
+        """Shuffle possible/impossible runs in test scenes
+
+        The test scenes are saved in 4 subdirectories 1, 2, 3 and 4, where 1
+        and 2 are possible, 3 and 4 are impossible. This method simply shuffle
+        in a random way the subdirectories.
+
+        The method is called by the director, at the very end of the program.
+
+        Dataset can be 'test' or 'dev' to shuffle the test dataset or the dev
+        dataset respectively.
+
+        """
+        if dataset not in ('test', 'dev'):
+            raise ValueError(f'dataset must be test or dev, it is {dataset}')
+
+        if not self.output_dir:
+            # dry mode, nothing to do
+            return
+
+        test_dir = os.path.join(self.output_dir, dataset)
+        if not os.path.isdir(test_dir):
+            # no test scene, nothing to do
+            return
+
+        # retrieve the list od directories to shuffle, those are 'test_dir/*/*'
+        scenes = glob.glob('{}/*/*'.format(test_dir))
+        ue.log('Shuffling possible/impossible runs for {} {} scenes'
+               .format(len(scenes), dataset))
+
+        for scene in scenes:
+            subdirs = sorted(os.listdir(scene))
+
+            # make sure we have the expected subdirectories to shuffle
+            if not subdirs == ['1', '2', '3', '4']:
+                raise ValueError(
+                    'unexpected subdirectories in {}: {}'
+                    .format(scene, subdirs))
+
+            # shuffle the subdirs (suffix with _tmp to avoid race conditions)
+            shuffled = [s + '_tmp' for s in subdirs]
+            random.shuffle(shuffled)
+
+            # move original to shuffled
+            for i in range(4):
+                shutil.move(
+                    os.path.join(scene, subdirs[i]),
+                    os.path.join(scene, shuffled[i]))
+
+            # remove the _tmp suffix
+            for subdir in os.listdir(scene):
+                shutil.move(
+                    os.path.join(scene, subdir),
+                    os.path.join(scene, subdir[0]))

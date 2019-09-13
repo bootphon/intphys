@@ -7,14 +7,14 @@
 #include "intphysGameModeBase.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class INTPHYS_API AintphysGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
-	
-	
-	
+
+
+
+
 };

@@ -1,11 +1,13 @@
 #!/bin/bash
 #
 # Build the game as a standalone binary.
-#
+
+
 # We assume $UE_ROOT is defined.
+[ -z "$UE_ROOT" ] && echo "error: UE_ROOT environment variable is not defined" && exit 1
 
 # abspath to the root directory of intphys
-INTPHYS_DIR=$(dirname $(dirname $(readlink -f $0)))
+INTPHYS_DIR=$(dirname $(dirname $(dirname $(readlink -f $0))))
 
 # where we are packaging the project
 PACKAGE_DIR=$INTPHYS_DIR/Package

@@ -40,7 +40,8 @@ class Wall(BaseMesh):
                  height=1,
                  material=None,
                  overlap=False,
-                 warning=False):
+                 warning=False,
+                 z=0):
         self.sides = {
             'Front': self.front,
             'Left': self.left,
@@ -48,20 +49,22 @@ class Wall(BaseMesh):
         }
         super().__init__(world.actor_spawn(ue.load_class('/Game/Wall.Wall_C')))
         self.get_parameters(side, length, depth,
-                            height, material, overlap, warning)
+                            height, material, overlap, warning, z)
         self.set_parameters()
 
     def get_parameters(self, side, length,
                        depth, height, material,
-                       overlap, warning):
+                       overlap, warning, z):
         self.depth = depth
         self.length = length
         self.height = height
+        self.z = z
         self.side = side
         self.sides[self.side]()
-        super().get_parameters(self.location, self.rotation, self.scale,
-                               0.5, 0.5, overlap, warning,
-                               '/Game/Meshes/Wall_400x400')
+        super().get_parameters(
+            self.location, self.rotation, self.scale,
+            0.5, 0.5, overlap, warning,
+            '/Game/Meshes/Wall_400x400')
         self.material = ue.load_object(Material, material)
 
     def set_parameters(self):
@@ -70,17 +73,17 @@ class Wall(BaseMesh):
     def front(self):
         self.scale = FVector(self.length / 400, 1, self.height)
         self.rotation = FRotator(0, 0, 90)
-        self.location = FVector(self.depth, (-1 * self.length) / 2, 0)
+        self.location = FVector(self.depth, (-1 * self.length) / 2, self.z)
 
     def left(self):
         self.scale = FVector(self.depth / 400, 1, self.height)
         self.rotation = FRotator(0, 0, 0)
-        self.location = FVector(0, (-1 * self.length) / 2, 0)
+        self.location = FVector(0, (-1 * self.length) / 2, self.z)
 
     def right(self):
         self.scale = FVector(self.depth / 400, 1, self.height)
         self.rotation = FRotator(0, 0, 0)
-        self.location = FVector(-0, self.length / 2, 0)
+        self.location = FVector(-0, self.length / 2, self.z)
 
     def get_status(self):
         status = super().get_status()

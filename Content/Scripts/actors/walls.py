@@ -9,20 +9,21 @@ Walls is a wrapper class that make 3 walls spawn.
 class Walls():
     def __init__(self, world, params=WallsParams):
         self.get_parameters(params)
+
         self.front = Wall(
             world, "Front",
             self.length, self.depth,
-            self.height, self.material, self.overlap, self.warning)
+            self.height, self.material, self.overlap, self.warning, self.z)
 
         self.right = Wall(
             world, "Right",
             self.length, self.depth,
-            self.height, self.material, self.overlap, self.warning)
+            self.height, self.material, self.overlap, self.warning, self.z)
 
         self.left = Wall(
             world, "Left",
             self.length, self.depth,
-            self.height, self.material, self.overlap, self.warning)
+            self.height, self.material, self.overlap, self.warning, self.z)
 
         self.is_valid = True
 
@@ -35,6 +36,7 @@ class Walls():
         self.depth = params.depth
         self.length = params.length
         self.height = params.height
+        self.z = params.z
         self.material = params.material
         self.overlap = False
         self.warning = False

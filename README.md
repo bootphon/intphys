@@ -98,6 +98,9 @@ this have not been tested.
         ./GenerateProjectFiles.sh
         make
 
+* **Install dependencies** required for intphys dataset generation:
+
+        sudo apt-get install libpng++-dev
 
 * **Install intphys** in a separate directory. Clone the repository and
   its UnrealEnginePython submodule from github:
@@ -130,7 +133,7 @@ this have not been tested.
 * **Build `intphys` package**: We now need to package the intphys
   project into a standalone binary program. Just have a:
 
-        ./Tools/build_package.sh
+        ./Tools/build/build_package.sh
 
 
 ## Usage
@@ -152,23 +155,17 @@ this have not been tested.
   (`--editor` option) or as a standalone game (`--standalone-game`
   option). The `--verbose` option is usefull for dev as well.
 
+* Use the `--headless` option to disable direct rendering on screen (the game
+  will be rendered in a frame buffer instead).
+
+* You can also use `Tools/parallel/intphys_parallel.sh` to call several
+  instances of `intphys.py` in parallel and speedup the dataset generation.
+
 
 ## Additional utils
 
-In the `Tools` directory are stored few utility scripts:
-
-* **images2video.sh** : converts a sequence of images into a video or
-  a gif file. Used to postprocess the generated png images.
-
-* **clean.sh** : deletes the intphys build/binaries directories.
-
-* **make_archives.py** : build tar.gz archives as released on
-  www.intphys.com.
-
-* scripts for building the project.
-
-In the `Exemples` directory are stored scripts to generate few videos,
-extract them to gif pictures and embeed them in a html page.
+In the `Tools` directory are stored few utility scripts, see README there for
+more information.
 
 
 ## Tweaks
@@ -186,7 +183,8 @@ try again. `sudo glxinfo` helps.
 ### Precompiled headers
 
 After a system update you may issue an error when running
-`./Tools/build_package.sh` about `.gch` precompiled headers. The issue is like:
+`./Tools/build/build_package.sh` about `.gch` precompiled headers. The issue is
+like:
 
     fatal error: file '/usr/include/linux/version.h' has been modified since the precompiled header '.../UE4Editor/Development/Engine/SharedPCH.Engine.h.gch' was built
     note: please rebuild precompiled header '.../UE4Editor/Development/Engine/SharedPCH.Engine.h.gch'
@@ -196,29 +194,3 @@ In that case remove all the `.gch` files and recompile the engine:
     cd $UE_ROOT
     find Engine/Intermediate -type f -name "*.gch" -delete
     ./GenerateProjectFiles.sh && make
-
-### How to make a new project
-
-Steps to duplicate the intphys project into a fresh one in
-UnrealEngine. This may be needed for debug or development or when
-upgrading to a new engine version.
-
-1. Open UE4Editor and create a new C++ blank project called `intphys`
-   in the `new` directory, open the project a first time and
-   close it just after.
-
-2. Copy the following files and folders from `old` to `new`:
-
-    - Config
-    - Content
-    - Source/intphys
-    - Plugins
-    - DeprecatedLua
-    - Exemples
-    - Tools
-    - .git
-    - and all the top-level files in the git repo (.gitignore,
-      configure, etc...)
-
-3. Reopen the project. In Project Settings / Maps & Mods, set up the
-   default map to intphysMap.

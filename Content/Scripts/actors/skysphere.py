@@ -28,6 +28,15 @@ class Skysphere(BaseMesh):
         self.actor.DirectionalLight.set_actor_location(FVector(0, 0, -1000))
         self.actor.DirectionalLight.set_actor_rotation(FRotator(0, 0, 0))
         """
+        self.get_parameters(params)
+        self.set_parameters()
+
+    def get_parameters(self, params):
+        super().get_parameters(FVector(0, 0, 0), params.rotation, 1.0,
+                1.0, 1.0, False, False, '/Game/Meshes/SkySphere/SM_SkySphere')
+
+    def set_parameters(self):
+        super().set_parameters()
 
     def get_status(self):
         status = {

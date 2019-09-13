@@ -44,7 +44,6 @@ class Saver:
         ScreenshotManager.Initialize(
             int(self.size[0]), int(self.size[1]), int(self.size[2]),
             self.camera.actor,
-            actors.parameters.theoretical_max_depth(),
             seed, verbose)
 
     def set_status_header(self, header):

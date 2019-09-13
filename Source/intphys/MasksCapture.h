@@ -49,10 +49,6 @@ private:
    // already indexed)
    uint8 GetActorIndex(const FString& Actor);
 
-   bool CaptureActor(const FString& Actor, const uint32& FrameIndex, const uint32& X, const uint32& Y);
-
-   // // Returns a map (actor index -> random gray level) and update the output masks
-   // TMap<uint8, uint8> Scramble(const uint32& FrameIndex, TArray<FString>& OutActorsMasks);
-
-   // TArray<uint8> RandomGrayLevels(const uint32& NumLevels) const;
+   bool CaptureActor(
+      const FString& Actor, const uint32& FrameIndex, const uint32& X, const uint32& Y);
 };

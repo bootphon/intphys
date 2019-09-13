@@ -5,7 +5,8 @@
 MasksCapture::MasksCapture(const FIntVector& Size, const int32& Seed)
    : m_Size(Size), m_Random(Seed)
 {
-   Reset(true);
+   m_Buffer.Init(png::image<png::gray_pixel>(m_Size.X, m_Size.Y), m_Size.Z);
+   m_ActorsMap.Init(TBidirMap<FString, png::gray_pixel>(), m_Size.Z);
 }
 
 
@@ -16,7 +17,16 @@ MasksCapture::~MasksCapture()
 void MasksCapture::Reset(bool DeleteActors)
 {
    // fill the images buffer with 0
-   m_Buffer.Init(png::image<png::gray_pixel>(m_Size.X, m_Size.Y), m_Size.Z);
+   for(uint32 z = 0; z < m_Size.Z; ++z)
+   {
+      for(uint32 y = 0; y < m_Size.Y; ++y)
+      {
+         for(uint32 x = 0; x < m_Size.X; ++x)
+         {
+            m_Buffer[z][y][x] = 0;
+         }
+      }
+   }
 
    if(DeleteActors)
    {
@@ -57,7 +67,8 @@ bool MasksCapture::CaptureSky(const uint32& FrameIndex, const uint32& X, const u
 }
 
 
-bool MasksCapture::CaptureActor(const FString& Actor, const uint32& FrameIndex, const uint32& X, const uint32& Y)
+bool MasksCapture::CaptureActor(
+   const FString& Actor, const uint32& FrameIndex, const uint32& X, const uint32& Y)
 {
    // assign a gray level for this actor in that frame
    TBidirMap<FString, png::gray_pixel>& FrameActorsMap = m_ActorsMap[FrameIndex];

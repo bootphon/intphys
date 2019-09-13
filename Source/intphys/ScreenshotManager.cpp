@@ -7,13 +7,12 @@ TSharedPtr<FScreenshot> UScreenshotManager::Screenshot = nullptr;
 bool UScreenshotManager::Initialize(
     int Width, int Height, int NumFrames,
     AActor* OriginActor,
-    float MaxDepth,
     int32 RandomSeed,
     bool Verbose)
 {
    FIntVector Size(Width, Height, NumFrames);
    Screenshot = TSharedPtr<FScreenshot>(
-      new FScreenshot(Size, OriginActor,  MaxDepth, RandomSeed, Verbose));
+      new FScreenshot(Size, OriginActor, RandomSeed, Verbose));
    return true;
 }
 

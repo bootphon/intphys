@@ -70,8 +70,7 @@ bool DepthCapture::Capture(
       Depth = MaxDepth;
    }
 
-   m_Buffer[ImageIndex][Y][X] = static_cast<png::gray_pixel_16>(
-      65535 * (1 - Depth / MaxDepth));
+   m_Buffer[ImageIndex][Y][X] = static_cast<png::gray_pixel_16>(65535 - 10 * Depth);
 
    return true;
 }

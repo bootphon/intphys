@@ -40,7 +40,7 @@ else
     exit 1
 fi
 
-scene=False
+scene=
 extra_options=""
 extra_options_arg=""
 delay=""

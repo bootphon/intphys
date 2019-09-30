@@ -9,6 +9,7 @@ from unreal_engine.classes import GameplayStatics
 from actors.camera import Camera
 from tools.utils import exit_ue
 from tools.saver import Saver
+from train import Train
 
 
 class PauseManager:
@@ -54,8 +55,7 @@ class SceneFactory:
 
     def get_train(self):
         """Returns an instance of a train scene"""
-        train_class = self._import_class('train', 'Train')
-        return train_class(self._world, self._saver)
+        return Train(self._world, self._saver)
 
     def get_sandbox(self):
         """Returns an instance of a sandbox scene"""
@@ -120,7 +120,7 @@ class SceneFactory:
         if category not in ('train', 'test', 'dev', 'sandbox'):
             exit_ue(
                 f'error: category must be train, test or dev '
-                'but is {category}')
+                f'but is {category}')
             return
 
         if 'train' in category:
@@ -216,6 +216,14 @@ class Director(object):
         # the list of the scenes being rendered by the director, as instances
         # of the class Scene.
         self.scenes = list(self.scene_factory.parse(scenes_json))
+
+        # dry mode and dev/test scenes are incompatible, make sure this is not
+        # the case
+        is_all_train = all(isinstance(s, Train) for s in self.scenes)
+        if output_dir is None and not is_all_train:
+            exit_ue(
+                'dry mode not supported for dev/test scenes, '
+                'please specify an output directory')
 
     @property
     def current_scene_index(self):

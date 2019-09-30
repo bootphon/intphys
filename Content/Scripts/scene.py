@@ -14,6 +14,7 @@ class Scene:
 
         self.actors = None
         self.run = 0
+        self._is_valid = True
 
         # TODO move in test scene, useless here
         self.last_locations = []
@@ -47,7 +48,7 @@ class Scene:
         self.saver.set_status_header(self.get_status_header())
 
     def is_valid(self):
-        return all([a.is_valid for a in self.actors.values()])
+        return self._is_valid and all(a.is_valid for a in self.actors.values())
 
     def is_possible(self):
         """Return True if the current run is plausible, False otherwise"""

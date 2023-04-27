@@ -1,6 +1,6 @@
 # intphys-2.0
 
-#### Data generation for the Intuitive Physics Challenge - http://www.intphys.com
+#### Data generation for the Intuitive Physics Challenge - https://intphys.cognitive-ml.fr
 
 Developed with
 [Unreal Engine](https://www.unrealengine.com/what-is-unreal-engine-4)
@@ -14,7 +14,7 @@ with UE-4.8 and Lua).
 **Important note**
 
 This software is used for generation of the datasets used in the
-[Intuitive Physics Challenge](https://intphys.com/challenge.html), it
+[Intuitive Physics Challenge](https://intphys.cognitive-ml.fr/challenge.html), it
 allows users to generate more train scenes but **the code for test
 scenes generation is kept private**.
 

@@ -15,7 +15,7 @@ datasets generation. Here is a brief description of its content:
 * `images2video.sh` generates a gif or a avi file from png images.
 
 * `make_archives.py` builds the `.tar.gz` archives as published on
-  www.intphys.com/download.
+  https://intphys.cognitive-ml.fr/download.
 
 * `dataset_pipeline.sh` is a complete pipeline to generate and archive an
   intphys dataset.
